@@ -1,14 +1,5 @@
 import { z } from "zod";
-import {
-  baseSchema,
-  addressSchema,
-  auditSchema,
-  createSchema,
-  updateSchema,
-  querySchema,
-  paginatedResponseSchema,
-  singleItemResponseSchema,
-} from "./base-schema.js";
+import { baseSchema, auditSchema } from "./base-schema.js";
 import {
   BUSINESS_TYPES,
   SUBSCRIPTION_PLANS,
@@ -28,7 +19,15 @@ export const organizationInfoSchema = z.object({
   phone: z.string().trim().optional(),
   email: z.string().email().toLowerCase().trim().optional(),
   website: z.string().trim().optional(),
-  address: addressSchema.optional(),
+  address: z
+    .object({
+      street: z.string().trim().optional(),
+      city: z.string().trim().optional(),
+      state: z.string().trim().optional(),
+      postalCode: z.string().trim().optional(),
+      country: z.string().trim().optional(),
+    })
+    .optional(),
   logoUrl: z.string().trim().optional(),
   taxId: z.string().trim().optional(),
   currency: z.enum(CURRENCIES).default("USD"),
@@ -101,79 +100,10 @@ export const organizationSchema = baseSchema.extend({
 });
 
 /**
- * Create organization schema
+ * Organization registration schema (for existing users)
  */
-export const createOrganizationSchema = createSchema(organizationSchema).omit({
-  slug: true,
-  registeredAt: true,
-  usage: true,
-  onboardingCompleted: true,
-  createdBy: true,
-  lastModifiedBy: true,
-});
-
-/**
- * Update organization schema
- */
-export const updateOrganizationSchema = updateSchema(organizationSchema).omit({
-  slug: true,
-  registeredAt: true,
-  usage: true,
-});
-
-/**
- * Organization query schema
- */
-export const organizationQuerySchema = querySchema({
+export const organizationRegisterSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
+  organizationName: z.string().min(1, "Organization name is required").trim(),
   businessType: z.enum(BUSINESS_TYPES).optional(),
-  status: z.enum(ORGANIZATION_STATUSES).optional(),
-  subscriptionPlan: z.enum(SUBSCRIPTION_PLANS).optional(),
-});
-
-/**
- * Organization response schema
- */
-export const organizationResponseSchema = organizationSchema;
-
-/**
- * Organization list response schema
- */
-export const organizationListResponseSchema = paginatedResponseSchema(
-  organizationResponseSchema
-);
-
-/**
- * Organization single response schema
- */
-export const organizationSingleResponseSchema = singleItemResponseSchema(
-  organizationResponseSchema
-);
-
-/**
- * Organization statistics schema
- */
-export const organizationStatsSchema = z.object({
-  totalOrganizations: z.number(),
-  activeOrganizations: z.number(),
-  trialOrganizations: z.number(),
-  paidOrganizations: z.number(),
-  totalUsers: z.number(),
-  totalOrders: z.number(),
-  totalRevenue: z.number(),
-});
-
-/**
- * Organization usage update schema
- */
-export const organizationUsageUpdateSchema = z.object({
-  organizationId: z.string().min(1, "Organization ID is required"),
-  usage: usageSchema.partial(),
-});
-
-/**
- * Organization limits update schema
- */
-export const organizationLimitsUpdateSchema = z.object({
-  organizationId: z.string().min(1, "Organization ID is required"),
-  limits: limitsSchema.partial(),
 });

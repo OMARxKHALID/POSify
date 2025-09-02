@@ -117,42 +117,69 @@ export const managerApprovalSchema = z.object({
 export const orderSchema = organizationBaseSchema.extend({
   // Required fields
   orderNumber: z.string().min(1, "Order number is required"),
-  customer: customerSchema.default({}),
   items: z.array(orderItemSchema).min(1, "At least one item is required"),
   subtotal: z.number().min(0, "Subtotal must be non-negative"),
   total: z.number().min(0, "Total must be non-negative"),
+  paymentMethod: z.enum(PAYMENT_METHODS, {
+    required_error: "Payment method is required",
+  }),
 
   // Optional fields
+  customerName: z.string().trim().default(DEFAULT_CUSTOMER_NAME),
+  mobileNumber: z.string().trim().optional(),
+  tableNumber: z.string().trim().optional(),
   status: z.enum(ORDER_STATUSES).default("pending"),
   deliveryType: z.enum(DELIVERY_TYPES).default("dine-in"),
-  deliveryStatus: z.enum(DELIVERY_STATUSES).optional(),
-  deliveryAddress: z.string().trim().optional(),
-  deliveryInstructions: z.string().trim().optional(),
-  estimatedDeliveryTime: z.date().optional(),
-  actualDeliveryTime: z.date().optional(),
-
-  // Payment information
-  payment: paymentSchema.optional(),
-  refundStatus: z.enum(REFUND_STATUSES).default("none"),
-  refundAmount: z.number().min(0).default(0),
+  servedBy: z.string().optional(), // User ID reference
 
   // Tax and fees
-  taxes: z.array(taxSchema).default([]),
-  serviceCharge: z.number().min(0).default(0),
+  tax: z.array(taxSchema).default([]),
   discount: z.number().min(0).default(0),
+  promoDiscount: z.number().min(0).default(0),
+  couponCode: z.string().trim().optional(),
+  serviceCharge: z.number().min(0).default(0),
+  tip: z.number().min(0).default(0),
+
+  // Payment and refund
+  isPaid: z.boolean().default(false),
+  refundStatus: z.enum(REFUND_STATUSES).default("none"),
+  returns: z.array(returnItemSchema).default([]),
+
+  // Delivery information
+  deliveryInfo: z
+    .object({
+      address: z.string().trim().optional(),
+      deliveryCharge: z.number().min(0).default(0),
+      estimatedDeliveryTime: z.date().optional(),
+      deliveryStatus: z.enum(DELIVERY_STATUSES).default("pending"),
+      deliveryPartner: z.string().trim().optional(),
+    })
+    .default({}),
+
+  // Kitchen information
+  kitchenInfo: z
+    .object({
+      prepStartTime: z.date().optional(),
+      prepCompleteTime: z.date().optional(),
+      estimatedPrepTime: z.number().optional(),
+      kitchenNotes: z.string().trim().optional(),
+    })
+    .default({}),
+
+  // Manager approval
+  managerApproval: z
+    .object({
+      required: z.boolean().default(false),
+      approvedBy: z.string().optional(),
+      approvedAt: z.date().optional(),
+      reason: z.string().trim().optional(),
+    })
+    .default({}),
 
   // Order details
   source: z.enum(ORDER_SOURCES).default("pos"),
   notes: z.string().trim().optional(),
-  specialInstructions: z.string().trim().optional(),
-  tableNumber: z.string().trim().optional(),
-  waiterName: z.string().trim().optional(),
-
-  // Timestamps
-  orderTime: z.date().default(() => new Date()),
-  readyTime: z.date().optional(),
-  servedTime: z.date().optional(),
-  paidTime: z.date().optional(),
+  idempotencyKey: z.string().trim().optional(),
 });
 
 /**

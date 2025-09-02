@@ -228,10 +228,10 @@ export const settingsSchema = organizationBaseSchema.extend({
   taxes: z.array(taxSettingsSchema).default([]),
 
   // Payment configuration
-  payments: paymentSettingsSchema.default({}),
+  payment: paymentSettingsSchema.default({}),
 
   // Receipt configuration
-  receipts: receiptSettingsSchema.default({}),
+  receipt: receiptSettingsSchema.default({}),
 
   // Customer preferences
   customerPreferences: customerPreferencesSchema.default({}),
@@ -243,13 +243,25 @@ export const settingsSchema = organizationBaseSchema.extend({
   business: businessConfigSchema.default({}),
 
   // Store information
-  store: storeInformationSchema.default({}),
+  storeInformation: storeInformationSchema.default({}),
 
   // Features
-  features: featuresSchema.default({}),
+  features: z
+    .object({
+      inventoryTracking: z.boolean().default(false),
+      advancedReporting: z.boolean().default(false),
+      multiLocation: z.boolean().default(false),
+      loyaltyProgram: z.boolean().default(false),
+      onlineOrdering: z.boolean().default(false),
+    })
+    .default({}),
 
   // Localization
-  localization: localizationSchema.default({}),
+  currency: z.string().default("USD"),
+  timezone: z.string().default("UTC"),
+  language: z.string().default("en"),
+  dateFormat: z.enum(DATE_FORMATS).default("MM/DD/YYYY"),
+  timeFormat: z.enum(TIME_FORMATS).default("12h"),
 });
 
 /**
