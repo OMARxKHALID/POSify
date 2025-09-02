@@ -26,7 +26,6 @@ export const ORGANIZATION_STATUSES = ["active", "inactive"];
 // ============================================================================
 
 export const USER_ROLES = ["super_admin", "admin", "staff"];
-export const ORG_USER_ROLES = ["admin", "staff"]; // Organization users only
 export const USER_STATUSES = ["invited", "active", "inactive", "suspended"];
 
 // Security constants
@@ -152,33 +151,3 @@ export const DEFAULT_ORGANIZATION_SUBSCRIPTION = {
   plan: "free",
   status: "trialing",
 };
-
-// ============================================================================
-// PERMISSION CONSTANTS
-// ============================================================================
-
-export const SUPER_ADMIN_PERMISSIONS = [
-  "system:manage",
-  "organizations:manage",
-  "users:manage",
-];
-
-export const ADMIN_PERMISSIONS = [
-  "organizations:manage",
-  "pos:access",
-  "dashboard:view",
-  "menu:manage",
-  "category:manage",
-  "orders:manage",
-  "users:manage",
-  "settings:manage",
-  "audit:view",
-];
-
-export const STAFF_PERMISSIONS = [
-  "pos:access",
-  "dashboard:view",
-  "menu:manage",
-  "category:manage",
-  "orders:manage",
-];

@@ -11,7 +11,7 @@ import {
   TIMEZONES,
   LANGUAGES,
 } from "@/constants";
-import { baseSchemaOptions } from "./utils/base-schema";
+import { baseSchemaOptions } from "@/schemas/base-schema.js";
 
 const { Schema } = mongoose;
 

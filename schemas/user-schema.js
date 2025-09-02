@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  organizationBaseSchema,
+  baseSchema,
   auditSchema,
   createSchema,
   updateSchema,
@@ -11,10 +11,10 @@ import {
 import { USER_ROLES, USER_STATUSES } from "@/constants";
 
 /**
- * User schema for organization users (admin, staff)
- * Aligns with the Mongoose OrgUser model
+ * User schema for both super admin and organization users
+ * Aligns with the updated Mongoose User model
  */
-export const userSchema = organizationBaseSchema.extend({
+export const userSchema = baseSchema.extend({
   // Required fields
   name: z.string().min(1, "Name is required").trim(),
   email: z.string().email("Invalid email format").toLowerCase().trim(),
@@ -22,6 +22,22 @@ export const userSchema = organizationBaseSchema.extend({
   role: z.enum(USER_ROLES, {
     errorMap: () => ({ message: "Role must be super_admin, admin or staff" }),
   }),
+
+  // Organization ID - only required for admin/staff users
+  organizationId: z
+    .string()
+    .optional()
+    .refine(
+      (val, ctx) => {
+        if (ctx.parent?.role !== "super_admin" && !val) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message: "Organization ID is required for admin and staff users",
+      }
+    ),
 
   // Optional fields
   status: z.enum(USER_STATUSES).default("invited"),
@@ -108,6 +124,7 @@ export const resetPasswordSchema = z
 export const userQuerySchema = querySchema({
   role: z.enum(USER_ROLES).optional(),
   status: z.enum(USER_STATUSES).optional(),
+  organizationId: z.string().optional(), // Allow filtering by organization
 });
 
 /**

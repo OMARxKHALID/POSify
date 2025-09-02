@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import { USER_ROLES, USER_STATUSES, SALT_ROUNDS } from "@/constants";
-import { baseSchemaOptions } from "./utils/base-schema";
+import { baseSchemaOptions } from "@/schemas/base-schema.js";
 
 const { Schema } = mongoose;
 
@@ -12,11 +12,6 @@ const { Schema } = mongoose;
 const UserSchema = new Schema(
   {
     // Required fields
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     name: {
       type: String,
       required: true,
@@ -34,8 +29,17 @@ const UserSchema = new Schema(
     },
     role: {
       type: String,
-      enum: USER_ROLES, // admin | staff
+      enum: USER_ROLES, // super_admin | admin | staff
       required: true,
+    },
+
+    // Organization ID - only required for admin/staff users
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: function () {
+        return this.role !== "super_admin";
+      },
     },
 
     // Optional fields
@@ -97,9 +101,9 @@ const UserSchema = new Schema(
 // INDEXES
 // ============================================================================
 
-UserSchema.index({ userId: 1, email: 1 }, { unique: true });
-UserSchema.index({ userId: 1, role: 1 });
-UserSchema.index({ status: 1 });
+UserSchema.index({ organizationId: 1, email: 1 }, { unique: true });
+UserSchema.index({ organizationId: 1, role: 1 });
+UserSchema.index({ organizationId: 1, status: 1 });
 
 // ============================================================================
 // MIDDLEWARE

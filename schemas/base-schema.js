@@ -155,3 +155,17 @@ export const bulkOperationResponseSchema = z.object({
     )
     .optional(),
 });
+
+// ============================================================================
+// MONGOOSE OPTIONS
+// ============================================================================
+
+/**
+ * Base Mongoose schema options for all models
+ */
+export const baseSchemaOptions = {
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+  versionKey: false,
+};

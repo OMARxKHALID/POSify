@@ -19,7 +19,7 @@ import {
   DEFAULT_STORE_NAME,
   DEFAULT_ORDER_NUMBER_FORMAT,
 } from "@/constants";
-import { baseSchemaOptions } from "./utils/base-schema";
+import { baseSchemaOptions } from "@/schemas/base-schema.js";
 
 const { Schema } = mongoose;
 

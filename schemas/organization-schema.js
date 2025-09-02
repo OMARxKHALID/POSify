@@ -1,8 +1,8 @@
 import { z } from "zod";
 import {
   baseSchema,
-  auditSchema,
   addressSchema,
+  auditSchema,
   createSchema,
   updateSchema,
   querySchema,
@@ -17,9 +17,6 @@ import {
   CURRENCIES,
   TIMEZONES,
   LANGUAGES,
-  DEFAULT_ORGANIZATION_LIMITS,
-  DEFAULT_ORGANIZATION_USAGE,
-  DEFAULT_ORGANIZATION_SUBSCRIPTION,
 } from "@/constants";
 
 /**
@@ -29,12 +26,7 @@ export const organizationInfoSchema = z.object({
   legalName: z.string().trim().optional(),
   displayName: z.string().trim().optional(),
   phone: z.string().trim().optional(),
-  email: z
-    .string()
-    .email("Invalid email format")
-    .toLowerCase()
-    .trim()
-    .optional(),
+  email: z.string().email().toLowerCase().trim().optional(),
   website: z.string().trim().optional(),
   address: addressSchema.optional(),
   logoUrl: z.string().trim().optional(),
@@ -48,40 +40,30 @@ export const organizationInfoSchema = z.object({
  * Subscription schema
  */
 export const subscriptionSchema = z.object({
-  plan: z
-    .enum(SUBSCRIPTION_PLANS)
-    .default(DEFAULT_ORGANIZATION_SUBSCRIPTION.plan),
-  status: z
-    .enum(SUBSCRIPTION_STATUSES)
-    .default(DEFAULT_ORGANIZATION_SUBSCRIPTION.status),
+  plan: z.enum(SUBSCRIPTION_PLANS).default("free"),
+  status: z.enum(SUBSCRIPTION_STATUSES).default("trialing"),
   currentPeriodStart: z.date().optional(),
   currentPeriodEnd: z.date().optional(),
   trialEnd: z.date().optional(),
 });
 
 /**
- * Usage limits schema
+ * Limits schema
  */
-export const usageLimitsSchema = z.object({
-  users: z.number().default(DEFAULT_ORGANIZATION_LIMITS.users),
-  menuItems: z.number().default(DEFAULT_ORGANIZATION_LIMITS.menuItems),
-  ordersPerMonth: z
-    .number()
-    .default(DEFAULT_ORGANIZATION_LIMITS.ordersPerMonth),
-  locations: z.number().default(DEFAULT_ORGANIZATION_LIMITS.locations),
+export const limitsSchema = z.object({
+  users: z.number().default(2),
+  menuItems: z.number().default(50),
+  ordersPerMonth: z.number().default(100),
+  locations: z.number().default(1),
 });
 
 /**
- * Current usage schema
+ * Usage schema
  */
-export const currentUsageSchema = z.object({
-  currentUsers: z.number().default(DEFAULT_ORGANIZATION_USAGE.currentUsers),
-  currentMenuItems: z
-    .number()
-    .default(DEFAULT_ORGANIZATION_USAGE.currentMenuItems),
-  ordersThisMonth: z
-    .number()
-    .default(DEFAULT_ORGANIZATION_USAGE.ordersThisMonth),
+export const usageSchema = z.object({
+  currentUsers: z.number().default(0),
+  currentMenuItems: z.number().default(0),
+  ordersThisMonth: z.number().default(0),
   lastResetDate: z.date().default(() => new Date()),
 });
 
@@ -107,10 +89,10 @@ export const organizationSchema = baseSchema.extend({
   subscription: subscriptionSchema.default({}),
 
   // Usage limits
-  limits: usageLimitsSchema.default({}),
+  limits: limitsSchema.default({}),
 
   // Current usage tracking
-  usage: currentUsageSchema.default({}),
+  usage: usageSchema.default({}),
 
   onboardingCompleted: z.boolean().default(false),
 
@@ -136,18 +118,16 @@ export const createOrganizationSchema = createSchema(organizationSchema).omit({
 export const updateOrganizationSchema = updateSchema(organizationSchema).omit({
   slug: true,
   registeredAt: true,
-  createdBy: true,
-  lastModifiedBy: true,
+  usage: true,
 });
 
 /**
  * Organization query schema
  */
 export const organizationQuerySchema = querySchema({
-  status: z.enum(ORGANIZATION_STATUSES).optional(),
   businessType: z.enum(BUSINESS_TYPES).optional(),
-}).omit({
-  organizationId: true, // Organizations don't have organizationId
+  status: z.enum(ORGANIZATION_STATUSES).optional(),
+  subscriptionPlan: z.enum(SUBSCRIPTION_PLANS).optional(),
 });
 
 /**
@@ -187,7 +167,7 @@ export const organizationStatsSchema = z.object({
  */
 export const organizationUsageUpdateSchema = z.object({
   organizationId: z.string().min(1, "Organization ID is required"),
-  usage: currentUsageSchema.partial(),
+  usage: usageSchema.partial(),
 });
 
 /**
@@ -195,5 +175,5 @@ export const organizationUsageUpdateSchema = z.object({
  */
 export const organizationLimitsUpdateSchema = z.object({
   organizationId: z.string().min(1, "Organization ID is required"),
-  limits: usageLimitsSchema.partial(),
+  limits: limitsSchema.partial(),
 });

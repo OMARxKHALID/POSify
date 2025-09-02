@@ -12,7 +12,7 @@ import {
   DEFAULT_PREP_TIME,
   DEFAULT_CUSTOMER_NAME,
 } from "@/constants";
-import { baseSchemaOptions } from "./utils/base-schema";
+import { baseSchemaOptions } from "@/schemas/base-schema.js";
 
 const { Schema } = mongoose;
 

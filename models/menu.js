@@ -4,7 +4,7 @@ import {
   DEFAULT_INVENTORY_UNIT,
   DEFAULT_LOW_STOCK_THRESHOLD,
 } from "@/constants";
-import { baseSchemaOptions } from "./utils/base-schema";
+import { baseSchemaOptions } from "@/schemas/base-schema.js";
 
 const { Schema } = mongoose;
 
