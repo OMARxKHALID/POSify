@@ -1,6 +1,13 @@
 import NextAuth from "next-auth";
 import { authOptions } from "@/lib/auth-config";
+import { createMethodHandler } from "@/lib/api";
 
+// Create the NextAuth handler
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
+// Export the main NextAuth routes
+export const GET = handler;
+export const POST = handler;
+
+// Fallback for unsupported HTTP methods
+export const { PUT, DELETE, PATCH } = createMethodHandler(["GET", "POST"]);

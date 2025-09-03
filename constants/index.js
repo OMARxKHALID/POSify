@@ -9,6 +9,7 @@ export const BUSINESS_TYPES = [
 ];
 
 export const SUBSCRIPTION_PLANS = ["free", "basic", "premium", "enterprise"]; // subscription tiers
+
 export const SUBSCRIPTION_STATUSES = [
   "active",
   "inactive",
@@ -16,6 +17,7 @@ export const SUBSCRIPTION_STATUSES = [
   "past_due",
   "canceled",
 ];
+
 export const ORGANIZATION_STATUSES = ["active", "inactive"]; // org active/inactive
 
 // USERS & SECURITY
@@ -131,7 +133,7 @@ export const DEFAULT_ORGANIZATION_SUBSCRIPTION = {
   plan: "free",
   status: "trialing",
 };
-// Default permissions
+// Default permissions just in the case of registration
 export const DEFAULT_PERMISSIONS = {
   super_admin: [
     "users:manage",
