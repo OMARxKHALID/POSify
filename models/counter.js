@@ -5,43 +5,30 @@ const { Schema } = mongoose;
 
 /**
  * Counter Schema
- * Manages auto-incrementing sequences for order numbers and other entities
+ * Handles auto-increment sequences (e.g., order numbers) per organization
  */
 const CounterSchema = new Schema(
   {
-    // Required fields
-    _id: {
-      type: String,
-      required: true,
-    },
     organizationId: {
       type: Schema.Types.ObjectId,
       ref: "Organization",
-      required: true,
+      required: true, // counter always tied to an org
     },
     name: {
       type: String,
-      required: true,
+      required: true, // counter type (e.g., "order", "invoice")
     },
-
-    // Optional fields
     seq: {
       type: Number,
-      default: 0,
+      default: 0, // current sequence value
     },
   },
   baseSchemaOptions
 );
 
-// ============================================================================
-// INDEXES
-// ============================================================================
-
+// Index for quick lookup per org + counter name
 CounterSchema.index({ organizationId: 1, name: 1 });
 
-// ============================================================================
-// EXPORT
-// ============================================================================
-
+// Export model
 export const Counter =
   mongoose.models.Counter || mongoose.model("Counter", CounterSchema);

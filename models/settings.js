@@ -8,54 +8,28 @@ import {
   DATE_FORMATS,
   TIME_FORMATS,
   SERVICE_CHARGE_APPLY_ON,
-  DEFAULT_ORDER_TIMEOUT,
-  DEFAULT_MAX_TABLES,
-  DEFAULT_ESTIMATED_DELIVERY_TIME,
-  DEFAULT_PREP_TIME,
-  DEFAULT_MANAGER_APPROVAL_THRESHOLD,
   DEFAULT_RECEIPT_FOOTER,
   DEFAULT_MAX_DISCOUNT_PERCENTAGE,
   DEFAULT_SUGGESTED_TIP_PERCENTAGES,
-  DEFAULT_STORE_NAME,
   DEFAULT_ORDER_NUMBER_FORMAT,
 } from "@/constants";
 import { baseSchemaOptions } from "@/schemas/base-schema.js";
 
 const { Schema } = mongoose;
 
+// SUB-SCHEMAS
+
 /**
  * Tax Settings Schema
- * Configuration for tax rates and types
+ * Defines tax rates and types
  */
 const TaxSettingsSchema = new Schema(
   {
-    // Required fields
-    id: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    rate: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-
-    // Optional fields
-    enabled: {
-      type: Boolean,
-      default: true,
-    },
-    type: {
-      type: String,
-      enum: TAX_TYPES,
-      default: "percentage",
-    },
+    id: { type: String, required: true, trim: true }, // tax ID
+    name: { type: String, required: true, trim: true }, // tax name
+    rate: { type: Number, required: true, min: 0 }, // tax %
+    enabled: { type: Boolean, default: true }, // enable/disable tax
+    type: { type: String, enum: TAX_TYPES, default: "percentage" }, // percentage or fixed
   },
   { _id: false }
 );
@@ -66,27 +40,11 @@ const TaxSettingsSchema = new Schema(
  */
 const PaymentSettingsSchema = new Schema(
   {
-    // Required fields
-    defaultMethod: {
-      type: String,
-      enum: PAYMENT_METHODS,
-      default: "cash",
-    },
-
-    // Optional fields
-    preferredMethods: {
-      type: [String],
-      default: PAYMENT_METHODS,
-    },
+    defaultMethod: { type: String, enum: PAYMENT_METHODS, default: "cash" }, // default payment
+    preferredMethods: { type: [String], default: PAYMENT_METHODS }, // available options
     cashHandling: {
-      enableCashDrawer: {
-        type: Boolean,
-        default: true,
-      },
-      requireExactChange: {
-        type: Boolean,
-        default: false,
-      },
+      enableCashDrawer: { type: Boolean, default: true }, // open drawer
+      requireExactChange: { type: Boolean, default: false }, // force exact cash
     },
   },
   { _id: false }
@@ -94,405 +52,125 @@ const PaymentSettingsSchema = new Schema(
 
 /**
  * Receipt Settings Schema
- * Configuration for receipt printing and formatting
+ * Receipt printing and formatting
  */
 const ReceiptSettingsSchema = new Schema(
   {
-    // Required fields
-    template: {
-      type: String,
-      enum: RECEIPT_TEMPLATES,
-      default: "default",
-    },
-
-    // Optional fields
-    footer: {
-      type: String,
-      trim: true,
-      default: DEFAULT_RECEIPT_FOOTER,
-    },
-    header: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-    printLogo: {
-      type: Boolean,
-      default: true,
-    },
-    showTaxBreakdown: {
-      type: Boolean,
-      default: true,
-    },
-    showItemDiscounts: {
-      type: Boolean,
-      default: true,
-    },
-    showOrderNumber: {
-      type: Boolean,
-      default: true,
-    },
-    showServerName: {
-      type: Boolean,
-      default: true,
-    },
-    autoPrint: {
-      type: Boolean,
-      default: false,
-    },
+    template: { type: String, enum: RECEIPT_TEMPLATES, default: "default" }, // receipt template
+    footer: { type: String, trim: true, default: DEFAULT_RECEIPT_FOOTER }, // footer note
+    header: { type: String, trim: true, default: "" }, // header note
+    printLogo: { type: Boolean, default: true }, // show logo
+    showTaxBreakdown: { type: Boolean, default: true }, // show tax details
+    showItemDiscounts: { type: Boolean, default: true }, // show discounts
+    showOrderNumber: { type: Boolean, default: true }, // show order ID
+    showServerName: { type: Boolean, default: true }, // show staff
+    autoPrint: { type: Boolean, default: false }, // auto print receipts
   },
   { _id: false }
 );
 
 /**
  * Customer Preferences Schema
- * Settings for customer interaction and checkout
+ * Customer-related checkout rules
  */
 const CustomerPreferencesSchema = new Schema(
   {
-    // Optional fields
-    requireCustomerPhone: {
-      type: Boolean,
-      default: false,
-    },
-    requireCustomerName: {
-      type: Boolean,
-      default: false,
-    },
-    allowGuestCheckout: {
-      type: Boolean,
-      default: true,
-    },
-    enableCustomerDatabase: {
-      type: Boolean,
-      default: true,
-    },
+    requireCustomerPhone: { type: Boolean, default: false }, // enforce phone
+    requireCustomerName: { type: Boolean, default: false }, // enforce name
+    allowGuestCheckout: { type: Boolean, default: true }, // allow guest
+    enableCustomerDatabase: { type: Boolean, default: true }, // store customer data
   },
   { _id: false }
 );
 
 /**
  * Operational Settings Schema
- * Day-to-day operational configurations
+ * Order, sync, and prep rules
  */
 const OperationalSettingsSchema = new Schema(
   {
-    // Order management
     orderManagement: {
-      defaultStatus: {
-        type: String,
-        enum: ORDER_STATUSES,
-        default: "pending",
-      },
-      orderNumberFormat: {
-        type: String,
-        default: DEFAULT_ORDER_NUMBER_FORMAT,
-      },
-      autoConfirmOrders: {
-        type: Boolean,
-        default: false,
-      },
-      orderTimeout: {
-        type: Number,
-        default: DEFAULT_ORDER_TIMEOUT,
-      },
+      defaultStatus: { type: String, enum: ORDER_STATUSES, default: "pending" }, // new order status
+      orderNumberFormat: { type: String, default: DEFAULT_ORDER_NUMBER_FORMAT }, // order ID format
+      autoConfirmOrders: { type: Boolean, default: false }, // auto-confirm orders
     },
-
-    // Table management
-    tableManagement: {
-      enableTableService: {
-        type: Boolean,
-        default: true,
-      },
-      maxTables: {
-        type: Number,
-        default: DEFAULT_MAX_TABLES,
-      },
-      requireTableNumber: {
-        type: Boolean,
-        default: false,
-      },
-    },
-
-    // Delivery settings
-    deliverySettings: {
-      enableDelivery: {
-        type: Boolean,
-        default: false,
-      },
-      deliveryCharge: {
-        type: Number,
-        default: 0,
-      },
-      freeDeliveryThreshold: {
-        type: Number,
-        default: 0,
-      },
-      estimatedDeliveryTime: {
-        type: Number,
-        default: DEFAULT_ESTIMATED_DELIVERY_TIME,
-      },
-    },
-
-    // Kitchen display
-    kitchenDisplay: {
-      defaultPrepTime: {
-        type: Number,
-        default: DEFAULT_PREP_TIME,
-      },
-      showCustomerInfo: {
-        type: Boolean,
-        default: true,
-      },
-      soundAlerts: {
-        type: Boolean,
-        default: true,
-      },
-    },
-    syncMode: {
-      type: String,
-      enum: SYNC_MODES,
-      default: "auto",
-    },
+    syncMode: { type: String, enum: SYNC_MODES, default: "auto" }, // sync mode
   },
   { _id: false }
 );
 
 /**
  * Business Config Schema
- * Business rules and configurations
+ * Discounts, service charge, tipping
  */
 const BusinessConfigSchema = new Schema(
   {
-    // Service charge
     serviceCharge: {
-      enabled: {
-        type: Boolean,
-        default: false,
-      },
-      percentage: {
-        type: Number,
-        default: 0,
-      },
+      enabled: { type: Boolean, default: false }, // enable service charge
+      percentage: { type: Number, default: 0 }, // % applied
       applyOn: {
         type: String,
         enum: SERVICE_CHARGE_APPLY_ON,
         default: "subtotal",
-      },
+      }, // apply rule
     },
-
-    // Tipping
     tipping: {
-      enabled: {
-        type: Boolean,
-        default: true,
-      },
+      enabled: { type: Boolean, default: true }, // enable tips
       suggestedPercentages: {
         type: [Number],
         default: DEFAULT_SUGGESTED_TIP_PERCENTAGES,
-      },
-      allowCustomTip: {
-        type: Boolean,
-        default: true,
-      },
+      }, // tip options
+      allowCustomTip: { type: Boolean, default: true }, // allow custom tip
     },
-
-    // Discount rules
     discountRules: {
       maxDiscountPercentage: {
         type: Number,
         default: DEFAULT_MAX_DISCOUNT_PERCENTAGE,
-      },
-      staffDiscountPermission: {
-        type: Boolean,
-        default: false,
-      },
-      requireManagerApproval: {
-        type: Boolean,
-        default: true,
-      },
-      managerApprovalThreshold: {
-        type: Number,
-        default: DEFAULT_MANAGER_APPROVAL_THRESHOLD,
-      },
+      }, // max % discount
     },
   },
   { _id: false }
 );
 
-/**
- * Store Information Schema
- * Basic store details and contact information
- */
-const StoreInformationSchema = new Schema(
-  {
-    // Required fields
-    storeName: {
-      type: String,
-      trim: true,
-      default: DEFAULT_STORE_NAME,
-    },
-
-    // Optional fields
-    logoUrl: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-    address: {
-      street: {
-        type: String,
-        trim: true,
-        default: "",
-      },
-      city: {
-        type: String,
-        trim: true,
-        default: "",
-      },
-      state: {
-        type: String,
-        trim: true,
-        default: "",
-      },
-      zipCode: {
-        type: String,
-        trim: true,
-        default: "",
-      },
-      country: {
-        type: String,
-        trim: true,
-        default: "",
-      },
-    },
-    phone: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-    email: {
-      type: String,
-      trim: true,
-      lowercase: true,
-      default: "",
-    },
-    adminName: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-    website: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-  },
-  { _id: false }
-);
+// MAIN SCHEMA
 
 /**
  * Settings Schema
- * Main settings document containing all configuration options
+ * Holds all configuration for an organization
  */
 const SettingsSchema = new Schema(
   {
-    // Required fields
     organizationId: {
       type: Schema.Types.ObjectId,
       ref: "Organization",
       required: true,
-    },
+    }, // linked org
 
-    // Optional fields
-    storeInformation: {
-      type: StoreInformationSchema,
-      default: () => ({}),
-    },
-    taxes: {
-      type: [TaxSettingsSchema],
-      default: [],
-    },
-    payment: {
-      type: PaymentSettingsSchema,
-      default: () => ({}),
-    },
-    receipt: {
-      type: ReceiptSettingsSchema,
-      default: () => ({}),
-    },
+    taxes: { type: [TaxSettingsSchema], default: [] }, // tax config
+    payment: { type: PaymentSettingsSchema, default: () => ({}) }, // payment config
+    receipt: { type: ReceiptSettingsSchema, default: () => ({}) }, // receipt config
     customerPreferences: {
       type: CustomerPreferencesSchema,
       default: () => ({}),
-    },
-    operational: {
-      type: OperationalSettingsSchema,
-      default: () => ({}),
-    },
-    business: {
-      type: BusinessConfigSchema,
-      default: () => ({}),
-    },
-    currency: {
-      type: String,
-      uppercase: true,
-      default: "USD",
-    },
-    timezone: {
-      type: String,
-      trim: true,
-      default: "UTC",
-    },
-    language: {
-      type: String,
-      trim: true,
-      default: "en",
-    },
-    dateFormat: {
-      type: String,
-      enum: DATE_FORMATS,
-      default: "MM/DD/YYYY",
-    },
-    timeFormat: {
-      type: String,
-      enum: TIME_FORMATS,
-      default: "12h",
-    },
-    features: {
-      inventoryTracking: {
-        type: Boolean,
-        default: false,
-      },
-      advancedReporting: {
-        type: Boolean,
-        default: false,
-      },
-      multiLocation: {
-        type: Boolean,
-        default: false,
-      },
-      loyaltyProgram: {
-        type: Boolean,
-        default: false,
-      },
-      onlineOrdering: {
-        type: Boolean,
-        default: false,
-      },
-    },
+    }, // customer rules
+    operational: { type: OperationalSettingsSchema, default: () => ({}) }, // ops rules
+    business: { type: BusinessConfigSchema, default: () => ({}) }, // business rules
+
+    // Localization
+    currency: { type: String, uppercase: true, default: "USD" }, // store currency
+    timezone: { type: String, trim: true, default: "UTC" }, // store timezone
+    language: { type: String, trim: true, default: "en" }, // language
+    dateFormat: { type: String, enum: DATE_FORMATS, default: "MM/DD/YYYY" }, // date format
+    timeFormat: { type: String, enum: TIME_FORMATS, default: "12h" }, // time format
   },
   baseSchemaOptions
 );
 
-// ============================================================================
 // INDEXES
-// ============================================================================
 
 SettingsSchema.index({ organizationId: 1, updatedAt: -1 });
 
-// ============================================================================
 // EXPORT
-// ============================================================================
 
 export const Settings =
   mongoose.models.Settings || mongoose.model("Settings", SettingsSchema);

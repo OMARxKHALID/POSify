@@ -1,3 +1,12 @@
+/**
+ * Organization Model
+ * -------------------
+ * - Represents a business using the POS system
+ * - Each Organization has exactly ONE Admin (owner)
+ * - Multiple Staff can belong to an Organization
+ * - Super Admins do NOT belong to any Organization
+ */
+
 import mongoose from "mongoose";
 import {
   BUSINESS_TYPES,
@@ -15,131 +24,43 @@ import { baseSchemaOptions } from "@/schemas/base-schema.js";
 
 const { Schema } = mongoose;
 
-/**
- * Organization Information Schema
- * Contains business/store details
- */
+// Sub-schema: Business/store details
 const OrganizationInfoSchema = new Schema(
   {
-    // Required fields
-    legalName: {
-      type: String,
-      trim: true,
-    },
-    displayName: {
-      type: String,
-      trim: true,
-    }, // What shows on receipts, POS, etc.
-
-    // Optional fields
-    phone: {
-      type: String,
-      trim: true,
-    },
-    email: {
-      type: String,
-      trim: true,
-      lowercase: true,
-    },
-    website: {
-      type: String,
-      trim: true,
-    },
+    legalName: { type: String, trim: true },
+    displayName: { type: String, trim: true }, // shown on POS/receipts
+    orgPhone: { type: String, trim: true },
+    orgEmail: { type: String, trim: true, lowercase: true },
+    website: { type: String, trim: true },
     address: {
-      street: {
-        type: String,
-        trim: true,
-      },
-      city: {
-        type: String,
-        trim: true,
-      },
-      state: {
-        type: String,
-        trim: true,
-      },
-      postalCode: {
-        type: String,
-        trim: true,
-      },
-      country: {
-        type: String,
-        trim: true,
-      },
+      street: { type: String, trim: true },
+      city: { type: String, trim: true },
+      state: { type: String, trim: true },
+      postalCode: { type: String, trim: true },
+      country: { type: String, trim: true },
     },
-    logoUrl: {
-      type: String,
-      trim: true,
-    }, // Stored in cloud storage
-    taxId: {
-      type: String,
-      trim: true,
-    }, // VAT / GST number if needed
-    currency: {
-      type: String,
-      enum: CURRENCIES,
-      default: "USD",
-    },
-    timezone: {
-      type: String,
-      enum: TIMEZONES,
-      default: "UTC",
-    },
-    language: {
-      type: String,
-      enum: LANGUAGES,
-      default: "en",
-    },
+    logoUrl: { type: String, trim: true },
+    taxId: { type: String, trim: true }, // VAT / GST number
+    currency: { type: String, enum: CURRENCIES, default: "USD" },
+    timezone: { type: String, enum: TIMEZONES, default: "UTC" },
+    language: { type: String, enum: LANGUAGES, default: "en" },
   },
   { _id: false }
 );
 
-/**
- * Organization Schema
- * Represents a business/organization using the POS system
- */
+// Main schema
 const OrganizationSchema = new Schema(
   {
-    // Required fields
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    name: { type: String, required: true, trim: true }, // org name
+    slug: { type: String, trim: true, lowercase: true }, // URL-friendly name
+    domain: { type: String, trim: true, lowercase: true }, // optional custom domain
+    status: { type: String, enum: ORGANIZATION_STATUSES, default: "active" },
 
-    // Optional fields
-    slug: {
-      type: String,
-      trim: true,
-      lowercase: true,
-    },
-    domain: {
-      type: String,
-      trim: true,
-      lowercase: true,
-    },
-    status: {
-      type: String,
-      enum: ORGANIZATION_STATUSES,
-      default: "active",
-    },
-    registeredAt: {
-      type: Date,
-      default: Date.now,
-    },
-    businessType: {
-      type: String,
-      enum: BUSINESS_TYPES,
-      default: "restaurant",
-    },
+    businessType: { type: String, enum: BUSINESS_TYPES, default: "restaurant" },
+    information: { type: OrganizationInfoSchema, default: () => ({}) },
 
-    // Business/store information
-    information: {
-      type: OrganizationInfoSchema,
-      default: () => ({}),
-    },
+    owner: { type: Schema.Types.ObjectId, ref: "User", required: true }, // the Admin of this org
 
-    // Subscription management
     subscription: {
       plan: {
         type: String,
@@ -156,12 +77,8 @@ const OrganizationSchema = new Schema(
       trialEnd: Date,
     },
 
-    // Usage limits
     limits: {
-      users: {
-        type: Number,
-        default: DEFAULT_ORGANIZATION_LIMITS.users,
-      },
+      users: { type: Number, default: DEFAULT_ORGANIZATION_LIMITS.users },
       menuItems: {
         type: Number,
         default: DEFAULT_ORGANIZATION_LIMITS.menuItems,
@@ -176,7 +93,6 @@ const OrganizationSchema = new Schema(
       },
     },
 
-    // Current usage tracking
     usage: {
       currentUsers: {
         type: Number,
@@ -196,38 +112,19 @@ const OrganizationSchema = new Schema(
       },
     },
 
-    onboardingCompleted: {
-      type: Boolean,
-      default: false,
-    },
+    onboardingCompleted: { type: Boolean, default: false },
 
-    // Audit fields
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-    lastModifiedBy: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" }, // who created org (super_admin)
+    lastModifiedBy: { type: Schema.Types.ObjectId, ref: "User" }, // who updated org
   },
   baseSchemaOptions
 );
 
-// ============================================================================
-// INDEXES
-// ============================================================================
-
+// Indexes
 OrganizationSchema.index({ domain: 1 }, { unique: true, sparse: true });
 OrganizationSchema.index({ slug: 1 }, { unique: true, sparse: true });
 
-// ============================================================================
-// MIDDLEWARE
-// ============================================================================
-
-/**
- * Pre-save middleware: Generate slug from name or domain
- */
+// Pre-save: auto-generate slug from name/domain
 OrganizationSchema.pre("save", async function (next) {
   if (!this.slug && (this.name || this.domain)) {
     this.slug = (this.domain || this.name)
@@ -241,48 +138,21 @@ OrganizationSchema.pre("save", async function (next) {
   next();
 });
 
-// ============================================================================
-// VIRTUAL PROPERTIES
-// ============================================================================
-
-/**
- * Check if subscription is active
- */
+// Virtuals
 OrganizationSchema.virtual("isSubscriptionActive").get(function () {
   return ["active", "trialing"].includes(this.subscription.status);
 });
 
-// ============================================================================
-// INSTANCE METHODS
-// ============================================================================
-
-/**
- * Check if organization can add a new user
- * @returns {boolean} - True if user limit not reached
- */
+// Instance methods
 OrganizationSchema.methods.canAddUser = function () {
   return this.usage.currentUsers < this.limits.users;
 };
-
-/**
- * Check if organization can add a new menu item
- * @returns {boolean} - True if menu item limit not reached
- */
 OrganizationSchema.methods.canAddMenuItem = function () {
   return this.usage.currentMenuItems < this.limits.menuItems;
 };
-
-/**
- * Check if organization can create a new order
- * @returns {boolean} - True if order limit not reached
- */
 OrganizationSchema.methods.canCreateOrder = function () {
   return this.usage.ordersThisMonth < this.limits.ordersPerMonth;
 };
-
-// ============================================================================
-// EXPORT
-// ============================================================================
 
 export const Organization =
   mongoose.models.Organization ||

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { USER_ROLES } from "@/constants";
 
 /**
  * Base password validation schema
@@ -8,7 +9,7 @@ const passwordSchema = z
   .min(6, "Password must be at least 6 characters");
 
 /**
- * Password confirmation schema
+ * Password confirmation schem
  */
 const passwordConfirmationSchema = z
   .object({
@@ -26,7 +27,6 @@ const passwordConfirmationSchema = z
 export const loginSchema = z.object({
   email: z.string().email("Invalid email format").toLowerCase().trim(),
   password: z.string().min(1, "Password is required"),
-  rememberMe: z.boolean().default(false),
 });
 
 /**
@@ -36,9 +36,6 @@ export const userRegisterSchema = z
   .object({
     name: z.string().min(1, "Name is required").trim(),
     email: z.string().email("Invalid email format").toLowerCase().trim(),
-    acceptTerms: z.boolean().refine((val) => val === true, {
-      message: "You must accept the terms and conditions",
-    }),
   })
   .merge(passwordConfirmationSchema);
 
@@ -50,7 +47,14 @@ export const adminRegisterSchema = z.object({
   email: z.string().email("Invalid email format").toLowerCase().trim(),
   password: z.string().min(6, "Password must be at least 6 characters"),
   organizationId: z.string().min(1, "Organization ID is required"),
-  role: z.enum(["admin", "staff"]).default("admin"),
+  role: z
+    .enum(
+      USER_ROLES.filter((role) => role !== "super_admin"),
+      {
+        errorMap: () => ({ message: "Role must be admin, staff or pending" }),
+      }
+    )
+    .default("staff"), // Default to staff for new organization members
 });
 
 /**
@@ -60,5 +64,7 @@ export const superAdminRegisterSchema = z
   .object({
     name: z.string().min(1, "Name is required").trim(),
     email: z.string().email("Invalid email format").toLowerCase().trim(),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    role: z.literal("super_admin"),
   })
   .merge(passwordConfirmationSchema);

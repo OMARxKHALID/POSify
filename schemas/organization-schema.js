@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { baseSchema, auditSchema } from "./base-schema.js";
+import { baseSchema, auditSchema, addressSchema } from "./base-schema.js";
 import {
   BUSINESS_TYPES,
   SUBSCRIPTION_PLANS,
@@ -19,15 +19,7 @@ export const organizationInfoSchema = z.object({
   phone: z.string().trim().optional(),
   email: z.string().email().toLowerCase().trim().optional(),
   website: z.string().trim().optional(),
-  address: z
-    .object({
-      street: z.string().trim().optional(),
-      city: z.string().trim().optional(),
-      state: z.string().trim().optional(),
-      postalCode: z.string().trim().optional(),
-      country: z.string().trim().optional(),
-    })
-    .optional(),
+  address: addressSchema.optional(), // uses base address schema
   logoUrl: z.string().trim().optional(),
   taxId: z.string().trim().optional(),
   currency: z.enum(CURRENCIES).default("USD"),
@@ -67,7 +59,7 @@ export const usageSchema = z.object({
 });
 
 /**
- * Organization schema
+ * Organization schema - this is it
  * Aligns with the Mongoose Organization model
  */
 export const organizationSchema = baseSchema.extend({
@@ -78,11 +70,13 @@ export const organizationSchema = baseSchema.extend({
   slug: z.string().trim().toLowerCase().optional(),
   domain: z.string().trim().toLowerCase().optional(),
   status: z.enum(ORGANIZATION_STATUSES).default("active"),
-  registeredAt: z.date().default(() => new Date()),
   businessType: z.enum(BUSINESS_TYPES).default("restaurant"),
 
   // Business/store information
   information: organizationInfoSchema.default({}),
+
+  // Owner (Admin user)
+  owner: z.string().min(1, "Owner ID is required"),
 
   // Subscription management
   subscription: subscriptionSchema.default({}),

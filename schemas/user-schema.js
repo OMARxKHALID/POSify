@@ -12,7 +12,9 @@ export const userSchema = baseSchema.extend({
   email: z.string().email("Invalid email format").toLowerCase().trim(),
   password: z.string().min(6, "Password must be at least 6 characters"),
   role: z.enum(USER_ROLES, {
-    errorMap: () => ({ message: "Role must be super_admin, admin or staff" }),
+    errorMap: () => ({
+      message: "Role must be super_admin, admin, staff or pending",
+    }),
   }),
 
   // Organization ID - only required for admin/staff users
@@ -32,7 +34,7 @@ export const userSchema = baseSchema.extend({
     ),
 
   // Optional fields
-  status: z.enum(USER_STATUSES).default("invited"),
+  status: z.enum(USER_STATUSES).default("active"),
   permissions: z.array(z.string()).default([]),
   permissionsUpdatedAt: z.date().default(() => new Date()),
   phone: z.string().trim().default(""),

@@ -4,85 +4,42 @@ import { baseSchemaOptions } from "@/schemas/base-schema.js";
 const { Schema } = mongoose;
 
 /**
- * Audit Log Schema
- * Tracks all system activities and changes for compliance and debugging
+ * Audit Log Model
+ * Tracks user/system actions for compliance, debugging, and history
  */
 const AuditLogSchema = new Schema(
   {
-    // Required fields
-    action: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    resource: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    resourceId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    userEmail: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    userRole: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    action: { type: String, required: true, trim: true }, // action performed
+    resource: { type: String, required: true, trim: true }, // entity type (e.g., User, Order)
+    resourceId: { type: Schema.Types.ObjectId, required: true }, // target entity ID
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true }, // actor
+    userEmail: { type: String, required: true, trim: true }, // actor's email
+    userRole: { type: String, required: true, trim: true }, // actor's role
 
-    // Optional fields
     organizationId: {
       type: Schema.Types.ObjectId,
       ref: "Organization",
-      // Required only if the actor is not a super_admin
       required: function () {
-        return this.userRole !== "super_admin";
+        return this.userRole !== "super_admin"; // org required unless super_admin
       },
     },
-    ipAddress: {
-      type: String,
-      trim: true,
-    },
-    userAgent: {
-      type: String,
-      trim: true,
-    },
+
+    ipAddress: { type: String, trim: true }, // request IP
+    userAgent: { type: String, trim: true }, // device/browser info
     changes: {
-      before: Schema.Types.Mixed,
-      after: Schema.Types.Mixed,
+      before: Schema.Types.Mixed, // state before change
+      after: Schema.Types.Mixed, // state after change
     },
-    description: {
-      type: String,
-      trim: true,
-    },
+    description: { type: String, trim: true }, // human-readable summary
     metadata: {
-      sessionId: {
-        type: String,
-        trim: true,
-      },
-      requestId: {
-        type: String,
-        trim: true,
-      },
+      sessionId: { type: String, trim: true }, // session reference
+      requestId: { type: String, trim: true }, // request trace ID
     },
   },
   baseSchemaOptions
 );
 
-// ============================================================================
-// INDEXES
-// ============================================================================
-
+// Indexes for faster querying
 AuditLogSchema.index({ organizationId: 1, resource: 1, resourceId: 1 });
 AuditLogSchema.index({ organizationId: 1, userId: 1 });
 AuditLogSchema.index({ organizationId: 1, action: 1 });
@@ -94,21 +51,10 @@ AuditLogSchema.index(
   { name: "text" }
 );
 
-// ============================================================================
-// VIRTUAL PROPERTIES
-// ============================================================================
-
-/**
- * Virtuals = computed fields, not stored in DB.
- * Here: checks if the action was performed by a super_admin.
- */
+// Virtual: check if actor was a super_admin
 AuditLogSchema.virtual("isSuperAdminOperation").get(function () {
   return this.userRole === "super_admin";
 });
-
-// ============================================================================
-// EXPORT
-// ============================================================================
 
 export const AuditLog =
   mongoose.models.AuditLog || mongoose.model("AuditLog", AuditLogSchema);
