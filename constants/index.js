@@ -1,6 +1,4 @@
-// ============================================================================
 // BUSINESS & ORGANIZATION
-// ============================================================================
 export const BUSINESS_TYPES = [
   "restaurant",
   "cafe",
@@ -20,16 +18,13 @@ export const SUBSCRIPTION_STATUSES = [
 ];
 export const ORGANIZATION_STATUSES = ["active", "inactive"]; // org active/inactive
 
-// ============================================================================
 // USERS & SECURITY
-// ============================================================================
+
 export const USER_ROLES = ["super_admin", "admin", "staff", "pending"]; // roles
 export const USER_STATUSES = ["active", "inactive", "suspended"]; // account lifecycle
 export const SALT_ROUNDS = 12; // bcrypt salt
 
-// ============================================================================
 // LOCALIZATION
-// ============================================================================
 export const CURRENCIES = [
   "USD",
   "EUR",
@@ -68,9 +63,8 @@ export const LANGUAGES = [
 export const DATE_FORMATS = ["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD"];
 export const TIME_FORMATS = ["12h", "24h"];
 
-// ============================================================================
 // ORDERS & PAYMENTS
-// ============================================================================
+
 export const ORDER_STATUSES = [
   "pending",
   "preparing",
@@ -97,15 +91,11 @@ export const PAYMENT_METHODS = ["cash", "card", "wallet"];
 export const TAX_TYPES = ["percentage", "fixed"];
 export const SERVICE_CHARGE_APPLY_ON = ["subtotal", "total"];
 
-// ============================================================================
 // SETTINGS & CONFIG
-// ============================================================================
 export const RECEIPT_TEMPLATES = ["default", "minimal", "detailed"];
 export const SYNC_MODES = ["auto", "manual"];
 
-// ============================================================================
 // DEFAULTS
-// ============================================================================
 
 export const DEFAULT_CUSTOMER_NAME = "Guest"; // walk-in customer
 export const DEFAULT_RECEIPT_FOOTER = "Thank you for your business!";
@@ -140,4 +130,26 @@ export const DEFAULT_ORGANIZATION_USAGE = {
 export const DEFAULT_ORGANIZATION_SUBSCRIPTION = {
   plan: "free",
   status: "trialing",
+};
+// Default permissions
+export const DEFAULT_PERMISSIONS = {
+  super_admin: [
+    "users:manage",
+    "organizations:manage",
+    "reports:view",
+    "audit:view",
+  ],
+  admin: [
+    "organizations:manage",
+    "dashboard:view",
+    "menu:manage",
+    "category:manage",
+    "orders:manage",
+    "users:manage",
+    "settings:manage",
+    "pos:access",
+    "audit:view",
+  ],
+  staff: ["dashboard:view", "orders:manage", "pos:access"],
+  pending: [],
 };

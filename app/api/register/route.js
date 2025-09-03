@@ -1,111 +1,106 @@
 import { NextResponse } from "next/server";
-import { userRegisterSchema } from "@/schemas/auth-schema.js";
+import { userRegisterSchemaWithoutOrganization } from "@/schemas/auth-schema.js";
 import { User } from "@/models/user.js";
 import dbConnect from "@/lib/db.js";
-import {
+import ResponseBuilder, {
   apiSuccess,
-  apiError,
-  apiValidationError,
+  apiFromZod,
+  apiFromMongoose,
   apiInternalError,
   apiConflict,
+  apiError,
 } from "@/lib/api-utils.js";
 
-/** POST /api/register - Register a new user (without organization) */
+// POST /api/register - Register a new user (without organization)
 export async function POST(request) {
   try {
-    console.log("🔐 User registration request received");
-
     // Connect to database
     await dbConnect();
-    console.log("✅ Database connected successfully");
 
     // Parse request body
-    const body = await request.json();
-    console.log("📝 Request body parsed:", {
-      name: body.name,
-      email: body.email,
-    });
-
-    // Validate input data
-    const validationResult = userRegisterSchema.safeParse(body);
-    if (!validationResult.success) {
-      console.log("❌ Validation failed:", validationResult.error.errors);
+    let body;
+    try {
+      body = await request.json();
+    } catch {
       return NextResponse.json(
-        apiValidationError(validationResult.error.errors),
+        apiError("Invalid JSON payload", "INVALID_JSON", [], 400),
         { status: 400 }
       );
     }
-    console.log("✅ Validation passed");
+
+    // Validate input data (Zod)
+    const validationResult =
+      userRegisterSchemaWithoutOrganization.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(apiFromZod(validationResult.error), {
+        status: 400,
+      });
+    }
 
     const { name, email, password } = validationResult.data;
 
-    // Check if user with this email already exists globally
+    // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      console.log("❌ User already exists:", email);
       return NextResponse.json(
         apiConflict("User with this email already exists"),
         { status: 409 }
       );
     }
-    console.log("✅ Email is unique");
 
-    // Create user (without organization) - will be linked later
+    // Create and save user
     const user = new User({
       name,
       email: email.toLowerCase(),
       password,
-      role: "pending", // Temporary role - will be updated to admin when organization is created
-      status: "active", // User is active by default
-      emailVerified: true, // Email is verified by default
-      permissions: [], // Default empty permissions
+      role: "pending",
+      status: "active",
+      emailVerified: true,
+      permissions: [],
     });
 
     await user.save();
-    console.log("✅ User saved to database:", user._id);
 
-    // Remove sensitive data before response
+    // Remove sensitive data
     const userResponse = user.toJSON();
     delete userResponse.password;
     delete userResponse.inviteToken;
 
-    const response = apiSuccess(
-      userResponse,
-      "User registered successfully",
-      201
+    return NextResponse.json(
+      apiSuccess({
+        data: userResponse,
+        message:
+          "User registered successfully. Please create an organization to complete setup.",
+        statusCode: 201,
+      }),
+      { status: 201 }
     );
-    console.log("✅ Registration successful, sending response");
-
-    return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    console.error("💥 User registration error:", error);
-    console.error("Error stack:", error.stack);
-
     // Handle duplicate key errors
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
-      console.log("❌ Duplicate key error:", field);
       return NextResponse.json(
-        apiError(
-          `${field} already exists`,
-          "DUPLICATE_KEY",
-          [{ field, issue: `${field} must be unique` }],
-          409
-        ),
+        ResponseBuilder.error({
+          message: `${field} already exists`,
+          code: "DUPLICATE_KEY",
+          details: [{ field, issue: `${field} must be unique` }],
+          statusCode: 409,
+        }),
         { status: 409 }
       );
     }
 
-    // Handle validation errors
+    // Handle mongoose validation errors
     if (error.name === "ValidationError") {
-      const validationErrors = Object.values(error.errors).map((err) => ({
-        field: err.path,
-        issue: err.message,
-      }));
-      console.log("❌ Mongoose validation error:", validationErrors);
-      return NextResponse.json(apiValidationError(validationErrors), {
-        status: 400,
-      });
+      return NextResponse.json(apiFromMongoose(error), { status: 400 });
+    }
+
+    // Handle invalid object IDs
+    if (error.name === "CastError") {
+      return NextResponse.json(
+        apiError("Invalid resource identifier", "CAST_ERROR", [], 400),
+        { status: 400 }
+      );
     }
 
     // Handle database connection errors
@@ -113,18 +108,50 @@ export async function POST(request) {
       error.name === "MongoNetworkError" ||
       error.name === "MongoServerSelectionError"
     ) {
-      console.error("❌ Database connection error:", error.message);
       return NextResponse.json(
-        apiError("Database connection failed", "DB_CONNECTION_ERROR", [], 503),
+        ResponseBuilder.error({
+          message: "Database connection failed",
+          code: "DB_CONNECTION_ERROR",
+          statusCode: 503,
+        }),
         { status: 503 }
       );
     }
 
-    // Handle other errors
-    console.error("❌ Unexpected error:", error.message);
+    // Handle timeout errors
+    if (error.message && error.message.includes("timed out")) {
+      return NextResponse.json(
+        apiError("Database request timed out", "DB_TIMEOUT", [], 504),
+        { status: 504 }
+      );
+    }
+
+    // Handle unexpected errors
     return NextResponse.json(
       apiInternalError("Failed to register user. Please try again."),
       { status: 500 }
     );
   }
+}
+
+// Fallback for unsupported HTTP methods
+export function GET() {
+  return NextResponse.json(
+    apiError("Method not allowed", "METHOD_NOT_ALLOWED", [], 405),
+    { status: 405 }
+  );
+}
+
+export function PUT() {
+  return NextResponse.json(
+    apiError("Method not allowed", "METHOD_NOT_ALLOWED", [], 405),
+    { status: 405 }
+  );
+}
+
+export function DELETE() {
+  return NextResponse.json(
+    apiError("Method not allowed", "METHOD_NOT_ALLOWED", [], 405),
+    { status: 405 }
+  );
 }

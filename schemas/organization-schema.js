@@ -59,7 +59,7 @@ export const usageSchema = z.object({
 });
 
 /**
- * Organization schema - this is it
+ * Organization schema
  * Aligns with the Mongoose Organization model
  */
 export const organizationSchema = baseSchema.extend({
@@ -100,4 +100,5 @@ export const organizationRegisterSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
   organizationName: z.string().min(1, "Organization name is required").trim(),
   businessType: z.enum(BUSINESS_TYPES).optional(),
+  information: organizationInfoSchema.optional(),
 });

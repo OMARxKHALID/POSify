@@ -2,32 +2,44 @@ import { NextResponse } from "next/server";
 import { superAdminRegisterSchema } from "@/schemas/auth-schema.js";
 import { User } from "@/models/user.js";
 import dbConnect from "@/lib/db.js";
-import {
+import ResponseBuilder, {
   apiSuccess,
-  apiError,
-  apiValidationError,
+  apiFromZod,
+  apiFromMongoose,
   apiInternalError,
   apiConflict,
+  apiError,
 } from "@/lib/api-utils.js";
+import { DefaultPermissions } from "@/constants";
 
-/** POST /api/register/super-admin - Register a super admin user (not tied to any organization) */
+// POST /api/register/super-admin - Register a super admin user
 export async function POST(request) {
   try {
-    await dbConnect(); // Connect to database
-    const body = await request.json(); // Parse request body
+    // Connect to database
+    await dbConnect();
 
-    // Validate input data
-    const validationResult = superAdminRegisterSchema.safeParse(body);
-    if (!validationResult.success) {
+    // Parse request body
+    let body;
+    try {
+      body = await request.json();
+    } catch {
       return NextResponse.json(
-        apiValidationError(validationResult.error.errors),
+        apiError("Invalid JSON payload", "INVALID_JSON", [], 400),
         { status: 400 }
       );
     }
 
+    // Validate input data (Zod)
+    const validationResult = superAdminRegisterSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(apiFromZod(validationResult.error), {
+        status: 400,
+      });
+    }
+
     const { name, email, password } = validationResult.data;
 
-    // Check if super admin already exists (limit to one super admin)
+    // Check if super admin already exists
     const existingSuperAdmin = await User.findOne({ role: "super_admin" });
     if (existingSuperAdmin) {
       return NextResponse.json(
@@ -46,7 +58,7 @@ export async function POST(request) {
       );
     }
 
-    // Check if user with this email already exists globally
+    // Check if user with this email already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return NextResponse.json(
@@ -55,59 +67,110 @@ export async function POST(request) {
       );
     }
 
-    // Create super admin user with full system access
+    // Create and save super admin
     const user = new User({
       name,
       email: email.toLowerCase(),
       password,
       role: "super_admin",
-      status: "active", // Super admin is active by default
-      emailVerified: true, // Super admin email is verified by default
-      permissions: ["*"], // Super admin has all permissions
+      status: "active",
+      emailVerified: true,
+      permissions: DefaultPermissions.superAdmin,
+      permissionsUpdatedAt: new Date(),
     });
 
     await user.save();
 
-    // Remove sensitive data before response
+    // Remove sensitive data
     const userResponse = user.toJSON();
     delete userResponse.password;
     delete userResponse.inviteToken;
 
     return NextResponse.json(
-      apiSuccess(userResponse, "Super admin registered successfully", 201),
+      apiSuccess({
+        data: userResponse,
+        message: "Super admin registered successfully",
+        statusCode: 201,
+      }),
       { status: 201 }
     );
   } catch (error) {
-    console.error("Super admin registration error:", error);
-
     // Handle duplicate key errors
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
       return NextResponse.json(
-        apiError(
-          `${field} already exists`,
-          "DUPLICATE_KEY",
-          [{ field, issue: `${field} must be unique` }],
-          409
-        ),
+        ResponseBuilder.error({
+          message: `${field} already exists`,
+          code: "DUPLICATE_KEY",
+          details: [{ field, issue: `${field} must be unique` }],
+          statusCode: 409,
+        }),
         { status: 409 }
       );
     }
 
-    // Handle validation errors
+    // Handle mongoose validation errors
     if (error.name === "ValidationError") {
-      const validationErrors = Object.values(error.errors).map((err) => ({
-        field: err.path,
-        issue: err.message,
-      }));
-      return NextResponse.json(apiValidationError(validationErrors), {
-        status: 400,
-      });
+      return NextResponse.json(apiFromMongoose(error), { status: 400 });
     }
 
+    // Handle invalid object IDs
+    if (error.name === "CastError") {
+      return NextResponse.json(
+        apiError("Invalid resource identifier", "CAST_ERROR", [], 400),
+        { status: 400 }
+      );
+    }
+
+    // Handle database connection errors
+    if (
+      error.name === "MongoNetworkError" ||
+      error.name === "MongoServerSelectionError"
+    ) {
+      return NextResponse.json(
+        ResponseBuilder.error({
+          message: "Database connection failed",
+          code: "DB_CONNECTION_ERROR",
+          statusCode: 503,
+        }),
+        { status: 503 }
+      );
+    }
+
+    // Handle timeout errors
+    if (error.message && error.message.includes("timed out")) {
+      return NextResponse.json(
+        apiError("Database request timed out", "DB_TIMEOUT", [], 504),
+        { status: 504 }
+      );
+    }
+
+    // Handle unexpected errors
     return NextResponse.json(
       apiInternalError("Failed to register super admin"),
       { status: 500 }
     );
   }
+}
+
+// Fallback for unsupported HTTP methods
+export function GET() {
+  return NextResponse.json(
+    apiError("Method not allowed", "METHOD_NOT_ALLOWED", [], 405),
+    { status: 405 }
+  );
+}
+
+export function PUT() {
+  return NextResponse.json(
+    apiError("Method not allowed", "METHOD_NOT_ALLOWED", [], 405),
+    { status: 405 }
+  );
+}
+
+export function DELETE() {
+  return NextResponse.json(
+    apiError("Method not allowed", "METHOD_NOT_ALLOWED", [], 405),
+    { status: 405 }
+  );
 }
