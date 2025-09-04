@@ -24,7 +24,7 @@ export const userRegisterSchemaWithoutOrganization = z.object({
   role: z.literal("pending"),
   status: z.literal("active"),
   emailVerified: z.literal(true),
-  permissions: z.literal(["*"]),
+  permissions: z.array(z.string()).default(["*"]),
   password: passwordSchema,
 });
 
@@ -38,5 +38,5 @@ export const superAdminRegisterSchema = z.object({
   role: z.literal("super_admin"),
   status: z.literal("active"),
   emailVerified: z.literal(true),
-  permissions: z.literal(["*"]),
+  permissions: z.array(z.string()).default(["*"]),
 });

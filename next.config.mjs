@@ -4,15 +4,15 @@ const isProd = process.env.NODE_ENV === "production";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
       },
     },
+  },
+  experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
   eslint: { ignoreDuringBuilds: false },
@@ -45,7 +45,7 @@ export default withPWA({
         cacheName: "http-cache",
         expiration: {
           maxEntries: 200,
-          maxAgeSeconds: 7 * 24 * 60 * 60,
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
         },
       },
     },

@@ -114,8 +114,8 @@ const OrganizationSchema = new Schema(
 
     onboardingCompleted: { type: Boolean, default: false },
 
-    createdBy: { type: Schema.Types.ObjectId, ref: "User" }, // who created org (super_admin)
-    lastModifiedBy: { type: Schema.Types.ObjectId, ref: "User" }, // who updated org
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" }, // created by admin
+    lastModifiedBy: { type: Schema.Types.ObjectId, ref: "User" }, // updated by admin
   },
   baseSchemaOptions
 );
