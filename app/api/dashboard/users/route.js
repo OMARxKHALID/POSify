@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { User } from "@/models/user.js";
-import { apiSuccess, apiError, createGetHandler } from "@/lib/api";
+import { apiSuccess, apiError, createGetHandler } from "@/lib/api-utils";
 
 // Business logic handler for GET users
 const handleGetUsers = async (queryParams) => {
