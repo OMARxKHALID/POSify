@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { userRegisterSchemaWithoutOrganization } from "@/schemas/auth-schema.js";
+import { userRegistrationSchema } from "@/schemas/auth-schema.js";
 import { User } from "@/models/user.js";
 import {
   apiSuccess,
@@ -53,7 +53,7 @@ const handleUserRegistration = async (validatedData) => {
 
 // POST /api/register - Register a new user (without organization)
 export const POST = createPostHandler(
-  userRegisterSchemaWithoutOrganization,
+  userRegistrationSchema,
   async (validatedData) => {
     try {
       return await handleUserRegistration(validatedData);

@@ -16,27 +16,10 @@ export const loginSchema = z.object({
 });
 
 /**
- * User registration schema (without organization)
+ * User registration schema
  */
-export const userRegisterSchemaWithoutOrganization = z.object({
-  name: z.string().min(1, "Name is required").trim(),
-  email: z.string().email("Invalid email format").toLowerCase().trim(),
-  role: z.literal("pending"),
-  status: z.literal("active"),
-  emailVerified: z.literal(true),
-  permissions: z.array(z.string()).default(["*"]),
-  password: passwordSchema,
-});
-
-/**
- * Super admin registration schema (need no organization to register)
- */
-export const superAdminRegisterSchema = z.object({
+export const userRegistrationSchema = z.object({
   name: z.string().min(1, "Name is required").trim(),
   email: z.string().email("Invalid email format").toLowerCase().trim(),
   password: passwordSchema,
-  role: z.literal("super_admin"),
-  status: z.literal("active"),
-  emailVerified: z.literal(true),
-  permissions: z.array(z.string()).default(["*"]),
 });

@@ -155,3 +155,7 @@ export const DEFAULT_PERMISSIONS = {
   staff: ["dashboard:view", "orders:manage", "pos:access"],
   pending: [],
 };
+
+export const DEFAULT_HEADERS = {
+  "Content-Type": "application/json",
+};

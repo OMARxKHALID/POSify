@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { superAdminRegisterSchema } from "@/schemas/auth-schema.js";
+import { userRegistrationSchema } from "@/schemas/auth-schema.js";
 import { User } from "@/models/user.js";
 import {
   apiSuccess,
@@ -74,13 +74,16 @@ const handleSuperAdminRegistration = async (validatedData) => {
 
 // POST /api/register/super-admin - Register a super admin user
 export const POST = createPostHandler(
-  superAdminRegisterSchema,
+  userRegistrationSchema,
   async (validatedData) => {
     try {
       return await handleSuperAdminRegistration(validatedData);
     } catch (error) {
       return NextResponse.json(
-        handleApiError(error, "Failed to register super admin"),
+        handleApiError(
+          error,
+          "Failed to register super admin. Please try again."
+        ),
         { status: 500 }
       );
     }
