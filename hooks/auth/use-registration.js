@@ -33,8 +33,7 @@ export function useUserRegistration() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
 
       toast.success(
-        data.message ||
-          "User registered successfully! Please create an organization to complete setup."
+        "User registered successfully! Please create an organization to complete setup."
       );
     },
     onError: (error) => {
@@ -72,7 +71,7 @@ export function useSuperAdminRegistration() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["super-admin"] });
 
-      toast.success(data.message || "Super admin registered successfully!");
+      toast.success("Super admin registered successfully!");
     },
     onError: (error) => {
       console.error("Super admin registration failed:", error);
@@ -111,7 +110,7 @@ export function useOrganizationRegistration() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["user", variables.userId] });
 
-      toast.success(data.message || "Organization registered successfully!");
+      toast.success("Organization registered successfully!");
     },
     onError: (error) => {
       console.error("Organization registration failed:", error);

@@ -1,6 +1,5 @@
 "use client";
 
-import { Suspense } from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,15 +22,7 @@ import { Lock, Mail, Store } from "lucide-react";
 import { PageLoading } from "@/components/ui/loading";
 import Link from "next/link";
 
-export default function AdminLoginPageWrapper() {
-  return (
-    <Suspense fallback={<PageLoading />}>
-      <AdminLoginPage />
-    </Suspense>
-  );
-}
-
-function AdminLoginPage() {
+export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const { status } = useSession();
 

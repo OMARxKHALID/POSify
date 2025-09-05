@@ -10,7 +10,6 @@ export {
   useUserRegistration,
   useSuperAdminRegistration,
   useOrganizationRegistration,
-  useCompleteRegistration,
 } from "./use-registration.js";
 
 // Re-export for convenience

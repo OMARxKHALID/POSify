@@ -15,14 +15,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
 import { userRegistrationSchema } from "@/schemas/auth-schema";
 import { User, Mail, Lock, Store } from "lucide-react";
 import Link from "next/link";
+import { useRegistration } from "@/hooks/auth/use-registration";
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { mutateAsync } = useRegistration();
   const router = useRouter();
 
   const form = useForm({
@@ -36,30 +36,17 @@ export default function RegisterPage() {
 
   async function onSubmit(data) {
     setLoading(true);
-    setError("");
 
     try {
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await mutateAsync(data);
 
-      const result = await response.json();
-
-      if (response.ok) {
-        toast.success("Registration successful! You can now sign in.");
+      if (result) {
+        // Success toast is handled by the hook
         router.push("/admin/login");
-      } else {
-        setError(result.message || "Registration failed. Please try again.");
-        toast.error("Registration failed");
       }
-    } catch (err) {
-      console.error("Registration error:", err);
-      setError("An unexpected error occurred. Please try again.");
-      toast.error("Registration failed");
+    } catch (error) {
+      console.error("Registration error:", error);
+      // Error handling is already done in the hook with toast notifications
     } finally {
       setLoading(false);
     }
@@ -88,11 +75,6 @@ export default function RegisterPage() {
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                {error}
-              </div>
-            )}
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
