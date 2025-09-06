@@ -17,7 +17,7 @@ export const organizationInfoSchema = z.object({
   legalName: z.string().trim().optional(),
   displayName: z.string().trim().optional(),
   orgPhone: z.string().trim().optional(), // Fixed: match model field name
-  email: z.string().email().toLowerCase().trim().optional(),
+  orgEmail: z.string().email().toLowerCase().trim().optional(), // Fixed: match model field name
   website: z.string().trim().optional(),
   address: addressSchema.optional(), // uses base address schema
   logoUrl: z.string().trim().optional(),

@@ -30,11 +30,11 @@ const handleOrganizationRegistration = async (validatedData) => {
       }
 
       if (user.status !== "active") {
-        throw new Error("USER_SUSPENDED");
+        throw new Error("INACTIVE_USER");
       }
 
       if (user.organizationId) {
-        throw new Error("USER_ALREADY_ORGANIZED");
+        throw new Error("USER_ALREADY_HAS_ORGANIZATION");
       }
 
       // Check if organization name already exists
@@ -92,6 +92,7 @@ const handleOrganizationRegistration = async (validatedData) => {
           ordersThisMonth: 0,
           lastResetDate: new Date(),
         },
+        onboardingCompleted: true, // Mark onboarding as completed
       });
 
       await organization.save({ session });
@@ -136,17 +137,17 @@ const handleOrganizationRegistration = async (validatedData) => {
     if (error.message === "USER_NOT_FOUND") {
       return NextResponse.json(apiNotFound("User"), { status: 404 });
     }
-    if (error.message === "USER_SUSPENDED") {
+    if (error.message === "INACTIVE_USER") {
       return NextResponse.json(
-        apiError("User account is suspended", "USER_SUSPENDED", [], 400),
+        apiError("User account is inactive", "INACTIVE_USER", [], 400),
         { status: 400 }
       );
     }
-    if (error.message === "USER_ALREADY_ORGANIZED") {
+    if (error.message === "USER_ALREADY_HAS_ORGANIZATION") {
       return NextResponse.json(
         apiError(
           "User already belongs to an organization",
-          "USER_ALREADY_ORGANIZED",
+          "USER_ALREADY_HAS_ORGANIZATION",
           [],
           400
         ),

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn, useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,29 +18,83 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { getAuthErrorMessage } from "@/lib/helpers/auth-errors";
+import { getRedirectPath } from "@/lib/helpers/auth-redirects";
 import { loginSchema } from "@/schemas/auth-schema";
 import { Lock, Mail, Store } from "lucide-react";
 import { PageLoading } from "@/components/ui/loading";
+import MainHeader from "@/components/main-header";
 import Link from "next/link";
+
+// Constants
+const FORM_DEFAULTS = {
+  email: "",
+  password: "",
+};
+
+const FALLBACK_REDIRECT = "/admin/dashboard";
 
 export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
-  const { status } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: FORM_DEFAULTS,
   });
 
-  // While session is loading, block UI
+  /**
+   * Get the appropriate redirect path for a user based on their role and status
+   * @param {Object} user - User object with role, organizationId, and onboardingCompleted
+   * @returns {string} Redirect path or null
+   */
+  const getUserRedirectPath = (user) => {
+    return getRedirectPath(
+      {
+        role: user.role,
+        organizationId: user.organizationId,
+        onboardingCompleted: user.onboardingCompleted,
+      },
+      "/admin/login"
+    );
+  };
+
+  // Handle URL error parameters
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error) {
+      toast.error(getAuthErrorMessage(error));
+      // Clean up URL
+      const url = new URL(window.location);
+      url.searchParams.delete("error");
+      window.history.replaceState({}, "", url);
+    }
+  }, [searchParams]);
+
+  // Redirect authenticated users
+  useEffect(() => {
+    if (session?.user) {
+      const redirectPath = getUserRedirectPath(session.user);
+      router.push(redirectPath || FALLBACK_REDIRECT);
+    }
+  }, [session, router]);
+
+  // Show loading while session is loading
   if (status === "loading") {
     return <PageLoading />;
   }
 
-  async function onSubmit(data) {
+  // Show loading while redirecting authenticated users
+  if (session?.user) {
+    return <PageLoading />;
+  }
+
+  /**
+   * Handle login form submission
+   * @param {Object} data - Form data containing email and password
+   */
+  const handleLogin = async (data) => {
     setLoading(true);
 
     try {
@@ -47,14 +102,13 @@ export default function AdminLoginPage() {
         email: data.email,
         password: data.password,
         redirect: false,
-        callbackUrl: "/admin/dashboard",
       });
 
       if (result?.error) {
         toast.error(getAuthErrorMessage(result.error));
       } else if (result?.ok) {
-        toast.success("Login successful!");
-        window.location.href = result.url || "/admin/dashboard";
+        toast.success("Login successful! Redirecting...");
+        // The useEffect will handle the redirect when session updates
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -62,113 +116,115 @@ export default function AdminLoginPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  // Form field components for better readability
+  const EmailField = () => (
+    <FormField
+      control={form.control}
+      name="email"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="text-sm font-medium text-foreground">
+            Email Address
+          </FormLabel>
+          <FormControl>
+            <div className="relative">
+              <Mail className="absolute w-4 h-4 text-muted-foreground transform -translate-y-1/2 left-3 top-1/2" />
+              <Input
+                type="email"
+                placeholder="admin@example.com"
+                className="pl-10 h-11"
+                {...field}
+              />
+            </div>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+
+  const PasswordField = () => (
+    <FormField
+      control={form.control}
+      name="password"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="text-sm font-medium text-foreground">
+            Password
+          </FormLabel>
+          <FormControl>
+            <div className="relative">
+              <Lock className="absolute w-4 h-4 text-muted-foreground transform -translate-y-1/2 left-3 top-1/2" />
+              <Input
+                type="password"
+                placeholder="Enter your password"
+                className="pl-10 h-11"
+                {...field}
+              />
+            </div>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+
+  const SubmitButton = ({ loading }) => (
+    <Button
+      type="submit"
+      className="w-full font-medium h-11"
+      disabled={loading}
+    >
+      {loading ? (
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 border-b-2 border-primary-foreground rounded-full animate-spin" />
+          Signing in...
+        </div>
+      ) : (
+        "Sign In"
+      )}
+    </Button>
+  );
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-600 rounded-lg shadow-lg">
-            <Store className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="mb-2 text-2xl font-semibold text-gray-900">
-            Restaurant POS
-          </h1>
-          <p className="text-sm text-gray-600">Admin Dashboard Access</p>
-        </div>
-
-        <Card className="bg-white border border-gray-200 shadow-sm">
+    <div className="min-h-screen bg-background">
+      <MainHeader />
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4 py-8">
+        <Card className="bg-card border border-border shadow-sm w-full max-w-md">
           <CardHeader className="pb-4 space-y-1">
-            <CardTitle className="text-xl font-semibold text-center text-gray-900">
+            <CardTitle className="text-xl font-semibold text-center text-card-foreground">
               Sign In
             </CardTitle>
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-muted-foreground">
               Enter your credentials to access the admin panel
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(handleLogin)}
                 className="space-y-4"
               >
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">
-                        Email Address
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-                          <Input
-                            type="email"
-                            placeholder="admin@example.com"
-                            className="pl-10 border-gray-300 h-11 focus:border-blue-500 focus:ring-blue-500"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <EmailField />
+                <PasswordField />
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">
-                        Password
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-                          <Input
-                            type="password"
-                            placeholder="Enter your password"
-                            className="pl-10 border-gray-300 h-11 focus:border-blue-500 focus:ring-blue-500"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <SubmitButton
+                  loading={loading || form.formState.isSubmitting}
                 />
-
-                <Button
-                  type="submit"
-                  className="w-full font-medium text-white bg-blue-600 h-11 hover:bg-blue-700"
-                  disabled={loading || form.formState.isSubmitting}
-                >
-                  {loading || form.formState.isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-b-2 border-white rounded-full animate-spin"></div>
-                      Signing in...
-                    </div>
-                  ) : (
-                    "Sign In"
-                  )}
-                </Button>
               </form>
             </Form>
 
-            <div className="pt-4 text-center border-t border-gray-200">
-              <p className="text-xs text-gray-500">
+            <div className="pt-4 text-center border-t border-border">
+              <p className="text-xs text-muted-foreground">
                 Secure access to restaurant management system
               </p>
             </div>
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 New restaurant owner?{" "}
-                <Link
-                  href="/register"
-                  className="text-blue-600 hover:underline"
-                >
+                <Link href="/register" className="text-primary hover:underline">
                   Register your restaurant here
                 </Link>
               </p>

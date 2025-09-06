@@ -19,6 +19,7 @@ import { userRegistrationSchema } from "@/schemas/auth-schema";
 import { User, Mail, Lock, Store } from "lucide-react";
 import Link from "next/link";
 import { useRegistration } from "@/hooks/auth/use-registration";
+import MainHeader from "@/components/main-header";
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
@@ -42,7 +43,7 @@ export default function RegisterPage() {
 
       if (result) {
         // Success toast is handled by the hook
-        router.push("/admin/login");
+        router.push("/organization/register");
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -53,24 +54,15 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-600 rounded-lg shadow-lg">
-            <Store className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="mb-2 text-2xl font-semibold text-gray-900">
-            Restaurant POS
-          </h1>
-          <p className="text-sm text-gray-600">Create your account</p>
-        </div>
-
-        <Card className="bg-white border border-gray-200 shadow-sm">
+    <div className="min-h-screen bg-background">
+      <MainHeader />
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4 py-8">
+        <Card className="bg-card border border-border shadow-sm w-full max-w-md">
           <CardHeader className="pb-4 space-y-1">
-            <CardTitle className="text-xl font-semibold text-center text-gray-900">
+            <CardTitle className="text-xl font-semibold text-center text-card-foreground">
               Register
             </CardTitle>
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-muted-foreground">
               Create your restaurant account to get started
             </p>
           </CardHeader>
@@ -85,16 +77,16 @@ export default function RegisterPage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">
+                      <FormLabel className="text-sm font-medium text-foreground">
                         Full Name
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <User className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+                          <User className="absolute w-4 h-4 text-muted-foreground transform -translate-y-1/2 left-3 top-1/2" />
                           <Input
                             type="text"
                             placeholder="John Doe"
-                            className="pl-10 border-gray-300 h-11 focus:border-blue-500 focus:ring-blue-500"
+                            className="pl-10 h-11"
                             {...field}
                           />
                         </div>
@@ -109,16 +101,16 @@ export default function RegisterPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">
+                      <FormLabel className="text-sm font-medium text-foreground">
                         Email Address
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+                          <Mail className="absolute w-4 h-4 text-muted-foreground transform -translate-y-1/2 left-3 top-1/2" />
                           <Input
                             type="email"
                             placeholder="john@example.com"
-                            className="pl-10 border-gray-300 h-11 focus:border-blue-500 focus:ring-blue-500"
+                            className="pl-10 h-11"
                             {...field}
                           />
                         </div>
@@ -133,16 +125,16 @@ export default function RegisterPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">
+                      <FormLabel className="text-sm font-medium text-foreground">
                         Password
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+                          <Lock className="absolute w-4 h-4 text-muted-foreground transform -translate-y-1/2 left-3 top-1/2" />
                           <Input
                             type="password"
                             placeholder="Enter your password"
-                            className="pl-10 border-gray-300 h-11 focus:border-blue-500 focus:ring-blue-500"
+                            className="pl-10 h-11"
                             {...field}
                           />
                         </div>
@@ -154,12 +146,12 @@ export default function RegisterPage() {
 
                 <Button
                   type="submit"
-                  className="w-full font-medium text-white bg-blue-600 h-11 hover:bg-blue-700"
+                  className="w-full font-medium h-11"
                   disabled={loading || form.formState.isSubmitting}
                 >
                   {loading || form.formState.isSubmitting ? (
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-b-2 border-white rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-b-2 border-primary-foreground rounded-full animate-spin"></div>
                       Creating account...
                     </div>
                   ) : (
@@ -169,17 +161,17 @@ export default function RegisterPage() {
               </form>
             </Form>
 
-            <div className="pt-4 text-center border-t border-gray-200">
-              <p className="text-xs text-gray-500">
+            <div className="pt-4 text-center border-t border-border">
+              <p className="text-xs text-muted-foreground">
                 By creating an account, you agree to our terms of service
               </p>
             </div>
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link
                   href="/admin/login"
-                  className="text-blue-600 hover:underline"
+                  className="text-primary hover:underline"
                 >
                   Sign in here
                 </Link>

@@ -33,7 +33,7 @@ export function useUserRegistration() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
 
       toast.success(
-        "User registered successfully! Please create an organization to complete setup."
+        "User registered successfully! Now let's set up your organization."
       );
     },
     onError: (error) => {
@@ -110,7 +110,9 @@ export function useOrganizationRegistration() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["user", variables.userId] });
 
-      toast.success("Organization registered successfully!");
+      toast.success(
+        "Organization created successfully! Welcome to your dashboard."
+      );
     },
     onError: (error) => {
       console.error("Organization registration failed:", error);

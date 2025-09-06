@@ -29,6 +29,23 @@ const CounterSchema = new Schema(
 // Index for quick lookup per org + counter name
 CounterSchema.index({ organizationId: 1, name: 1 });
 
+// Static method for getting next sequence
+CounterSchema.statics.getNextSequence = async function (
+  organizationId,
+  counterName
+) {
+  const result = await this.findOneAndUpdate(
+    { organizationId, name: counterName },
+    { $inc: { seq: 1 } },
+    {
+      new: true,
+      upsert: true,
+      setDefaultsOnInsert: true,
+    }
+  );
+  return result.seq;
+};
+
 // Export model
 export const Counter =
   mongoose.models.Counter || mongoose.model("Counter", CounterSchema);
