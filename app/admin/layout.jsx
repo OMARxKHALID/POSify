@@ -5,7 +5,7 @@ import { signOut } from "next-auth/react";
 import { AUTH_ROUTES, DEFAULT_REDIRECTS } from "@/constants";
 
 // Components
-import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ErrorBoundary } from "@/components/error-boundary";

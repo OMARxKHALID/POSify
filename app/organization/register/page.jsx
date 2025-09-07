@@ -32,7 +32,7 @@ import {
   REGISTRATION_TYPES,
 } from "@/hooks/auth/use-registration";
 import { PageLoading } from "@/components/ui/loading";
-import MainHeader from "@/components/main-header";
+import MainHeader from "@/components/dashboard/dashboard-header";
 
 export default function OrganizationRegisterPage() {
   const [loading, setLoading] = useState(false);

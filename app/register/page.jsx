@@ -19,7 +19,7 @@ import { userRegistrationSchema } from "@/schemas/auth-schema";
 import { User, Mail, Lock, Store } from "lucide-react";
 import Link from "next/link";
 import { useRegistration } from "@/hooks/auth/use-registration";
-import MainHeader from "@/components/main-header";
+import MainHeader from "@/components/dashboard/dashboard-header";
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);

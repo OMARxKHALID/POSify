@@ -31,64 +31,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 // Icons
-import {
-  LayoutDashboard,
-  Building2,
-  Users,
-  ShoppingCart,
-  Package,
-  BarChart3,
-  Settings,
-  Crown,
-  Receipt,
-  TrendingUp,
-  Bell,
-  HelpCircle,
-  ChevronDown,
-  Check,
-} from "lucide-react";
+import { Building2, Crown, ChevronDown, Check } from "lucide-react";
 
-// Constants
-const NAVIGATION_DATA = {
-  main: [
-    {
-      title: "Dashboard",
-      url: "/admin/dashboard/overview",
-      icon: LayoutDashboard,
-    },
-    { title: "Analytics", url: "/admin/dashboard/analytics", icon: BarChart3 },
-  ],
-  business: [
-    {
-      title: "Organization",
-      url: "/admin/dashboard/organization",
-      icon: Building2,
-    },
-    {
-      title: "Store Settings",
-      url: "/admin/dashboard/settings",
-      icon: Building2,
-    },
-  ],
-  operations: [
-    { title: "Orders", url: "/admin/dashboard/orders", icon: ShoppingCart },
-    { title: "Products", url: "/admin/dashboard/products", icon: Package },
-    { title: "Receipts", url: "/admin/dashboard/receipts", icon: Receipt },
-  ],
-  management: [
-    { title: "Users", url: "/admin/dashboard/users", icon: Users },
-    { title: "Reports", url: "/admin/dashboard/reports", icon: TrendingUp },
-  ],
-  system: [
-    { title: "Settings", url: "/admin/dashboard/settings", icon: Settings },
-    {
-      title: "Notifications",
-      url: "/admin/dashboard/notifications",
-      icon: Bell,
-    },
-    { title: "Help & Support", url: "/admin/dashboard/help", icon: HelpCircle },
-  ],
-};
+// Import navigation permissions and helper functions
+import { NAVIGATION_PERMISSIONS } from "@/constants";
+import { filterNavigationByPermissions } from "@/lib/helpers/permissions";
 
 // Helper Components
 function OrganizationSwitcher({ user, organizations = [] }) {
@@ -209,16 +156,12 @@ export function DashboardSidebar({ ...props }) {
 
   const user = session?.user;
   const isSuperAdmin = user?.role === "super_admin";
-  const isOwner = user?.organizationName;
 
-  const getFilteredNavigation = () => {
-    const filtered = { ...NAVIGATION_DATA };
-    if (isSuperAdmin) return filtered;
-    if (!isOwner) delete filtered.system;
-    return filtered;
-  };
-
-  const filteredNavigation = getFilteredNavigation();
+  // Filter navigation based on user permissions
+  const filteredNavigation = filterNavigationByPermissions(
+    NAVIGATION_PERMISSIONS,
+    user
+  );
 
   // Handle sidebar click to close on mobile only
   const handleSidebarClick = (e) => {
@@ -230,10 +173,11 @@ export function DashboardSidebar({ ...props }) {
   return (
     <Sidebar {...props} onClick={handleSidebarClick}>
       <SidebarHeader>
-        {/* Organization Switcher */}
-        <OrganizationSwitcher user={user} />
+        {/* Organization Switcher - Hide for super admin */}
+        {!isSuperAdmin && <OrganizationSwitcher user={user} />}
 
-        <Separator />
+        {/* Only show separator if organization switcher is visible */}
+        {!isSuperAdmin && <Separator />}
 
         {user && <UserProfile user={user} isSuperAdmin={isSuperAdmin} />}
       </SidebarHeader>

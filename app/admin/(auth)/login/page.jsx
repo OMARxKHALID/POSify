@@ -22,7 +22,7 @@ import { getRedirectPath } from "@/lib/helpers/auth-redirects";
 import { loginSchema } from "@/schemas/auth-schema";
 import { Lock, Mail } from "lucide-react";
 import { PageLoading } from "@/components/ui/loading";
-import MainHeader from "@/components/main-header";
+import MainHeader from "@/components/dashboard/dashboard-header";
 import Link from "next/link";
 import { FORM_DEFAULTS, DEFAULT_REDIRECTS, AUTH_ROUTES } from "@/constants";
 
