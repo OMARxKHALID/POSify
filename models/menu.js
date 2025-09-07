@@ -81,6 +81,11 @@ MenuSchema.index(
 MenuSchema.index({ organizationId: 1, isSpecial: 1 }); // quick lookup for specials
 MenuSchema.index({ organizationId: 1, tags: 1 }); // filtering by tags (e.g., vegan dishes)
 
+// Additional indexes for common query patterns
+MenuSchema.index({ organizationId: 1, price: 1 }); // price range queries
+MenuSchema.index({ organizationId: 1, createdAt: -1 }); // recent items
+MenuSchema.index({ organizationId: 1, displayOrder: 1 }); // menu ordering
+
 // EXPORT
 
 export const Menu = mongoose.models.Menu || mongoose.model("Menu", MenuSchema);

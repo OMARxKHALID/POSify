@@ -1,0 +1,2 @@
+
+Ensure MCP server is configured and connected properly, so the u can fetch components and generate UI blocks using the create-dashboard tool. Tools like get_block or similar are available to generate complete dashboard layouts

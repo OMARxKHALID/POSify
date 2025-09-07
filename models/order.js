@@ -324,6 +324,12 @@ OrderSchema.index({ organizationId: 1, "deliveryInfo.deliveryStatus": 1 });
 OrderSchema.index({ organizationId: 1, "kitchenInfo.prepStartTime": 1 });
 OrderSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
 
+// Additional indexes for common query patterns
+OrderSchema.index({ organizationId: 1, createdAt: -1 }); // recent orders
+OrderSchema.index({ organizationId: 1, isPaid: 1, status: 1 }); // payment queries
+OrderSchema.index({ organizationId: 1, "items.menuItem": 1 }); // menu item analytics
+OrderSchema.index({ organizationId: 1, totalAmount: 1 }); // revenue queries
+
 // ============================================================================
 // VIRTUAL PROPERTIES
 // ============================================================================

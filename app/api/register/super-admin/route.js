@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { userRegistrationSchema } from "@/schemas/auth-schema.js";
-import { User } from "@/models/user.js";
+import { userRegistrationSchema } from "@/schemas/auth-schema";
+import { User } from "@/models/user";
+import { getApiErrorMessages } from "@/lib/helpers/error-messages";
 import {
   apiSuccess,
   apiConflict,
@@ -11,36 +12,23 @@ import {
 } from "@/lib/api-utils";
 import { DEFAULT_PERMISSIONS } from "@/constants";
 
-// Business logic handler
+/**
+ * Business logic handler for super admin registration
+ * Creates a super admin user with full system permissions
+ */
 const handleSuperAdminRegistration = async (validatedData) => {
   const { name, email, password } = validatedData;
 
   // Check if super admin already exists
   const existingSuperAdmin = await User.findOne({ role: "super_admin" });
   if (existingSuperAdmin) {
-    return NextResponse.json(
-      apiError(
-        "Super admin already exists",
-        "SUPER_ADMIN_EXISTS",
-        [
-          {
-            field: "role",
-            issue: "Only one super admin is allowed in the system",
-          },
-        ],
-        409
-      ),
-      { status: 409 }
-    );
+    throw new Error("SUPER_ADMIN_EXISTS");
   }
 
   // Check if user with this email already exists
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
-    return NextResponse.json(
-      apiConflict("User with this email already exists"),
-      { status: 409 }
-    );
+    throw new Error("USER_EXISTS");
   }
 
   // Create and save super admin
@@ -72,20 +60,45 @@ const handleSuperAdminRegistration = async (validatedData) => {
   );
 };
 
-// POST /api/register/super-admin - Register a super admin user
+/**
+ * POST /api/register/super-admin
+ * Register a super admin user
+ */
 export const POST = createPostHandler(
   userRegistrationSchema,
   async (validatedData) => {
     try {
       return await handleSuperAdminRegistration(validatedData);
     } catch (error) {
-      return NextResponse.json(
-        handleApiError(
-          error,
-          "Failed to register super admin. Please try again."
-        ),
-        { status: 500 }
-      );
+      // Handle specific errors
+      switch (error.message) {
+        case "SUPER_ADMIN_EXISTS":
+          return NextResponse.json(
+            apiError(
+              getApiErrorMessages("SUPER_ADMIN_EXISTS"),
+              "SUPER_ADMIN_EXISTS",
+              [
+                {
+                  field: "role",
+                  issue: "Only one super admin is allowed in the system",
+                },
+              ],
+              409
+            ),
+            { status: 409 }
+          );
+        case "USER_EXISTS":
+          return NextResponse.json(
+            apiConflict(getApiErrorMessages("USER_EXISTS")),
+            { status: 409 }
+          );
+        default:
+          // Handle other errors
+          return NextResponse.json(
+            handleApiError(error, getApiErrorMessages("REGISTRATION_FAILED")),
+            { status: 500 }
+          );
+      }
     }
   }
 );

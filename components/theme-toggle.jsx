@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Monitor } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +11,8 @@ export function ThemeToggle() {
   const toggleTheme = () => {
     if (theme === "light") {
       setTheme("dark");
+    } else if (theme === "dark") {
+      setTheme("system");
     } else {
       setTheme("light");
     }
@@ -19,14 +21,18 @@ export function ThemeToggle() {
   const getIcon = () => {
     if (theme === "light") {
       return <Sun className="h-4 w-4" />;
-    } else {
+    } else if (theme === "dark") {
       return <Moon className="h-4 w-4" />;
+    } else {
+      return <Monitor className="h-4 w-4" />;
     }
   };
 
   const getTooltip = () => {
     if (theme === "light") {
       return "Switch to dark mode";
+    } else if (theme === "dark") {
+      return "Switch to system theme";
     } else {
       return "Switch to light mode";
     }

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import { organizationRegisterSchema } from "@/schemas/organization-schema.js";
-import { User } from "@/models/user.js";
-import { Organization } from "@/models/organization.js";
+import { organizationRegisterSchema } from "@/schemas/organization-schema";
+import { User } from "@/models/user";
+import { Organization } from "@/models/organization";
+import { getApiErrorMessages } from "@/lib/helpers/error-messages";
 import {
   apiSuccess,
   apiConflict,
@@ -14,7 +15,10 @@ import {
 } from "@/lib/api-utils";
 import { DEFAULT_PERMISSIONS } from "@/constants";
 
-// Business logic handler
+/**
+ * Business logic handler for organization registration
+ * Creates a new organization and links it to a user with admin role
+ */
 const handleOrganizationRegistration = async (validatedData) => {
   const { userId, organizationName, businessType, information } = validatedData;
 
@@ -135,18 +139,26 @@ const handleOrganizationRegistration = async (validatedData) => {
   } catch (error) {
     // Handle specific transaction errors
     if (error.message === "USER_NOT_FOUND") {
-      return NextResponse.json(apiNotFound("User"), { status: 404 });
+      return NextResponse.json(
+        apiNotFound(getApiErrorMessages("USER_NOT_FOUND")),
+        { status: 404 }
+      );
     }
     if (error.message === "INACTIVE_USER") {
       return NextResponse.json(
-        apiError("User account is inactive", "INACTIVE_USER", [], 400),
+        apiError(
+          getApiErrorMessages("INACTIVE_USER"),
+          "INACTIVE_USER",
+          [],
+          400
+        ),
         { status: 400 }
       );
     }
     if (error.message === "USER_ALREADY_HAS_ORGANIZATION") {
       return NextResponse.json(
         apiError(
-          "User already belongs to an organization",
+          getApiErrorMessages("USER_ALREADY_HAS_ORGANIZATION"),
           "USER_ALREADY_HAS_ORGANIZATION",
           [],
           400
@@ -156,7 +168,7 @@ const handleOrganizationRegistration = async (validatedData) => {
     }
     if (error.message === "ORGANIZATION_EXISTS") {
       return NextResponse.json(
-        apiConflict("Organization with this name already exists"),
+        apiConflict(getApiErrorMessages("ORGANIZATION_EXISTS")),
         { status: 409 }
       );
     }
@@ -168,7 +180,10 @@ const handleOrganizationRegistration = async (validatedData) => {
   }
 };
 
-// POST /api/organizations/register - Register a new organization and link it to a user
+/**
+ * POST /api/organizations/register
+ * Register a new organization and link it to a user
+ */
 export const POST = createPostHandler(
   organizationRegisterSchema,
   async (validatedData) => {
@@ -176,7 +191,7 @@ export const POST = createPostHandler(
       return await handleOrganizationRegistration(validatedData);
     } catch (error) {
       return NextResponse.json(
-        handleApiError(error, "Failed to register organization"),
+        handleApiError(error, getApiErrorMessages("REGISTRATION_FAILED")),
         { status: 500 }
       );
     }

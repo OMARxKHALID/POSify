@@ -3,21 +3,27 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeProviderContext = createContext({
-  theme: "system",
+  theme: "dark",
   setTheme: () => null,
 });
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "dark",
   storageKey = "posify-ui-theme",
   ...props
 }) {
   const [theme, setTheme] = useState(defaultTheme);
 
   useEffect(() => {
-    const root = window.document.documentElement;
+    const storedTheme = localStorage.getItem(storageKey);
+    if (storedTheme) {
+      setTheme(storedTheme);
+    }
+  }, [storageKey]);
 
+  useEffect(() => {
+    const root = window.document.documentElement;
     root.classList.remove("light", "dark");
 
     if (theme === "system") {
@@ -25,7 +31,6 @@ export function ThemeProvider({
         .matches
         ? "dark"
         : "light";
-
       root.classList.add(systemTheme);
       return;
     }
@@ -35,18 +40,11 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    setTheme: (newTheme) => {
+      localStorage.setItem(storageKey, newTheme);
+      setTheme(newTheme);
     },
   };
-
-  useEffect(() => {
-    const storedTheme = localStorage.getItem(storageKey);
-    if (storedTheme) {
-      setTheme(storedTheme);
-    }
-  }, [storageKey]);
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

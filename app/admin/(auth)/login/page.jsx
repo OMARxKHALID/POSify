@@ -17,38 +17,26 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import { getAuthErrorMessage } from "@/lib/helpers/auth-errors";
+import { getAuthErrorMessages } from "@/lib/helpers/error-messages";
 import { getRedirectPath } from "@/lib/helpers/auth-redirects";
 import { loginSchema } from "@/schemas/auth-schema";
-import { Lock, Mail, Store } from "lucide-react";
+import { Lock, Mail } from "lucide-react";
 import { PageLoading } from "@/components/ui/loading";
 import MainHeader from "@/components/main-header";
 import Link from "next/link";
-
-// Constants
-const FORM_DEFAULTS = {
-  email: "",
-  password: "",
-};
-
-const FALLBACK_REDIRECT = "/admin/dashboard";
+import { FORM_DEFAULTS, DEFAULT_REDIRECTS, AUTH_ROUTES } from "@/constants";
 
 export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
-    defaultValues: FORM_DEFAULTS,
+    defaultValues: FORM_DEFAULTS.LOGIN,
   });
 
-  /**
-   * Get the appropriate redirect path for a user based on their role and status
-   * @param {Object} user - User object with role, organizationId, and onboardingCompleted
-   * @returns {string} Redirect path or null
-   */
   const getUserRedirectPath = (user) => {
     return getRedirectPath(
       {
@@ -56,7 +44,7 @@ export default function AdminLoginPage() {
         organizationId: user.organizationId,
         onboardingCompleted: user.onboardingCompleted,
       },
-      "/admin/login"
+      AUTH_ROUTES.LOGIN
     );
   };
 
@@ -64,7 +52,7 @@ export default function AdminLoginPage() {
   useEffect(() => {
     const error = searchParams.get("error");
     if (error) {
-      toast.error(getAuthErrorMessage(error));
+      toast.error(getAuthErrorMessages(error));
       // Clean up URL
       const url = new URL(window.location);
       url.searchParams.delete("error");
@@ -76,24 +64,19 @@ export default function AdminLoginPage() {
   useEffect(() => {
     if (session?.user) {
       const redirectPath = getUserRedirectPath(session.user);
-      router.push(redirectPath || FALLBACK_REDIRECT);
+      if (redirectPath && redirectPath !== AUTH_ROUTES.LOGIN) {
+        router.push(redirectPath);
+      } else {
+        router.push(DEFAULT_REDIRECTS.FALLBACK);
+      }
     }
   }, [session, router]);
-
-  // Show loading while session is loading
-  if (status === "loading") {
-    return <PageLoading />;
-  }
 
   // Show loading while redirecting authenticated users
   if (session?.user) {
     return <PageLoading />;
   }
 
-  /**
-   * Handle login form submission
-   * @param {Object} data - Form data containing email and password
-   */
   const handleLogin = async (data) => {
     setLoading(true);
 
@@ -105,13 +88,11 @@ export default function AdminLoginPage() {
       });
 
       if (result?.error) {
-        toast.error(getAuthErrorMessage(result.error));
+        toast.error(getAuthErrorMessages(result.error));
       } else if (result?.ok) {
         toast.success("Login successful! Redirecting...");
-        // The useEffect will handle the redirect when session updates
       }
     } catch (error) {
-      console.error("Login error:", error);
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -224,7 +205,10 @@ export default function AdminLoginPage() {
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
                 New restaurant owner?{" "}
-                <Link href="/register" className="text-primary hover:underline">
+                <Link
+                  href={AUTH_ROUTES.REGISTER}
+                  className="text-primary hover:underline"
+                >
                   Register your restaurant here
                 </Link>
               </p>
