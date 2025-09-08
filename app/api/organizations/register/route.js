@@ -145,24 +145,13 @@ const handleOrganizationRegistration = async (validatedData) => {
       );
     }
     if (error.message === "INACTIVE_USER") {
-      return NextResponse.json(
-        apiError(
-          getApiErrorMessages("INACTIVE_USER"),
-          "INACTIVE_USER",
-          [],
-          400
-        ),
-        { status: 400 }
-      );
+      return NextResponse.json(apiError(getApiErrorMessages("INACTIVE_USER")), {
+        status: 400,
+      });
     }
     if (error.message === "USER_ALREADY_HAS_ORGANIZATION") {
       return NextResponse.json(
-        apiError(
-          getApiErrorMessages("USER_ALREADY_HAS_ORGANIZATION"),
-          "USER_ALREADY_HAS_ORGANIZATION",
-          [],
-          400
-        ),
+        apiError(getApiErrorMessages("USER_ALREADY_HAS_ORGANIZATION")),
         { status: 400 }
       );
     }

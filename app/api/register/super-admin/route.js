@@ -74,17 +74,7 @@ export const POST = createPostHandler(
       switch (error.message) {
         case "SUPER_ADMIN_EXISTS":
           return NextResponse.json(
-            apiError(
-              getApiErrorMessages("SUPER_ADMIN_EXISTS"),
-              "SUPER_ADMIN_EXISTS",
-              [
-                {
-                  field: "role",
-                  issue: "Only one super admin is allowed in the system",
-                },
-              ],
-              409
-            ),
+            apiError(getApiErrorMessages("SUPER_ADMIN_EXISTS")),
             { status: 409 }
           );
         case "USER_EXISTS":

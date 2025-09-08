@@ -322,12 +322,7 @@ export const GET = createGetRouteHandler(async (queryParams, request) => {
         );
       case "INVALID_TIME_RANGE":
         return NextResponse.json(
-          apiError(
-            "Invalid time range. Must be 7d, 30d, or 90d",
-            "INVALID_TIME_RANGE",
-            [],
-            400
-          ),
+          apiError(getApiErrorMessages("INVALID_TIME_RANGE")),
           { status: 400 }
         );
       default:
