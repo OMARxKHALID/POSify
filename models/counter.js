@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { baseSchemaOptions } from "@/schemas/base-schema.js";
+import { baseSchemaOptions } from "@/schemas/base-schema";
 
 const { Schema } = mongoose;
 

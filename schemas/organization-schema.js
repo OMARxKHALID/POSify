@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { baseSchema, auditSchema, addressSchema } from "./base-schema.js";
+import { baseSchema, auditSchema, addressSchema } from "./base-schema";
 import {
   BUSINESS_TYPES,
   SUBSCRIPTION_PLANS,

@@ -16,6 +16,7 @@ export const ADMIN_ROUTES = {
   OVERVIEW: "/admin/dashboard/overview",
   ANALYTICS: "/admin/dashboard/analytics",
   SETTINGS: "/admin/dashboard/settings",
+  USERS: "/admin/dashboard/users",
 };
 
 // Organization Routes

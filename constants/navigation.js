@@ -17,6 +17,7 @@ import {
   Bell,
   HelpCircle,
 } from "lucide-react";
+import { ADMIN_ROUTES } from "./routes";
 
 export const NAVIGATION_PERMISSIONS = {
   main: [
@@ -77,7 +78,7 @@ export const NAVIGATION_PERMISSIONS = {
   management: [
     {
       title: "Users",
-      url: "/admin/dashboard/users",
+      url: ADMIN_ROUTES.USERS,
       icon: Users,
       permissions: ["users:manage"],
       roles: ["super_admin", "admin"],

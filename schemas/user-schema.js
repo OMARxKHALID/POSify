@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { baseSchema, auditSchema } from "./base-schema.js";
+import { baseSchema, auditSchema } from "./base-schema";
 import { USER_ROLES, USER_STATUSES } from "@/constants";
 
 /**

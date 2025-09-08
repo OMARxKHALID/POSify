@@ -13,7 +13,7 @@ import {
   DEFAULT_SUGGESTED_TIP_PERCENTAGES,
   DEFAULT_ORDER_NUMBER_FORMAT,
 } from "@/constants";
-import { baseSchemaOptions } from "@/schemas/base-schema.js";
+import { baseSchemaOptions } from "@/schemas/base-schema";
 
 const { Schema } = mongoose;
 

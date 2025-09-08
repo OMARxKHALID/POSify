@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { organizationBaseSchema } from "./base-schema.js";
+import { organizationBaseSchema } from "./base-schema";
 import {
   PAYMENT_METHODS,
   ORDER_STATUSES,

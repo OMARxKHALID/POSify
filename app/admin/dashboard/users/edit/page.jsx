@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { userEditSchema } from "@/schemas/auth-schema";
+import { ADMIN_ROUTES } from "@/constants";
 import {
   ArrowLeft,
   Edit,
@@ -108,7 +109,7 @@ export default function EditUserPage() {
         userId,
         userData: data,
       });
-      router.push("/admin/dashboard/users");
+      router.push(ADMIN_ROUTES.USERS);
     } catch (error) {
       console.error("Failed to update user:", error);
     }
@@ -153,7 +154,7 @@ export default function EditUserPage() {
               The user you're trying to edit doesn't exist or you don't have
               permission to access it.
             </p>
-            <Button onClick={() => router.push("/admin/dashboard/users")}>
+            <Button onClick={() => router.push(ADMIN_ROUTES.USERS)}>
               Back to Users
             </Button>
           </div>
@@ -165,7 +166,7 @@ export default function EditUserPage() {
   // Redirect if user doesn't have permission
   useEffect(() => {
     if (!isLoading && !canEdit) {
-      router.push("/admin/dashboard/users");
+      router.push(ADMIN_ROUTES.USERS);
     }
   }, [canEdit, router, isLoading]);
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { baseSchema } from "./base-schema.js";
+import { baseSchema } from "./base-schema";
 
 /**
  * Changes schema for audit log

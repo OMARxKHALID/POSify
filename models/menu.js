@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { DEFAULT_PREP_TIME } from "@/constants";
-import { baseSchemaOptions } from "@/schemas/base-schema.js";
+import { baseSchemaOptions } from "@/schemas/base-schema";
 
 const { Schema } = mongoose;
 

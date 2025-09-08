@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { userCreationSchema } from "@/schemas/auth-schema";
+import { ADMIN_ROUTES } from "@/constants";
 import {
   ArrowLeft,
   UserPlus,
@@ -68,7 +69,7 @@ export default function CreateUserPage() {
   const onSubmit = async (data) => {
     try {
       await createUserMutation.mutateAsync(data);
-      router.push("/admin/dashboard/users");
+      router.push(ADMIN_ROUTES.USERS);
     } catch (error) {
       console.error("Failed to create user:", error);
     }
@@ -77,7 +78,7 @@ export default function CreateUserPage() {
   // Redirect if user doesn't have permission
   useEffect(() => {
     if (!usersLoading && !userCanCreate) {
-      router.push("/admin/dashboard/users");
+      router.push(ADMIN_ROUTES.USERS);
     }
   }, [userCanCreate, router, usersLoading]);
 

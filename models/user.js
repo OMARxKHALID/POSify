@@ -11,7 +11,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import { USER_ROLES, USER_STATUSES, SALT_ROUNDS } from "@/constants";
-import { baseSchemaOptions } from "@/schemas/base-schema.js";
+import { baseSchemaOptions } from "@/schemas/base-schema";
 
 const { Schema } = mongoose;
 
