@@ -1,7 +1,6 @@
 /**
  * Default Values Constants
  */
-
 export const DEFAULT_CUSTOMER_NAME = "Guest";
 
 export const DEFAULT_RECEIPT_FOOTER = "Thank you for your business!";
