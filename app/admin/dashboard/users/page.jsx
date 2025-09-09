@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -40,8 +40,9 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { PageLoading } from "@/components/ui/loading";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { KPICard, KPICardsGrid } from "@/components/ui/kpi-card";
+import { PageLayout } from "@/components/dashboard/page-layout";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { useUsersManagement } from "@/hooks/use-users";
 import {
   getRoleBadgeVariant,
@@ -70,8 +71,15 @@ export default function UsersPage() {
   } = useUsersManagement();
 
   // Extract users from API response
-  const users = usersData?.users || [];
-  const currentUser = usersData?.currentUser;
+  const users = useMemo(() => usersData?.users || [], [usersData?.users]);
+  const currentUser = useMemo(
+    () => usersData?.currentUser,
+    [usersData?.currentUser]
+  );
+  const organization = useMemo(
+    () => usersData?.organization,
+    [usersData?.organization]
+  );
 
   // Delete confirmation dialog state
   const [deleteDialog, setDeleteDialog] = useState({
@@ -79,7 +87,6 @@ export default function UsersPage() {
     userId: null,
     userInfo: null,
   });
-  const organization = usersData?.organization;
 
   // Define table columns
   const columns = [
@@ -129,7 +136,7 @@ export default function UsersPage() {
                   checked={!column.getFilterValue()}
                   onCheckedChange={() => column.setFilterValue(undefined)}
                 >
-                  All Roles
+                  All
                 </DropdownMenuCheckboxItem>
                 {/* Only super_admin can see and filter by super_admin role */}
                 {currentUser?.role === "super_admin" && (
@@ -303,7 +310,7 @@ export default function UsersPage() {
       await deleteUser.mutateAsync(deleteDialog.userId);
       setDeleteDialog({ isOpen: false, userId: null, userInfo: null });
     } catch (error) {
-      console.error("Failed to delete user:", error);
+      // Error handling is already done in the hook with toast notifications
     }
   };
 
@@ -317,178 +324,103 @@ export default function UsersPage() {
     router.push("/admin/dashboard/users/create");
   };
 
-  // Show loading state
-  if (isLoading) {
-    return <PageLoading />;
-  }
-
-  // Show error state
-  if (isError) {
-    return (
-      <div className="min-h-screen w-full max-w-full overflow-x-hidden space-y-3 p-3 sm:space-y-4 sm:p-4 lg:p-6">
-        <div className="mb-2">
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
-            Users Management
-          </h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            Error loading users data
-          </p>
-        </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Failed to load users</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {error?.message || "An error occurred while loading users data"}
-            </p>
-            <Button onClick={() => refetch()}>Try Again</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <ErrorBoundary message="Failed to load users management. Please try refreshing the page.">
-      <div className="min-h-screen w-full max-w-full overflow-x-hidden space-y-4 p-4 sm:space-y-6 sm:p-6">
-        {/* Page Header */}
-        <div className="space-y-2">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-              <Users className="h-5 w-5 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-                Users Management
-              </h1>
-              <p className="text-sm text-muted-foreground sm:text-base">
-                Manage users, roles, and permissions for your organization
-              </p>
-            </div>
-          </div>
-        </div>
+    <PageLayout
+      isLoading={isLoading}
+      error={isError ? error : null}
+      errorMessage="Failed to load users management. Please try refreshing the page."
+    >
+      <PageHeader
+        title="Users Management"
+        description="Manage users, roles, and permissions for your organization"
+        icon={Users}
+      />
 
-        {/* Stats Cards */}
-        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{users.length}</div>
-              <p className="text-xs text-muted-foreground">
-                {users.filter((u) => u.status === "active").length} active
-              </p>
-            </CardContent>
-          </Card>
+      {/* Stats Cards */}
+      <KPICardsGrid>
+        <KPICard
+          title="Total Users"
+          value={users.length}
+          icon={Users}
+          period={`${users.filter((u) => u.status === "active").length} active`}
+        />
+        <KPICard
+          title="Admins"
+          value={users.filter((u) => u.role === "admin").length}
+          icon={Shield}
+          period="Organization administrators"
+        />
+        <KPICard
+          title="Staff Members"
+          value={users.filter((u) => u.role === "staff").length}
+          icon={UserPlus}
+          period="Team members"
+        />
+        <KPICard
+          title="Pending"
+          value={users.filter((u) => u.role === "pending").length}
+          icon={AlertTriangle}
+          period="Awaiting approval"
+        />
+      </KPICardsGrid>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Admins</CardTitle>
-              <Shield className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {users.filter((u) => u.role === "admin").length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Organization administrators
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Staff Members
-              </CardTitle>
-              <UserPlus className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {users.filter((u) => u.role === "staff").length}
-              </div>
-              <p className="text-xs text-muted-foreground">Team members</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {users.filter((u) => u.role === "pending").length}
-              </div>
-              <p className="text-xs text-muted-foreground">Awaiting approval</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Organization Info (for admins) */}
-        {organization && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Organization
-              </CardTitle>
-              <CardDescription>
-                Your organization information and settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary flex-shrink-0">
-                    <Building2 className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium truncate">{organization.name}</p>
-                    <p className="text-sm text-muted-foreground truncate">
-                      Organization ID: {organization.id}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full sm:w-auto"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Users Table */}
+      {/* Organization Info (for admins) */}
+      {organization && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              All Users
+              <Building2 className="h-5 w-5" />
+              Organization
             </CardTitle>
             <CardDescription>
-              Manage user accounts, roles, and permissions
+              Your organization information and settings
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <DataTable
-              data={users}
-              columns={columns}
-              searchKey="name"
-              searchPlaceholder="Search users by name or email..."
-              showAddButton={canCreateUsers(currentUser)}
-              addButtonText="Add New User"
-              onAddClick={handleCreateUser}
-            />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary flex-shrink-0">
+                  <Building2 className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate">{organization.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">
+                    Organization ID: {organization.id}
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+            </div>
           </CardContent>
         </Card>
-      </div>
+      )}
+
+      {/* Users Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            All Users
+          </CardTitle>
+          <CardDescription>
+            Manage user accounts, roles, and permissions
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            data={users}
+            columns={columns}
+            searchKey="name"
+            searchPlaceholder="Search users by name or email..."
+            showAddButton={canCreateUsers(currentUser)}
+            addButtonText="Add New User"
+            onAddClick={handleCreateUser}
+          />
+        </CardContent>
+      </Card>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
@@ -502,6 +434,6 @@ export default function UsersPage() {
         isLoading={deleteUser.isPending}
         userInfo={deleteDialog.userInfo}
       />
-    </ErrorBoundary>
+    </PageLayout>
   );
 }

@@ -1,40 +1,33 @@
+/**
+ * useUsers Hook
+ * Custom hook for user management operations using TanStack React Query
+ */
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-import { toast } from "sonner";
-import { getApiErrorMessages } from "@/lib/helpers/error-messages";
-
-/**
- * Get error message for user operations
- */
-const getUserErrorMessage = (error) => {
-  return (
-    getApiErrorMessages(error.code) ||
-    (error.statusCode === 409 && getApiErrorMessages("USER_EXISTS")) ||
-    (error.statusCode === 403 &&
-      getApiErrorMessages("INSUFFICIENT_PERMISSIONS")) ||
-    (error.statusCode === 404 && getApiErrorMessages("USER_NOT_FOUND")) ||
-    error.message ||
-    getApiErrorMessages("OPERATION_FAILED")
-  );
-};
+import {
+  getDefaultQueryOptions,
+  getDefaultMutationOptions,
+  handleHookSuccess,
+  queryKeys,
+  invalidateQueries,
+} from "@/lib/hooks/hook-utils";
 
 /**
  * Hook to fetch users based on authenticated user's role and permissions
  */
 export const useUsers = (options = {}) => {
-  const {
-    enabled = true,
-    staleTime = 5 * 60 * 1000, // 5 minutes
-    retry = 2,
-    ...queryOptions
-  } = options;
+  const queryOptions = getDefaultQueryOptions({
+    staleTime: 3 * 60 * 1000, // 3 minutes (users data changes moderately)
+    ...options,
+  });
 
   return useQuery({
-    queryKey: ["users"],
-    queryFn: () => apiClient.get("/dashboard/users"),
-    enabled,
-    staleTime,
-    retry,
+    queryKey: queryKeys.users,
+    queryFn: async () => {
+      const data = await apiClient.get("/dashboard/users");
+      return data;
+    },
     ...queryOptions,
   });
 };
@@ -55,13 +48,10 @@ export const useCreateUser = () => {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("User created successfully!");
+      invalidateQueries.users(queryClient);
+      handleHookSuccess("User created successfully!");
     },
-    onError: (error) => {
-      console.error("User creation failed:", error);
-      toast.error(getUserErrorMessage(error));
-    },
+    ...getDefaultMutationOptions({ operation: "User creation" }),
   });
 };
 
@@ -81,13 +71,10 @@ export const useEditUser = () => {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("User updated successfully!");
+      invalidateQueries.users(queryClient);
+      handleHookSuccess("User updated successfully!");
     },
-    onError: (error) => {
-      console.error("User update failed:", error);
-      toast.error(getUserErrorMessage(error));
-    },
+    ...getDefaultMutationOptions({ operation: "User update" }),
   });
 };
 
@@ -106,13 +93,10 @@ export const useDeleteUser = () => {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("User deleted successfully!");
+      invalidateQueries.users(queryClient);
+      handleHookSuccess("User deleted successfully!");
     },
-    onError: (error) => {
-      console.error("User deletion failed:", error);
-      toast.error(getUserErrorMessage(error));
-    },
+    ...getDefaultMutationOptions({ operation: "User deletion" }),
   });
 };
 

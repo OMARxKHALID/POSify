@@ -23,6 +23,5 @@ export const DEFAULT_STORE_NAME = "My Store";
 
 export const DEFAULT_MANAGER_APPROVAL_THRESHOLD = 100;
 
-export const DEFAULT_HEADERS = {
-  "Content-Type": "application/json",
-};
+export const RECEIPT_TEMPLATES = ["default", "minimal", "detailed"];
+export const SYNC_MODES = ["auto", "manual"];

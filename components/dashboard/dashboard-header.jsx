@@ -1,12 +1,13 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { Store, LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 import Link from "next/link";
 
-export default function MainHeader() {
+export function DashboardHeader() {
   const { data: session } = useSession();
 
   return (
@@ -18,7 +19,7 @@ export default function MainHeader() {
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Store className="w-5 h-5 text-primary" />
+              <Logo className="w-5 h-5" />
             </div>
             <h1 className="text-xl font-semibold text-card-foreground">
               POSIFY

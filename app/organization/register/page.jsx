@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -10,34 +10,29 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   Form,
-  FormControl,
-  FormField,
   FormItem,
   FormLabel,
+  FormControl,
   FormMessage,
+  FormField as ReactHookFormField,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FormField } from "@/components/dashboard/form-field";
 import { organizationRegisterSchema } from "@/schemas/organization-schema";
 import { BUSINESS_TYPES } from "@/constants";
-import { Building2, Store, ArrowLeft } from "lucide-react";
+import { Store, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import {
-  useRegistration,
-  REGISTRATION_TYPES,
-} from "@/hooks/auth/use-registration";
+import { useRegistration } from "@/hooks/use-registration";
+import { REGISTRATION_TYPES } from "@/constants";
 import { PageLoading } from "@/components/ui/loading";
-import MainHeader from "@/components/dashboard/dashboard-header";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { Logo } from "@/components/ui/logo";
+import { sessionUtils } from "@/lib/hooks/hook-utils";
 
 export default function OrganizationRegisterPage() {
-  const [loading, setLoading] = useState(false);
   const { data: session, status } = useSession();
-  const { mutateAsync } = useRegistration(REGISTRATION_TYPES.ORGANIZATION);
+  const organizationRegistrationMutation = useRegistration(
+    REGISTRATION_TYPES.ORGANIZATION
+  );
   const router = useRouter();
 
   const form = useForm({
@@ -83,9 +78,7 @@ export default function OrganizationRegisterPage() {
   return (
     <OrganizationForm
       session={session}
-      loading={loading}
-      setLoading={setLoading}
-      mutateAsync={mutateAsync}
+      organizationRegistrationMutation={organizationRegistrationMutation}
       router={router}
       form={form}
     />
@@ -94,15 +87,13 @@ export default function OrganizationRegisterPage() {
 
 function OrganizationForm({
   session,
-  loading,
-  setLoading,
-  mutateAsync,
+  organizationRegistrationMutation,
   router,
   form,
 }) {
-  async function onSubmit(data) {
-    setLoading(true);
+  const { update: updateSession } = useSession();
 
+  async function onSubmit(data) {
     try {
       // Include userId from session
       const formData = {
@@ -110,118 +101,95 @@ function OrganizationForm({
         userId: session.user.id,
       };
 
-      const result = await mutateAsync(formData);
+      const result = await organizationRegistrationMutation.mutateAsync(
+        formData
+      );
 
       if (result) {
-        // Success toast is handled by the hook
+        // Handle session refresh at page level (following existing pattern)
+        if (result.sessionRefresh) {
+          await sessionUtils.handleSessionRefresh(updateSession, {
+            data: result,
+          });
+        }
+
         router.push("/admin/dashboard");
       }
     } catch (error) {
-      console.error("Organization registration error:", error);
       // Error handling is already done in the hook with toast notifications
-    } finally {
-      setLoading(false);
     }
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <MainHeader />
+      <DashboardHeader />
       <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4 py-8">
         <div className="w-full max-w-2xl mx-auto">
-          <div className="mb-4 text-center">
-            <div className="inline-flex items-center justify-center w-10 h-10 mb-2 bg-primary rounded-lg shadow-sm">
-              <Building2 className="w-5 h-5 text-primary-foreground" />
+          <div className="mb-6 text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 mb-3 bg-primary/10 rounded-lg shadow-sm">
+              <Logo className="w-6 h-6" />
             </div>
-            <h1 className="mb-1 text-lg font-semibold text-foreground">
+            <h1 className="mb-2 text-xl font-semibold text-foreground">
               POSIFY
             </h1>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Create your organization
             </p>
           </div>
 
           <Card className="bg-card border border-border shadow-sm w-full">
-            <CardHeader className="pb-2 space-y-1">
-              <CardTitle className="text-base font-semibold text-center text-card-foreground">
+            <CardHeader className="pb-4 space-y-2">
+              <CardTitle className="text-lg font-semibold text-center text-card-foreground">
                 Register Organization
               </CardTitle>
-              <p className="text-xs text-center text-muted-foreground">
+              <p className="text-sm text-center text-muted-foreground">
                 Set up your restaurant or business to get started
               </p>
             </CardHeader>
-            <CardContent className="space-y-3 p-4">
+            <CardContent className="space-y-4 p-6">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-3"
                 >
                   {/* Main Organization Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="organizationName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium text-foreground">
-                            Organization Name *
-                          </FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Store className="absolute w-4 h-4 text-muted-foreground transform -translate-y-1/2 left-3 top-1/2" />
-                              <Input
-                                type="text"
-                                placeholder="My Restaurant"
-                                className="pl-10 h-10"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      label="Organization Name *"
+                      icon={Store}
+                      type="text"
+                      placeholder="My Restaurant"
+                      iconPosition="input"
+                      className="h-11"
+                      disabled={organizationRegistrationMutation.isPending}
                     />
 
                     <FormField
                       control={form.control}
                       name="businessType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium text-foreground">
-                            Business Type *
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-10">
-                                <SelectValue placeholder="Select business type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {BUSINESS_TYPES.map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {type.charAt(0).toUpperCase() +
-                                    type.slice(1).replace("-", " ")}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      label="Business Type *"
+                      placeholder="Select business type"
+                      options={BUSINESS_TYPES.map((type) => ({
+                        value: type,
+                        label:
+                          type.charAt(0).toUpperCase() +
+                          type.slice(1).replace("-", " "),
+                      }))}
+                      className="h-11"
+                      disabled={organizationRegistrationMutation.isPending}
                     />
                   </div>
 
                   {/* Additional Information Section */}
-                  <div className="pt-2 border-t border-border">
-                    <h3 className="text-sm font-medium text-foreground mb-2">
+                  <div className="pt-4 border-t border-border">
+                    <h3 className="text-sm font-medium text-foreground mb-4">
                       Additional Information (Optional)
                     </h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-                      <FormField
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                      <ReactHookFormField
                         control={form.control}
                         name="information.legalName"
                         render={({ field }) => (
@@ -233,7 +201,10 @@ function OrganizationForm({
                               <Input
                                 type="text"
                                 placeholder="Legal business name"
-                                className="h-9"
+                                className="h-10"
+                                disabled={
+                                  organizationRegistrationMutation.isPending
+                                }
                                 {...field}
                               />
                             </FormControl>
@@ -242,7 +213,7 @@ function OrganizationForm({
                         )}
                       />
 
-                      <FormField
+                      <ReactHookFormField
                         control={form.control}
                         name="information.displayName"
                         render={({ field }) => (
@@ -254,7 +225,10 @@ function OrganizationForm({
                               <Input
                                 type="text"
                                 placeholder="Display name for customers"
-                                className="h-9"
+                                className="h-10"
+                                disabled={
+                                  organizationRegistrationMutation.isPending
+                                }
                                 {...field}
                               />
                             </FormControl>
@@ -263,7 +237,7 @@ function OrganizationForm({
                         )}
                       />
 
-                      <FormField
+                      <ReactHookFormField
                         control={form.control}
                         name="information.orgPhone"
                         render={({ field }) => (
@@ -275,7 +249,10 @@ function OrganizationForm({
                               <Input
                                 type="tel"
                                 placeholder="+1 (555) 123-4567"
-                                className="h-9"
+                                className="h-10"
+                                disabled={
+                                  organizationRegistrationMutation.isPending
+                                }
                                 {...field}
                               />
                             </FormControl>
@@ -284,7 +261,7 @@ function OrganizationForm({
                         )}
                       />
 
-                      <FormField
+                      <ReactHookFormField
                         control={form.control}
                         name="information.email"
                         render={({ field }) => (
@@ -296,7 +273,10 @@ function OrganizationForm({
                               <Input
                                 type="email"
                                 placeholder="business@example.com"
-                                className="h-9"
+                                className="h-10"
+                                disabled={
+                                  organizationRegistrationMutation.isPending
+                                }
                                 {...field}
                               />
                             </FormControl>
@@ -305,7 +285,7 @@ function OrganizationForm({
                         )}
                       />
 
-                      <FormField
+                      <ReactHookFormField
                         control={form.control}
                         name="information.website"
                         render={({ field }) => (
@@ -317,7 +297,10 @@ function OrganizationForm({
                               <Input
                                 type="url"
                                 placeholder="https://myrestaurant.com"
-                                className="h-9"
+                                className="h-10"
+                                disabled={
+                                  organizationRegistrationMutation.isPending
+                                }
                                 {...field}
                               />
                             </FormControl>
@@ -330,10 +313,10 @@ function OrganizationForm({
 
                   <Button
                     type="submit"
-                    className="w-full font-medium h-10"
-                    disabled={loading || form.formState.isSubmitting}
+                    className="w-full font-medium h-11"
+                    disabled={organizationRegistrationMutation.isPending}
                   >
-                    {loading || form.formState.isSubmitting ? (
+                    {organizationRegistrationMutation.isPending ? (
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 border-b-2 border-primary-foreground rounded-full animate-spin"></div>
                         Creating organization...
@@ -345,17 +328,19 @@ function OrganizationForm({
                 </form>
               </Form>
 
-              <div className="pt-3 text-center border-t border-border">
-                <p className="text-xs text-muted-foreground mb-3">
+              <div className="pt-4 text-center border-t border-border">
+                <p className="text-sm text-muted-foreground mb-4">
                   Your organization will be set up with a free trial
                 </p>
-                <Link
-                  href="/admin/login"
-                  className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <ArrowLeft className="w-3 h-3 mr-1" />
-                  Back to login
-                </Link>
+                <p className="text-sm text-muted-foreground">
+                  <Link
+                    href="/admin/login"
+                    className="inline-flex items-center text-primary hover:underline"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-1" />
+                    Back to login
+                  </Link>
+                </p>
               </div>
             </CardContent>
           </Card>

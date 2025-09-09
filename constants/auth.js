@@ -3,20 +3,6 @@
  * Centralized authentication-related constants
  */
 
-// Form Defaults
-export const FORM_DEFAULTS = {
-  LOGIN: {
-    email: "",
-    password: "",
-  },
-  REGISTER: {
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  },
-};
-
 // Session Configuration
 export const SESSION_CONFIG = {
   MAX_AGE: 24 * 60 * 60, // 1 day in seconds
@@ -40,11 +26,12 @@ export const COOKIE_CONFIG = {
   },
 };
 
-// Error Messages
-export const AUTH_ERROR_MESSAGES = {
-  VALIDATION_ERROR: "Please check your input and try again.",
-  INVALID_CREDENTIALS: "Invalid email or password.",
-  INACTIVE_ACCOUNT: "Your account is inactive. Please contact support.",
-  ORGANIZATION_NOT_FOUND: "Organization not found.",
-  LOGIN_FAILED: "Login failed. Please try again.",
+// Registration Types
+export const REGISTRATION_TYPES = {
+  USER: "user",
+  SUPER_ADMIN: "super_admin",
+  ORGANIZATION: "organization",
 };
+
+// Note: Error messages are now centralized in lib/helpers/error-messages.js
+// Import getAuthErrorMessages from there instead of using this duplicate

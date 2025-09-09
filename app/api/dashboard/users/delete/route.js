@@ -1,60 +1,42 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth-config";
 import { User } from "@/models/user";
-import { getApiErrorMessages } from "@/lib/helpers/error-messages";
+import { Organization } from "@/models/organization";
+import { logDelete } from "@/lib/helpers/audit-helpers";
 import {
-  apiSuccess,
-  apiNotFound,
-  apiError,
-  handleApiError,
+  getAuthenticatedUser,
+  cleanUserResponse,
   createMethodHandler,
   createDeleteHandler,
 } from "@/lib/api-utils";
+import {
+  apiSuccess,
+  notFound,
+  forbidden,
+  serverError,
+  badRequest,
+} from "@/lib/api-utils";
 
 /**
- * Get authenticated user from session
+ * Handle user deletion with role-based permissions and organization scoping
  */
-const getAuthenticatedUser = async () => {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    throw new Error("AUTHENTICATION_REQUIRED");
-  }
-
-  const currentUser = await User.findById(session.user.id).select(
-    "-password -inviteToken -__v"
-  );
-
-  if (!currentUser) {
-    throw new Error("USER_NOT_FOUND");
-  }
-
-  return currentUser;
-};
-
-/**
- * Business logic handler for deleting a user
- * Implements role-based permissions and organization scoping
- */
-const handleUserDelete = async (queryParams) => {
+const handleUserDelete = async (queryParams, request) => {
   const { userId } = queryParams;
   const currentUser = await getAuthenticatedUser();
 
-  // Find target user
+  // Find target user to delete
   const targetUser = await User.findById(userId).select(
     "-password -inviteToken -__v"
   );
   if (!targetUser) {
-    throw new Error("TARGET_USER_NOT_FOUND");
+    return notFound("TARGET_USER_NOT_FOUND");
   }
 
-  // Check if user is trying to delete themselves
+  // Check if user is deleting themselves
   const isSelfDelete = currentUser._id.toString() === targetUser._id.toString();
 
-  // Role-based permission checks
+  // Apply role-based permission checks
   if (currentUser.role === "staff") {
-    // Staff cannot delete anyone
-    throw new Error("INSUFFICIENT_PERMISSIONS");
+    // Staff have no delete permissions
+    return forbidden("INSUFFICIENT_PERMISSIONS");
   } else if (currentUser.role === "admin") {
     // Admin can only delete staff in their organization
     if (
@@ -63,110 +45,83 @@ const handleUserDelete = async (queryParams) => {
       currentUser.organizationId.toString() !==
         targetUser.organizationId.toString()
     ) {
-      throw new Error("INSUFFICIENT_PERMISSIONS");
+      return forbidden("INSUFFICIENT_PERMISSIONS");
     }
 
-    // Admin cannot delete other admins or themselves
+    // Prevent admin from deleting other admins or themselves
     if (targetUser.role === "admin" || isSelfDelete) {
-      throw new Error("CANNOT_DELETE_ADMIN");
+      return forbidden("CANNOT_DELETE_ADMIN");
     }
   } else if (currentUser.role === "super_admin") {
     // Super admin can delete anyone except themselves
     if (isSelfDelete) {
-      throw new Error("CANNOT_DELETE_SELF");
+      return forbidden("CANNOT_DELETE_SELF");
+    }
+
+    // Check if admin is organization owner
+    if (targetUser.role === "admin" && targetUser.organizationId) {
+      const organization = await Organization.findById(
+        targetUser.organizationId
+      ).select("owner name");
+
+      if (
+        organization &&
+        organization.owner.toString() === targetUser._id.toString()
+      ) {
+        // Check if there are other staff in the organization
+        const staffCount = await User.countDocuments({
+          organizationId: targetUser.organizationId,
+          role: "staff",
+          _id: { $ne: targetUser._id },
+        });
+
+        if (staffCount === 0) {
+          return badRequest("CANNOT_DELETE_ORG_OWNER_NO_STAFF");
+        } else {
+          return badRequest("CANNOT_DELETE_ORG_OWNER_HAS_STAFF");
+        }
+      }
     }
   } else {
-    // Pending users can't delete anyone
-    throw new Error("INSUFFICIENT_PERMISSIONS");
+    // Pending users have no delete permissions
+    return forbidden("INSUFFICIENT_PERMISSIONS");
   }
 
-  // Check if user has any critical dependencies (e.g., created orders, etc.)
+  // Check for critical dependencies before deletion
   // For now, we'll allow deletion but this could be extended to check for dependencies
 
-  // Delete user
-  const deletedUser = await User.findByIdAndDelete(userId);
-  if (!deletedUser) {
-    throw new Error("DELETE_FAILED");
+  // Store user data for audit trail
+  const userToDelete = { ...targetUser.toObject() };
+
+  // Delete user from database
+  let deletedUser;
+  try {
+    deletedUser = await User.findByIdAndDelete(userId);
+    if (!deletedUser) {
+      return serverError("DELETE_FAILED");
+    }
+  } catch (error) {
+    return serverError("DELETE_FAILED");
   }
 
-  // Format response data (exclude sensitive fields)
-  const userResponse = {
-    id: deletedUser._id,
-    name: deletedUser.name,
-    email: deletedUser.email,
-    role: deletedUser.role,
-    status: deletedUser.status,
-    permissions: deletedUser.permissions,
-    emailVerified: deletedUser.emailVerified,
-    createdAt: deletedUser.createdAt,
-    organizationId: deletedUser.organizationId,
-  };
+  // Log user deletion for audit trail
+  try {
+    await logDelete("User", userToDelete, currentUser, request);
+  } catch (auditError) {
+    // Don't fail the deletion if audit logging fails
+  }
 
-  return NextResponse.json(
-    apiSuccess({
-      data: userResponse,
-      message: "User deleted successfully",
-    }),
-    { status: 200 }
-  );
+  // Clean user response data
+  const userResponse = cleanUserResponse(deletedUser);
+
+  return apiSuccess("USER_DELETED_SUCCESSFULLY", userResponse);
 };
 
 /**
  * DELETE /api/dashboard/users/delete?userId=<id>
  * Delete a user based on role-based permissions
  */
-export const DELETE = createDeleteHandler(async (queryParams) => {
-  try {
-    return await handleUserDelete(queryParams);
-  } catch (error) {
-    // Handle specific errors
-    switch (error.message) {
-      case "AUTHENTICATION_REQUIRED":
-        return NextResponse.json(
-          apiError(getApiErrorMessages("AUTHENTICATION_REQUIRED")),
-          {
-            status: 401,
-          }
-        );
-      case "USER_NOT_FOUND":
-        return NextResponse.json(
-          apiNotFound(getApiErrorMessages("USER_NOT_FOUND")),
-          { status: 404 }
-        );
-      case "TARGET_USER_NOT_FOUND":
-        return NextResponse.json(
-          apiNotFound(getApiErrorMessages("TARGET_USER_NOT_FOUND")),
-          { status: 404 }
-        );
-      case "INSUFFICIENT_PERMISSIONS":
-        return NextResponse.json(
-          apiError(getApiErrorMessages("INSUFFICIENT_PERMISSIONS")),
-          { status: 403 }
-        );
-      case "CANNOT_DELETE_ADMIN":
-        return NextResponse.json(
-          apiError(getApiErrorMessages("CANNOT_DELETE_ADMIN")),
-          { status: 403 }
-        );
-      case "CANNOT_DELETE_SELF":
-        return NextResponse.json(
-          apiError(getApiErrorMessages("CANNOT_DELETE_SELF")),
-          { status: 400 }
-        );
-      case "DELETE_FAILED":
-        return NextResponse.json(
-          apiError(getApiErrorMessages("DELETE_FAILED")),
-          { status: 500 }
-        );
-      default:
-        // Handle other errors
-        return NextResponse.json(
-          handleApiError(error, getApiErrorMessages("OPERATION_FAILED")),
-          { status: 500 }
-        );
-    }
-  }
-});
+export const DELETE = createDeleteHandler(handleUserDelete);
 
 // Fallback for unsupported HTTP methods
 export const { GET, POST, PUT } = createMethodHandler(["DELETE"]);

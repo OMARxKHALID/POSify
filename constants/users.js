@@ -9,12 +9,7 @@ export const USER_STATUSES = ["active", "inactive", "suspended"];
 export const SALT_ROUNDS = 12;
 
 export const DEFAULT_PERMISSIONS = {
-  super_admin: [
-    "users:manage",
-    "organizations:manage",
-    "reports:view",
-    "audit:view",
-  ],
+  super_admin: ["users:manage", "organizations:manage", "audit:view"],
   admin: [
     "organizations:manage",
     "dashboard:view",

@@ -1,63 +1,53 @@
-import { NextResponse } from "next/server";
 import { userRegistrationSchema } from "@/schemas/auth-schema";
 import { User } from "@/models/user";
-import { getApiErrorMessages } from "@/lib/helpers/error-messages";
 import {
-  apiSuccess,
-  apiConflict,
-  apiError,
-  handleApiError,
+  cleanUserResponse,
   createMethodHandler,
   createPostHandler,
 } from "@/lib/api-utils";
 import { DEFAULT_PERMISSIONS } from "@/constants";
+import { apiSuccess, conflict, serverError } from "@/lib/api-utils";
 
 /**
- * Business logic handler for super admin registration
- * Creates a super admin user with full system permissions
+ * Handle super admin registration with full system permissions
  */
 const handleSuperAdminRegistration = async (validatedData) => {
   const { name, email, password } = validatedData;
 
-  // Check if super admin already exists
+  // Check for existing super admin
   const existingSuperAdmin = await User.findOne({ role: "super_admin" });
   if (existingSuperAdmin) {
-    throw new Error("SUPER_ADMIN_EXISTS");
+    return conflict("SUPER_ADMIN_EXISTS");
   }
 
-  // Check if user with this email already exists
+  // Check for existing user with same email
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
-    throw new Error("USER_EXISTS");
+    return conflict("USER_EXISTS");
   }
 
-  // Create and save super admin
-  const user = new User({
-    name,
-    email: email.toLowerCase(),
-    password,
-    role: "super_admin",
-    status: "active",
-    emailVerified: true,
-    permissions: DEFAULT_PERMISSIONS.super_admin,
-    permissionsUpdatedAt: new Date(),
-  });
+  try {
+    // Create new super admin with full permissions
+    const user = new User({
+      name,
+      email: email.toLowerCase(),
+      password,
+      role: "super_admin",
+      status: "active",
+      emailVerified: true,
+      permissions: DEFAULT_PERMISSIONS.super_admin,
+      permissionsUpdatedAt: new Date(),
+    });
 
-  await user.save();
+    await user.save();
 
-  // Remove sensitive data
-  const userResponse = user.toJSON();
-  delete userResponse.password;
-  delete userResponse.inviteToken;
+    // Clean user response data
+    const userResponse = cleanUserResponse(user);
 
-  return NextResponse.json(
-    apiSuccess({
-      data: userResponse,
-      message: "Super admin registered successfully",
-      statusCode: 201,
-    }),
-    { status: 201 }
-  );
+    return apiSuccess("SUPER_ADMIN_REGISTERED_SUCCESSFULLY", userResponse, 201);
+  } catch (error) {
+    return serverError("REGISTRATION_FAILED");
+  }
 };
 
 /**
@@ -66,31 +56,7 @@ const handleSuperAdminRegistration = async (validatedData) => {
  */
 export const POST = createPostHandler(
   userRegistrationSchema,
-  async (validatedData) => {
-    try {
-      return await handleSuperAdminRegistration(validatedData);
-    } catch (error) {
-      // Handle specific errors
-      switch (error.message) {
-        case "SUPER_ADMIN_EXISTS":
-          return NextResponse.json(
-            apiError(getApiErrorMessages("SUPER_ADMIN_EXISTS")),
-            { status: 409 }
-          );
-        case "USER_EXISTS":
-          return NextResponse.json(
-            apiConflict(getApiErrorMessages("USER_EXISTS")),
-            { status: 409 }
-          );
-        default:
-          // Handle other errors
-          return NextResponse.json(
-            handleApiError(error, getApiErrorMessages("REGISTRATION_FAILED")),
-            { status: 500 }
-          );
-      }
-    }
-  }
+  handleSuperAdminRegistration
 );
 
 // Fallback for unsupported HTTP methods

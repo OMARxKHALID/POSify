@@ -58,3 +58,11 @@ export const userEditSchema = z.object({
   status: z.enum(["active", "inactive", "suspended"]).optional(),
   permissions: z.array(z.string()).optional(),
 });
+
+/**
+ * Organization ownership transfer schema
+ */
+export const organizationTransferSchema = z.object({
+  organizationId: z.string().min(1, "Organization ID is required"),
+  newOwnerId: z.string().min(1, "New owner ID is required"),
+});

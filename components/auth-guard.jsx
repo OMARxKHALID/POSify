@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { PageLoading } from "@/components/ui/loading";
 import { AUTH_ROUTES } from "@/constants";
 
@@ -15,13 +15,21 @@ export function AuthGuard({ children, fallback = null }) {
   const { status } = useSession();
   const router = useRouter();
 
+  const shouldRedirect = useMemo(() => {
+    return status === "unauthenticated";
+  }, [status]);
+
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (shouldRedirect) {
       router.push(AUTH_ROUTES.LOGIN);
     }
-  }, [status, router]);
+  }, [shouldRedirect, router]);
 
-  if (status === "loading" || status === "unauthenticated") {
+  const isLoading = useMemo(() => {
+    return status === "loading" || status === "unauthenticated";
+  }, [status]);
+
+  if (isLoading) {
     return fallback || <PageLoading />;
   }
 

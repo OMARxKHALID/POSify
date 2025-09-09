@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Bell,
   HelpCircle,
+  Shield,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "./routes";
 
@@ -81,6 +82,13 @@ export const NAVIGATION_PERMISSIONS = {
       url: ADMIN_ROUTES.USERS,
       icon: Users,
       permissions: ["users:manage"],
+      roles: ["super_admin", "admin"],
+    },
+    {
+      title: "Audit Logs",
+      url: ADMIN_ROUTES.AUDIT_LOGS,
+      icon: Shield,
+      permissions: ["audit:view"],
       roles: ["super_admin", "admin"],
     },
     {

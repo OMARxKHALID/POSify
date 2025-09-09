@@ -5,27 +5,34 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { getDefaultQueryOptions, queryKeys } from "@/lib/hooks/hook-utils";
 
 /**
- * Hook to fetch analytics data
+ * Hook to fetch analytics data with time range filtering
  */
 export const useAnalytics = (options = {}) => {
   const {
     timeRange = "30d",
     enabled = true,
-    staleTime = 5 * 60 * 1000, // 5 minutes
-    retry = 2,
     refetchInterval,
-    ...queryOptions
+    ...customOptions
   } = options;
 
-  return useQuery({
-    queryKey: ["analytics", timeRange],
-    queryFn: () => apiClient.get(`/dashboard/analytics?timeRange=${timeRange}`),
+  const queryOptions = getDefaultQueryOptions({
     enabled,
-    staleTime,
-    retry,
     refetchInterval,
+    staleTime: 2 * 60 * 1000, // 2 minutes (analytics data changes frequently)
+    ...customOptions,
+  });
+
+  return useQuery({
+    queryKey: queryKeys.analytics(timeRange),
+    queryFn: async () => {
+      const data = await apiClient.get(
+        `/dashboard/analytics?timeRange=${timeRange}`
+      );
+      return data;
+    },
     ...queryOptions,
   });
 };

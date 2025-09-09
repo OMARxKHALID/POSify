@@ -2,19 +2,20 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Store, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import MainHeader from "@/components/dashboard/dashboard-header";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { Logo } from "@/components/ui/logo";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted/20 to-accent/20">
-      <MainHeader />
+      <DashboardHeader />
       <div className="flex items-center justify-center p-4 pt-20">
         <div className="max-w-4xl w-full space-y-8">
           <div className="text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-20 h-20 mb-6 bg-primary rounded-2xl shadow-lg">
-              <Store className="w-10 h-10 text-primary-foreground" />
+            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-primary/10 rounded-xl shadow-sm">
+              <Logo className="w-10 h-10" />
             </div>
             <h1 className="text-5xl font-bold text-foreground">
               Welcome to POSify
@@ -30,7 +31,7 @@ export default function HomePage() {
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center justify-center gap-2">
-                  <Store className="w-5 h-5" />
+                  <Logo className="w-5 h-5" />
                   Business Owner
                 </CardTitle>
               </CardHeader>
@@ -51,7 +52,7 @@ export default function HomePage() {
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center justify-center gap-2">
-                  <Store className="w-5 h-5" />
+                  <Logo className="w-5 h-5" />
                   Admin Access
                 </CardTitle>
               </CardHeader>

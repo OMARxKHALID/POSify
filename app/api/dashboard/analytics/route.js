@@ -1,21 +1,14 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth-config";
-import { User } from "@/models/user";
 import { Organization } from "@/models/organization";
 import { Order } from "@/models/order";
-import { getApiErrorMessages } from "@/lib/helpers/error-messages";
 import {
-  apiSuccess,
-  apiNotFound,
-  apiError,
-  handleApiError,
+  getAuthenticatedUser,
   createMethodHandler,
-  createGetRouteHandler,
+  createGetHandler,
 } from "@/lib/api-utils";
+import { apiSuccess, badRequest, notFound } from "@/lib/api-utils";
 
 /**
- * Helper functions for data processing
+ * Generate empty analytics structure for new organizations
  */
 const generateEmptyAnalytics = () => ({
   sales: { dailySales: [], hourlySales: [], topItems: [] },
@@ -47,8 +40,10 @@ const generateEmptyAnalytics = () => ({
   inventory: { lowStock: [] },
 });
 
+/**
+ * Calculate KPIs with mock previous period data for comparison
+ */
 const calculateKPIs = (totalRevenue, totalOrders, avgOrderValue) => {
-  // Mock previous period data (in production, query actual previous period)
   const previousRevenue = totalRevenue * 0.88;
   const previousOrders = Math.floor(totalOrders * 0.92);
   const previousAOV = avgOrderValue * 0.95;
@@ -91,6 +86,9 @@ const calculateKPIs = (totalRevenue, totalOrders, avgOrderValue) => {
   ];
 };
 
+/**
+ * Generate mock inventory data for low stock items
+ */
 const generateMockInventory = () => [
   { item: "Chicken Breast", current: 5, min: 10, category: "Meat" },
   { item: "Tomatoes", current: 8, min: 15, category: "Vegetables" },
@@ -100,7 +98,7 @@ const generateMockInventory = () => [
 ];
 
 /**
- * Generate analytics data for the organization
+ * Generate comprehensive analytics data for organization orders and sales
  */
 const generateAnalyticsData = async (organizationId, timeRange = "30d") => {
   const now = new Date();
@@ -220,76 +218,46 @@ const generateAnalyticsData = async (organizationId, timeRange = "30d") => {
 };
 
 /**
- * Validate time range parameter
+ * Validate time range parameter against allowed values
  */
 const validateTimeRange = (timeRange) => {
   return ["7d", "30d", "90d"].includes(timeRange);
 };
 
 /**
- * Business logic handler for analytics data
- * Returns comprehensive analytics data for the authenticated user's organization
+ * Handle analytics data request with role-based access control
  */
 const handleAnalyticsData = async (queryParams, request) => {
-  // Get authenticated session
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    throw new Error("AUTHENTICATION_REQUIRED");
-  }
-
-  // Find user with basic info
-  const user = await User.findById(session.user.id).select(
-    "-password -inviteToken -__v"
-  );
-
-  if (!user) {
-    throw new Error("USER_NOT_FOUND");
-  }
-
-  // Get and validate time range
+  const user = await getAuthenticatedUser();
   const timeRange = queryParams.timeRange || "30d";
+
   if (!validateTimeRange(timeRange)) {
-    throw new Error("INVALID_TIME_RANGE");
+    return badRequest("INVALID_TIME_RANGE");
   }
 
-  // For super_admin users, return empty analytics
   if (user.role === "super_admin") {
-    return NextResponse.json(
-      apiSuccess({
-        data: generateEmptyAnalytics(),
-        message: "Analytics data retrieved successfully (super admin)",
-      }),
-      { status: 200 }
+    return apiSuccess(
+      "ANALYTICS_RETRIEVED_SUCCESSFULLY_SUPER_ADMIN",
+      generateEmptyAnalytics()
     );
   }
 
-  // For admin/staff users, validate organization
   if (!user.organizationId) {
-    throw new Error("ORGANIZATION_NOT_FOUND");
+    return notFound("ORGANIZATION_NOT_FOUND");
   }
 
-  // Verify organization exists
   const organization = await Organization.findById(user.organizationId).select(
     "-__v"
   );
-
   if (!organization) {
-    throw new Error("ORGANIZATION_NOT_FOUND");
+    return notFound("ORGANIZATION_NOT_FOUND");
   }
 
-  // Generate analytics data
   const analyticsData = await generateAnalyticsData(
     user.organizationId,
     timeRange
   );
-
-  return NextResponse.json(
-    apiSuccess({
-      data: analyticsData,
-      message: "Analytics data retrieved successfully",
-    }),
-    { status: 200 }
-  );
+  return apiSuccess("ANALYTICS_RETRIEVED_SUCCESSFULLY", analyticsData);
 };
 
 /**
@@ -297,43 +265,7 @@ const handleAnalyticsData = async (queryParams, request) => {
  * Get analytics data for the authenticated user's organization
  * Returns sales data, performance metrics, and inventory information
  */
-export const GET = createGetRouteHandler(async (queryParams, request) => {
-  try {
-    return await handleAnalyticsData(queryParams, request);
-  } catch (error) {
-    // Handle specific authentication and data errors
-    switch (error.message) {
-      case "AUTHENTICATION_REQUIRED":
-        return NextResponse.json(
-          apiError(getApiErrorMessages("AUTHENTICATION_REQUIRED")),
-          {
-            status: 401,
-          }
-        );
-      case "USER_NOT_FOUND":
-        return NextResponse.json(
-          apiNotFound(getApiErrorMessages("USER_NOT_FOUND")),
-          { status: 404 }
-        );
-      case "ORGANIZATION_NOT_FOUND":
-        return NextResponse.json(
-          apiNotFound(getApiErrorMessages("ORGANIZATION_NOT_FOUND")),
-          { status: 404 }
-        );
-      case "INVALID_TIME_RANGE":
-        return NextResponse.json(
-          apiError(getApiErrorMessages("INVALID_TIME_RANGE")),
-          { status: 400 }
-        );
-      default:
-        // Handle other errors
-        return NextResponse.json(
-          handleApiError(error, getApiErrorMessages("OPERATION_FAILED")),
-          { status: 500 }
-        );
-    }
-  }
-});
+export const GET = createGetHandler(handleAnalyticsData);
 
 // Fallback for unsupported HTTP methods
 export const { POST, PUT, DELETE } = createMethodHandler(["GET"]);

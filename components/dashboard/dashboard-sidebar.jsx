@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -39,12 +39,12 @@ import { filterNavigationByPermissions } from "@/lib/helpers/permissions";
 
 // Helper Components
 function OrganizationSwitcher({ user, organizations = [] }) {
-  const [selectedOrg, setSelectedOrg] = React.useState(
+  const [selectedOrg, setSelectedOrg] = useState(
     user?.organizationName || "No Organization"
   );
 
-  const availableOrgs =
-    organizations.length > 0
+  const availableOrgs = useMemo(() => {
+    return organizations.length > 0
       ? organizations
       : [
           {
@@ -55,6 +55,7 @@ function OrganizationSwitcher({ user, organizations = [] }) {
           { id: "2", name: "Demo Store", isActive: false },
           { id: "3", name: "Test Location", isActive: false },
         ];
+  }, [organizations, user?.organizationName]);
 
   return (
     <DropdownMenu>
@@ -100,11 +101,19 @@ function OrganizationSwitcher({ user, organizations = [] }) {
 }
 
 function UserProfile({ user, isSuperAdmin }) {
+  const userInitials = useMemo(() => {
+    return user?.name?.charAt(0)?.toUpperCase() || "U";
+  }, [user?.name]);
+
+  const roleDisplay = useMemo(() => {
+    return user?.role?.replace("_", " ").toUpperCase() || "USER";
+  }, [user?.role]);
+
   return (
     <div className="flex items-center gap-3 px-2 py-2">
       <Avatar className="h-8 w-8">
-        <AvatarImage src={user?.profileImage} />
-        <AvatarFallback>{user?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+        <AvatarImage src={user?.profileImage} alt={`${user?.name} profile`} />
+        <AvatarFallback>{userInitials}</AvatarFallback>
       </Avatar>
       <div className="flex flex-1 flex-col min-w-0">
         <p className="text-sm font-medium truncate">{user?.name}</p>
@@ -114,7 +123,7 @@ function UserProfile({ user, isSuperAdmin }) {
             variant={isSuperAdmin ? "default" : "secondary"}
             className="text-xs"
           >
-            {user?.role?.replace("_", " ").toUpperCase()}
+            {roleDisplay}
           </Badge>
         </div>
       </div>
@@ -125,7 +134,9 @@ function UserProfile({ user, isSuperAdmin }) {
 function NavigationGroup({ title, items, pathname, onItemClick }) {
   return (
     <SidebarGroup className="py-1">
-      <SidebarGroupLabel className="px-2 py-1">{title}</SidebarGroupLabel>
+      <SidebarGroupLabel className="px-2 py-1 text-xs font-medium text-muted-foreground">
+        {title}
+      </SidebarGroupLabel>
       <SidebarGroupContent className="px-2">
         <SidebarMenu>
           {items.map((item) => (
@@ -135,10 +146,14 @@ function NavigationGroup({ title, items, pathname, onItemClick }) {
                 isActive={pathname === item.url}
                 tooltip={item.title}
                 onClick={onItemClick}
+                className="w-full justify-start gap-2 h-9"
               >
-                <Link href={item.url}>
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.title}</span>
+                <Link
+                  href={item.url}
+                  className="flex items-center gap-2 w-full"
+                >
+                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -158,30 +173,35 @@ export function DashboardSidebar({ ...props }) {
   const isSuperAdmin = user?.role === "super_admin";
 
   // Filter navigation based on user permissions
-  const filteredNavigation = filterNavigationByPermissions(
-    NAVIGATION_PERMISSIONS,
-    user
-  );
+  const filteredNavigation = useMemo(() => {
+    const filtered = filterNavigationByPermissions(
+      NAVIGATION_PERMISSIONS,
+      user
+    );
+    return filtered;
+  }, [user]);
 
   // Handle sidebar click to close on mobile only
-  const handleSidebarClick = (e) => {
-    if (isMobile) {
-      setOpenMobile(false);
-    }
-  };
+  const handleSidebarClick = useMemo(() => {
+    return (e) => {
+      if (isMobile) {
+        setOpenMobile(false);
+      }
+    };
+  }, [isMobile, setOpenMobile]);
 
   return (
     <Sidebar {...props} onClick={handleSidebarClick}>
-      <SidebarHeader>
+      <SidebarHeader className="border-b">
         {/* Organization Switcher - Hide for super admin */}
         {!isSuperAdmin && <OrganizationSwitcher user={user} />}
 
         {/* Only show separator if organization switcher is visible */}
-        {!isSuperAdmin && <Separator />}
+        {!isSuperAdmin && <Separator className="my-2" />}
 
         {user && <UserProfile user={user} isSuperAdmin={isSuperAdmin} />}
       </SidebarHeader>
-      <SidebarContent className="gap-1">
+      <SidebarContent className="gap-1 py-2">
         {Object.entries(filteredNavigation).map(([key, items]) => (
           <NavigationGroup
             key={key}

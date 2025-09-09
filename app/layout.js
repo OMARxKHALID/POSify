@@ -18,6 +18,23 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "POSify - Point of Sale System",
   description: "Modern POS system for restaurants and retail businesses",
+  icons: {
+    icon: [
+      { url: "/favicon-light.svg", media: "(prefers-color-scheme: light)" },
+      { url: "/favicon-dark.svg", media: "(prefers-color-scheme: dark)" },
+      { url: "/favicon.svg" }, // fallback
+    ],
+    shortcut: [
+      { url: "/favicon-light.svg", media: "(prefers-color-scheme: light)" },
+      { url: "/favicon-dark.svg", media: "(prefers-color-scheme: dark)" },
+      { url: "/favicon.svg" }, // fallback
+    ],
+    apple: [
+      { url: "/favicon-light.svg", media: "(prefers-color-scheme: light)" },
+      { url: "/favicon-dark.svg", media: "(prefers-color-scheme: dark)" },
+      { url: "/favicon.svg" }, // fallback
+    ],
+  },
 };
 
 export default function RootLayout({ children }) {

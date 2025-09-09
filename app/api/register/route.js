@@ -1,55 +1,45 @@
-import { NextResponse } from "next/server";
 import { userRegistrationSchema } from "@/schemas/auth-schema";
 import { User } from "@/models/user";
-import { getApiErrorMessages } from "@/lib/helpers/error-messages";
 import {
-  apiSuccess,
-  apiConflict,
-  handleApiError,
+  cleanUserResponse,
   createMethodHandler,
   createPostHandler,
 } from "@/lib/api-utils";
+import { apiSuccess, conflict, serverError } from "@/lib/api-utils";
 
 /**
- * Business logic handler for user registration
- * Creates a new user with pending role
+ * Handle user registration with pending role
  */
 const handleUserRegistration = async (validatedData) => {
   const { name, email, password } = validatedData;
 
-  // Check if user already exists
+  // Check for existing user with same email
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
-    throw new Error("USER_EXISTS");
+    return conflict("USER_EXISTS");
   }
 
-  // Create and save user
-  const user = new User({
-    name,
-    email: email.toLowerCase(),
-    password,
-    role: "pending",
-    status: "active",
-    emailVerified: true,
-    permissions: [],
-  });
+  try {
+    // Create new user with pending role
+    const user = new User({
+      name,
+      email: email.toLowerCase(),
+      password,
+      role: "pending",
+      status: "active",
+      emailVerified: true,
+      permissions: [],
+    });
 
-  await user.save();
+    await user.save();
 
-  // Remove sensitive data
-  const userResponse = user.toJSON();
-  delete userResponse.password;
-  delete userResponse.inviteToken;
+    // Clean user response data
+    const userResponse = cleanUserResponse(user);
 
-  return NextResponse.json(
-    apiSuccess({
-      data: userResponse,
-      message:
-        "User registered successfully. Please create an organization to complete setup.",
-      statusCode: 201,
-    }),
-    { status: 201 }
-  );
+    return apiSuccess("USER_REGISTERED_SUCCESSFULLY", userResponse, 201);
+  } catch (error) {
+    return serverError("REGISTRATION_FAILED");
+  }
 };
 
 /**
@@ -58,25 +48,7 @@ const handleUserRegistration = async (validatedData) => {
  */
 export const POST = createPostHandler(
   userRegistrationSchema,
-  async (validatedData) => {
-    try {
-      return await handleUserRegistration(validatedData);
-    } catch (error) {
-      // Handle specific errors
-      if (error.message === "USER_EXISTS") {
-        return NextResponse.json(
-          apiConflict(getApiErrorMessages("USER_EXISTS")),
-          { status: 409 }
-        );
-      }
-
-      // Handle other errors
-      return NextResponse.json(
-        handleApiError(error, getApiErrorMessages("REGISTRATION_FAILED")),
-        { status: 500 }
-      );
-    }
-  }
+  handleUserRegistration
 );
 
 // Fallback for unsupported HTTP methods

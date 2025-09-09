@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, User, LayoutDashboard } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Logo } from "@/components/ui/logo";
 import Link from "next/link";
 
 export default function Header() {
@@ -29,7 +30,13 @@ export default function Header() {
     <header className="bg-card border-b border-border px-4 py-3">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <Link href="/" className="hover:opacity-80 transition-opacity">
+          <Link
+            href="/"
+            className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+          >
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Logo className="w-5 h-5" />
+            </div>
             <h1 className="text-xl font-semibold text-card-foreground">
               POSIFY
             </h1>

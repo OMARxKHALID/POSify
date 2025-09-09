@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useMemo } from "react";
 import { AUTH_ROUTES, DEFAULT_REDIRECTS } from "@/constants";
 
 // Components
@@ -20,15 +21,20 @@ import {
 // Icons
 import { LogOut, Bell, Settings } from "lucide-react";
 
+// Components
+import { ThemeToggle } from "@/components/theme-toggle";
+
 function MainContent({ children }) {
   const { isMobile, setOpenMobile } = useSidebar();
 
-  const handleMainClick = (e) => {
-    // Only close sidebar on mobile when clicking anywhere in main content
-    if (isMobile) {
-      setOpenMobile(false);
-    }
-  };
+  const handleMainClick = useMemo(() => {
+    return (e) => {
+      // Only close sidebar on mobile when clicking anywhere in main content
+      if (isMobile) {
+        setOpenMobile(false);
+      }
+    };
+  }, [isMobile, setOpenMobile]);
 
   return (
     <div className="flex-1 flex flex-col">
@@ -49,8 +55,10 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
 
   // Define public routes that should not show dashboard layout
-  const publicRoutes = [AUTH_ROUTES.LOGIN];
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const publicRoutes = useMemo(() => [AUTH_ROUTES.LOGIN], []);
+  const isPublicRoute = useMemo(() => {
+    return publicRoutes.includes(pathname);
+  }, [publicRoutes, pathname]);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: DEFAULT_REDIRECTS.AFTER_LOGOUT });
@@ -64,7 +72,7 @@ export default function AdminLayout({ children }) {
   // For protected routes, use AuthGuard and dashboard layout
   return (
     <AuthGuard>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <DashboardSidebar className="w-56" />
         <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -82,6 +90,8 @@ export default function AdminLayout({ children }) {
                 <Settings className="h-4 w-4" />
                 <span className="sr-only">Settings</span>
               </Button>
+
+              <ThemeToggle />
 
               <Separator orientation="vertical" className="h-4" />
 

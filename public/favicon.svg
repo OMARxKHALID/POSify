@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background using project's card color -->
+  <rect width="100" height="100" fill="oklch(0.967 0.0029 264.5419)" rx="20"/>
+
+  <!-- Simple "P" letter design using project's primary color -->
+  <text x="50" y="70" font-family="Arial, sans-serif" font-size="60" font-weight="bold" text-anchor="middle" fill="oklch(0.6716 0.1368 48.513)">P</text>
+
+  <!-- Small dot accent using project's secondary color -->
+  <circle cx="70" cy="35" r="6" fill="oklch(0.536 0.0398 196.028)"/>
+</svg>

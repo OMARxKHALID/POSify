@@ -51,10 +51,5 @@ AuditLogSchema.index(
   { name: "text" }
 );
 
-// Virtual: check if actor was a super_admin
-AuditLogSchema.virtual("isSuperAdminOperation").get(function () {
-  return this.userRole === "super_admin";
-});
-
 export const AuditLog =
   mongoose.models.AuditLog || mongoose.model("AuditLog", AuditLogSchema);

@@ -11,15 +11,17 @@ import { Separator } from "@/components/ui/separator";
 // Icons
 import { Settings, Bell, Shield, Palette } from "lucide-react";
 
+import { PageLayout } from "@/components/dashboard/page-layout";
+import { PageHeader } from "@/components/dashboard/page-header";
+
 export default function SettingsPage() {
   return (
-    <div className="p-6 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your account settings and preferences.
-        </p>
-      </div>
+    <PageLayout>
+      <PageHeader
+        title="Settings"
+        description="Manage your account settings and preferences."
+        icon={Settings}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card>
@@ -200,6 +202,6 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </PageLayout>
   );
 }

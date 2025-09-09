@@ -1,91 +1,50 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth-config";
 import { Organization } from "@/models/organization";
-import { User } from "@/models/user";
-import { getApiErrorMessages } from "@/lib/helpers/error-messages";
 import {
-  apiSuccess,
-  apiNotFound,
-  apiError,
-  handleApiError,
+  getAuthenticatedUser,
+  formatUserData,
+  formatOrganizationData,
   createMethodHandler,
-  createGetRouteHandler,
+  createGetHandler,
 } from "@/lib/api-utils";
+import { apiSuccess, notFound } from "@/lib/api-utils";
 
 /**
- * Format user data for response
- */
-const formatUserData = (user) => ({
-  id: user._id,
-  name: user.name,
-  email: user.email,
-  role: user.role,
-  status: user.status,
-  permissions: user.permissions,
-  lastLogin: user.lastLogin,
-});
-
-/**
- * Business logic handler for organization data
- * Returns organization data for the authenticated user
+ * Handle organization data request for authenticated user
  */
 const handleOrganizationData = async (queryParams, request) => {
-  // Get authenticated session
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    throw new Error("AUTHENTICATION_REQUIRED");
-  }
+  // Get authenticated user with organization data
+  const user = await getAuthenticatedUser();
 
-  // Find user with organization data
-  const user = await User.findById(session.user.id)
-    .populate({
+  // Populate organization data if available
+  if (user.organizationId) {
+    await user.populate({
       path: "organizationId",
       select: "-__v",
-    })
-    .select("-password -inviteToken -__v");
-
-  if (!user) {
-    throw new Error("USER_NOT_FOUND");
+    });
   }
 
   if (!user.organizationId) {
-    return NextResponse.json(
-      apiSuccess({
-        data: null,
-        message: "User has no organization",
-      }),
-      { status: 200 }
-    );
+    return apiSuccess("NO_ORGANIZATION_FOUND", null);
   }
 
-  // Get organization with populated owner data
+  // Get organization with owner details
   const organization = await Organization.findById(user.organizationId._id)
     .populate("owner", "name email role")
     .select("-__v");
 
   if (!organization) {
-    throw new Error("ORGANIZATION_NOT_FOUND");
+    return notFound("ORGANIZATION_NOT_FOUND");
   }
 
-  // Format response data
+  // Clean organization response data
   const organizationData = {
-    ...organization.toJSON(),
-    owner: {
-      id: organization.owner._id,
-      name: organization.owner.name,
-      email: organization.owner.email,
-      role: organization.owner.role,
-    },
+    ...formatOrganizationData(organization),
     user: formatUserData(user),
   };
 
-  return NextResponse.json(
-    apiSuccess({
-      data: organizationData,
-      message: "Organization data retrieved successfully",
-    }),
-    { status: 200 }
+  return apiSuccess(
+    "ORGANIZATION_DATA_RETRIEVED_SUCCESSFULLY",
+    organizationData
   );
 };
 
@@ -93,38 +52,7 @@ const handleOrganizationData = async (queryParams, request) => {
  * GET /api/organizations
  * Fetch organization data for the authenticated user
  */
-export const GET = createGetRouteHandler(async (queryParams, request) => {
-  try {
-    return await handleOrganizationData(queryParams, request);
-  } catch (error) {
-    // Handle specific authentication and data errors
-    switch (error.message) {
-      case "AUTHENTICATION_REQUIRED":
-        return NextResponse.json(
-          apiError(getApiErrorMessages("AUTHENTICATION_REQUIRED")),
-          {
-            status: 401,
-          }
-        );
-      case "USER_NOT_FOUND":
-        return NextResponse.json(
-          apiNotFound(getApiErrorMessages("USER_NOT_FOUND")),
-          { status: 404 }
-        );
-      case "ORGANIZATION_NOT_FOUND":
-        return NextResponse.json(
-          apiNotFound(getApiErrorMessages("ORGANIZATION_NOT_FOUND")),
-          { status: 404 }
-        );
-      default:
-        // Handle other errors
-        return NextResponse.json(
-          handleApiError(error, getApiErrorMessages("OPERATION_FAILED")),
-          { status: 500 }
-        );
-    }
-  }
-});
+export const GET = createGetHandler(handleOrganizationData);
 
 // Fallback for unsupported HTTP methods
 export const { POST, PUT, DELETE } = createMethodHandler(["GET"]);

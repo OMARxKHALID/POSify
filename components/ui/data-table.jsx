@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useMemo } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -64,29 +64,43 @@ export function DataTable({
     pageSize: 10,
   });
 
-  const table = useReactTable({
-    data,
-    columns,
-    state: {
+  // Memoize table configuration for better performance
+  const tableConfig = useMemo(
+    () => ({
+      data,
+      columns,
+      state: {
+        sorting,
+        columnVisibility,
+        rowSelection,
+        columnFilters,
+        pagination,
+      },
+      enableRowSelection: true,
+      onRowSelectionChange: setRowSelection,
+      onSortingChange: setSorting,
+      onColumnFiltersChange: setColumnFilters,
+      onColumnVisibilityChange: setColumnVisibility,
+      onPaginationChange: setPagination,
+      getCoreRowModel: getCoreRowModel(),
+      getFilteredRowModel: getFilteredRowModel(),
+      getPaginationRowModel: getPaginationRowModel(),
+      getSortedRowModel: getSortedRowModel(),
+      getFacetedRowModel: getFacetedRowModel(),
+      getFacetedUniqueValues: getFacetedUniqueValues(),
+    }),
+    [
+      data,
+      columns,
       sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
       pagination,
-    },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-  });
+    ]
+  );
+
+  const table = useReactTable(tableConfig);
 
   return (
     <div className="w-full space-y-4">

@@ -3,13 +3,13 @@
 import React from "react";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
-  CardAction,
 } from "@/components/ui/card";
+import { KPICard, KPICardsGrid } from "@/components/ui/kpi-card";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -110,45 +110,6 @@ const inventoryColumns = [
   },
 ];
 
-// KPI Card Component
-function KPICard({ title, value, change, trend, period }) {
-  const isPositive = trend === "up";
-
-  return (
-    <Card className="@container/card">
-      <CardHeader className="pb-2">
-        <div>
-          <CardDescription className="text-xs">{title}</CardDescription>
-          <CardTitle className="text-lg font-semibold tabular-nums sm:text-xl @[250px]/card:text-2xl">
-            {value}
-          </CardTitle>
-        </div>
-        <CardAction>
-          <Badge variant="outline" className="text-xs flex items-center gap-1">
-            {isPositive ? (
-              <TrendingUp className="h-3 w-3" />
-            ) : (
-              <TrendingDown className="h-3 w-3" />
-            )}
-            {change}
-          </Badge>
-        </CardAction>
-      </CardHeader>
-      <CardFooter className="flex-col items-start gap-1 text-xs pt-0">
-        <div className="line-clamp-1 flex gap-1 font-medium">
-          {isPositive ? "Trending up" : "Down this period"}{" "}
-          {isPositive ? (
-            <TrendingUp className="size-3" />
-          ) : (
-            <TrendingDown className="size-3" />
-          )}
-        </div>
-        <div className="text-muted-foreground">{period}</div>
-      </CardFooter>
-    </Card>
-  );
-}
-
 // Analytics Dashboard Page
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = React.useState("30d");
@@ -227,7 +188,7 @@ export default function AnalyticsPage() {
             </p>
             <button
               onClick={() => refetch()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
               Try Again
             </button>
@@ -275,7 +236,7 @@ export default function AnalyticsPage() {
       {/* Main Content Grid */}
       <div className="grid gap-3 sm:gap-4 lg:gap-6">
         {/* Key Performance Indicators */}
-        <div className="w-full *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs">
+        <KPICardsGrid>
           {performance.kpis.map((kpi, index) => (
             <KPICard
               key={index}
@@ -286,7 +247,7 @@ export default function AnalyticsPage() {
               period={kpi.period}
             />
           ))}
-        </div>
+        </KPICardsGrid>
 
         {/* Charts Row */}
         <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">

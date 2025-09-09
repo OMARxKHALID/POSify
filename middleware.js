@@ -30,6 +30,6 @@ export default withAuth(
 export const config = {
   matcher: [
     // Match all request paths except for static files and API routes
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.svg).*)",
   ],
 };
