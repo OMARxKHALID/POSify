@@ -9,13 +9,13 @@ import { Header } from "@/components/home/header";
 
 export default function Home() {
   return (
-    <div className="min-h-screen w-full relative bg-black">
+    <div className="min-h-screen w-full relative bg-background">
       {/* Background gradient */}
       <div
         className="absolute inset-0 z-0"
         style={{
           background:
-            "radial-gradient(ellipse 50% 35% at 50% 0%, rgba(226, 232, 240, 0.12), transparent 60%), #000000",
+            "radial-gradient(ellipse 50% 35% at 50% 0%, hsl(var(--foreground) / 0.12), transparent 60%), hsl(var(--background))",
         }}
       />
       <Header />

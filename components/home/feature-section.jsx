@@ -4,7 +4,6 @@ import React from "react";
 import { useTheme } from "next-themes";
 import Earth from "@/components/ui/globe";
 import ScrambleHover from "@/components/ui/scramble";
-import { FollowerPointerCard } from "@/components/ui/following-pointer";
 import { motion, useInView } from "framer-motion";
 import { Suspense, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -14,29 +13,29 @@ const featureCards = [
     id: "menu",
     title: "Menu",
     description: "Manage your menu items and pricing with ease.",
-    colSpan: "col-span-12 md:col-span-6 xl:col-span-6 xl:col-start-2",
-    delay: 0.5,
+    colSpan: "col-span-12 md:col-span-6 xl:col-span-5 xl:col-start-2",
+    delay: 0,
   },
   {
     id: "orders",
     title: "Orders",
     description: "Process orders quickly and efficiently.",
-    colSpan: "col-span-12 md:col-span-6 xl:col-span-6 xl:col-start-8",
-    delay: 0.5,
+    colSpan: "col-span-12 md:col-span-6 xl:col-span-5 xl:col-start-7",
+    delay: 0,
   },
   {
     id: "analytics",
     title: "Analytics",
     description: "Track sales and monitor your business performance.",
-    colSpan: "col-span-12 md:col-span-6 xl:col-span-6 xl:col-start-2",
-    delay: 1.0,
+    colSpan: "col-span-12 md:col-span-6 xl:col-span-5 xl:col-start-2",
+    delay: 0,
   },
   {
     id: "multiLocation",
     title: "Multi-location",
     description: "Manage multiple locations from one dashboard.",
-    colSpan: "col-span-12 md:col-span-6 xl:col-span-6 xl:col-start-8",
-    delay: 1.0,
+    colSpan: "col-span-12 md:col-span-6 xl:col-span-5 xl:col-start-7",
+    delay: 0,
   },
 ];
 
@@ -110,35 +109,24 @@ export function FeatureSection() {
         transition={{ duration: 0.5, delay: 0 }}
         className="container mx-auto flex flex-col items-center gap-6 sm:gap-12"
       >
-        <h2 className="via-foreground mb-4 bg-gradient-to-b from-zinc-800 to-zinc-700 bg-clip-text text-center text-4xl font-semibold tracking-tighter text-transparent md:text-[54px] md:leading-[60px]">
+        <h2 className="mb-4 bg-gradient-to-b from-foreground via-foreground to-foreground/80 bg-clip-text text-center text-4xl font-semibold tracking-tighter text-transparent md:text-[54px] md:leading-[60px]">
           Features
         </h2>
 
-        <FollowerPointerCard
-          title={
-            <div className="flex items-center gap-2">
-              <span>✨</span>
-              <span>Features</span>
-            </div>
-          }
-        >
-          <div className="cursor-none">
-            <div className="grid grid-cols-12 gap-4 justify-center">
-              {featureCards.map((feature) => (
-                <FeatureCard
-                  key={feature.id}
-                  feature={feature}
-                  isInView={isInView}
-                  onHoverChange={(isHovering) =>
-                    updateHoverState(feature.id, isHovering)
-                  }
-                >
-                  {renderFeatureContent(feature)}
-                </FeatureCard>
-              ))}
-            </div>
-          </div>
-        </FollowerPointerCard>
+        <div className="grid grid-cols-12 gap-4 justify-center">
+          {featureCards.map((feature) => (
+            <FeatureCard
+              key={feature.id}
+              feature={feature}
+              isInView={isInView}
+              onHoverChange={(isHovering) =>
+                updateHoverState(feature.id, isHovering)
+              }
+            >
+              {renderFeatureContent(feature)}
+            </FeatureCard>
+          ))}
+        </div>
       </motion.div>
     </section>
   );
@@ -157,8 +145,8 @@ const FeatureCard = ({ feature, isInView, onHoverChange, children }) => (
     transition={{ duration: 0.5, delay: feature.delay }}
     whileHover={{
       scale: 1.02,
-      borderColor: "rgba(231, 138, 83, 0.6)",
-      boxShadow: "0 0 30px rgba(231, 138, 83, 0.2)",
+      borderColor: "hsl(var(--primary) / 0.6)",
+      boxShadow: "0 0 30px hsl(var(--primary) / 0.2)",
     }}
     style={{ transition: "all 0s ease-in-out" }}
   >
@@ -170,7 +158,7 @@ const FeatureCard = ({ feature, isInView, onHoverChange, children }) => (
         <p className="max-w-[460px]">{feature.description}</p>
       </div>
     </div>
-    {children}
+    <div className="mt-6">{children}</div>
   </motion.div>
 );
 
@@ -200,7 +188,7 @@ const MenuFeatureContent = ({ isHovering }) => (
         >
           <motion.path
             d="M 60.688 1.59 L 60.688 92.449 M 60.688 92.449 L 119.368 92.449 M 60.688 92.449 L 1.414 92.449"
-            stroke="rgb(255,222,213)"
+            stroke="hsl(var(--primary-foreground) / 0.8)"
             fill="transparent"
             strokeDasharray="2 2"
             initial={{ pathLength: 0 }}
@@ -222,7 +210,7 @@ const OrdersFeatureContent = ({ isHovering, globeColors }) => (
           scrambleSpeed={70}
           maxIterations={20}
           useOriginalCharsOnly={false}
-          className="cursor-pointer bg-gradient-to-t from-[#e78a53] to-[#e78a53] bg-clip-text text-transparent"
+          className="cursor-pointer bg-gradient-to-t from-primary to-primary bg-clip-text text-transparent"
           isHovering={isHovering}
           setIsHovering={() => {}}
           characters="abcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;':\,./<>?"
@@ -250,10 +238,10 @@ const AnalyticsFeatureContent = ({
 }) => (
   <div className="flex grow items-center justify-center select-none relative min-h-[300px] p-4">
     <div className="w-full max-w-lg">
-      <div className="relative rounded-2xl border border-white/10 bg-black/20 dark:bg-white/5 backdrop-blur-sm">
+      <div className="relative rounded-2xl border border-border/50 bg-background/20 dark:bg-card/50 backdrop-blur-sm">
         <div className="p-4">
           <textarea
-            className="w-full min-h-[100px] bg-transparent border-none text-white placeholder:text-white/50 resize-none focus:outline-none text-base leading-relaxed"
+            className="w-full min-h-[100px] bg-transparent border-none text-foreground placeholder:text-muted-foreground resize-none focus:outline-none text-base leading-relaxed"
             placeholder="Search orders, customers, or products..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
@@ -262,7 +250,7 @@ const AnalyticsFeatureContent = ({
         </div>
         <div className="flex items-center justify-between px-4 pb-4">
           <div className="flex items-center gap-3">
-            <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+            <button className="p-2 rounded-full bg-card/50 hover:bg-card transition-colors">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -273,12 +261,12 @@ const AnalyticsFeatureContent = ({
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-white/70"
+                className="text-muted-foreground"
               >
                 <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
               </svg>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#e78a53] hover:bg-[#e78a53]/90 transition-colors text-white font-medium">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary hover:bg-primary/90 transition-colors text-primary-foreground font-medium">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -297,7 +285,7 @@ const AnalyticsFeatureContent = ({
               Find
             </button>
           </div>
-          <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+          <button className="p-2 rounded-full bg-card/50 hover:bg-card transition-colors">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -308,7 +296,7 @@ const AnalyticsFeatureContent = ({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-white/70"
+              className="text-muted-foreground"
             >
               <path d="m22 2-7 20-4-9-9-4Z"></path>
               <path d="M22 2 11 13"></path>

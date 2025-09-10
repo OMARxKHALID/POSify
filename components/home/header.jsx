@@ -70,7 +70,7 @@ export function Header() {
           </a>
           <a
             href="/signup"
-            className="inline-block rounded-md bg-gradient-to-b from-primary to-primary/80 px-4 py-2 text-sm font-bold text-primary-foreground shadow-[inset_0_2px_0_rgba(255,255,255,0.3)] transition duration-200 hover:-translate-y-0.5"
+            className="inline-block rounded-md bg-gradient-to-b from-primary to-primary/80 px-4 py-2 text-sm font-bold text-primary-foreground shadow-[inset_0_2px_0_hsl(var(--primary-foreground)/0.3)] transition duration-200 hover:-translate-y-0.5"
           >
             Sign Up
           </a>
@@ -118,7 +118,7 @@ export function Header() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden">
+        <div className="fixed inset-0 z-40 bg-background/50 backdrop-blur-sm md:hidden">
           <div className="absolute top-20 left-4 right-4 rounded-2xl border border-border/50 bg-background/95 p-6 shadow-2xl backdrop-blur-md">
             <nav className="flex flex-col space-y-4">
               {NAV_ITEMS.map((item) => (

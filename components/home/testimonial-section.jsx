@@ -65,10 +65,10 @@ const testimonialColumns = [
 
 const TestimonialCard = ({ img, name, username, body }) => {
   return (
-    <div className="relative w-full max-w-xs overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.02] p-10 shadow-[0px_2px_0px_0px_rgba(255,255,255,0.1)_inset]">
-      <div className="absolute -top-5 -left-5 -z-10 h-40 w-40 rounded-full bg-gradient-to-b from-[#e78a53]/10 to-transparent blur-md"></div>
+    <div className="relative w-full max-w-xs overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-b from-card/50 to-card/[0.02] p-10 shadow-[0px_2px_0px_0px_hsl(var(--foreground)/0.1)_inset]">
+      <div className="absolute -top-5 -left-5 -z-10 h-40 w-40 rounded-full bg-gradient-to-b from-primary/10 to-transparent blur-md"></div>
 
-      <div className="text-white/90 leading-relaxed">{body}</div>
+      <div className="text-foreground/90 leading-relaxed">{body}</div>
 
       <div className="mt-5 flex items-center gap-2">
         <img
@@ -80,10 +80,10 @@ const TestimonialCard = ({ img, name, username, body }) => {
           loading="lazy"
         />
         <div className="flex flex-col">
-          <div className="leading-5 font-medium tracking-tight text-white">
+          <div className="leading-5 font-medium tracking-tight text-foreground">
             {name}
           </div>
-          <div className="leading-5 tracking-tight text-white/60">
+          <div className="leading-5 tracking-tight text-muted-foreground">
             {username}
           </div>
         </div>
@@ -100,18 +100,18 @@ export function TestimonialSection() {
           <div className="flex justify-center">
             <button
               type="button"
-              className="group relative z-10 mx-auto rounded-full border border-white/20 bg-white/5 px-6 py-1 text-xs backdrop-blur transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-100 md:text-sm"
+              className="group relative z-10 mx-auto rounded-full border border-border/50 bg-card/50 px-6 py-1 text-xs backdrop-blur transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-100 md:text-sm"
             >
-              <div className="absolute inset-x-0 -top-px mx-auto h-0.5 w-1/2 bg-gradient-to-r from-transparent via-[#e78a53] to-transparent shadow-2xl transition-all duration-500 group-hover:w-3/4"></div>
-              <div className="absolute inset-x-0 -bottom-px mx-auto h-0.5 w-1/2 bg-gradient-to-r from-transparent via-[#e78a53] to-transparent shadow-2xl transition-all duration-500 group-hover:h-px"></div>
-              <span className="relative text-white">Testimonials</span>
+              <div className="absolute inset-x-0 -top-px mx-auto h-0.5 w-1/2 bg-gradient-to-r from-transparent via-primary to-transparent shadow-2xl transition-all duration-500 group-hover:w-3/4"></div>
+              <div className="absolute inset-x-0 -bottom-px mx-auto h-0.5 w-1/2 bg-gradient-to-r from-transparent via-primary to-transparent shadow-2xl transition-all duration-500 group-hover:h-px"></div>
+              <span className="relative text-foreground">Testimonials</span>
             </button>
           </div>
           <h2 className="from-foreground/60 via-foreground to-foreground/60 dark:from-muted-foreground/55 dark:via-foreground dark:to-muted-foreground/55 mt-3 bg-gradient-to-r bg-clip-text text-center text-4xl font-semibold tracking-tighter text-transparent md:text-[54px] md:leading-[60px] __className_bb4e88 relative z-10">
             What our customers say
           </h2>
 
-          <p className="mt-3 relative z-10 text-center text-lg text-zinc-500">
+          <p className="mt-3 relative z-10 text-center text-lg text-muted-foreground">
             From small cafes to large restaurant chains, POSify is trusted by
             businesses worldwide to streamline their operations.
           </p>
@@ -147,11 +147,11 @@ export function TestimonialSection() {
         </div>
 
         <div className="-mt-8 flex justify-center">
-          <button className="group relative inline-flex items-center gap-2 rounded-full border border-[#e78a53]/30 bg-black/50 px-6 py-3 text-sm font-medium text-white transition-all hover:border-[#e78a53]/60 hover:bg-[#e78a53]/10 active:scale-95">
-            <div className="absolute inset-x-0 -top-px mx-auto h-px w-3/4 bg-gradient-to-r from-transparent via-[#e78a53]/40 to-transparent"></div>
-            <div className="absolute inset-x-0 -bottom-px mx-auto h-px w-3/4 bg-gradient-to-r from-transparent via-[#e78a53]/40 to-transparent"></div>
+          <button className="group relative inline-flex items-center gap-2 rounded-full border border-primary/30 bg-background/50 px-6 py-3 text-sm font-medium text-foreground transition-all hover:border-primary/60 hover:bg-primary/10 active:scale-95">
+            <div className="absolute inset-x-0 -top-px mx-auto h-px w-3/4 bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
+            <div className="absolute inset-x-0 -bottom-px mx-auto h-px w-3/4 bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
             <svg
-              className="h-4 w-4 text-[#e78a53]"
+              className="h-4 w-4 text-primary"
               fill="currentColor"
               viewBox="0 0 24 24"
             >

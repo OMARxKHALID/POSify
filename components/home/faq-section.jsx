@@ -36,7 +36,7 @@ export function FaqSection() {
   ];
 
   return (
-    <section id="faq" className="relative overflow-hidden py-16 pb-96">
+    <section id="faq" className="relative overflow-hidden py-16 pb-100">
       {/* Background blur effects */}
       <div className="absolute top-1/2 -right-20 z-[-1] h-64 w-64 rounded-full bg-primary/20 opacity-80 blur-3xl" />
       <div className="absolute top-1/2 -left-20 z-[-1] h-64 w-64 rounded-full bg-primary/20 opacity-80 blur-3xl" />
@@ -64,7 +64,7 @@ export function FaqSection() {
           viewport={{ once: true }}
         >
           Questions? We've got{" "}
-          <span className="bg-gradient-to-b from-foreground via-rose-200 to-primary bg-clip-text text-transparent">
+          <span className="bg-gradient-to-b from-foreground via-foreground/60 to-primary bg-clip-text text-transparent">
             answers
           </span>
         </motion.h2>
@@ -77,7 +77,7 @@ export function FaqSection() {
             return (
               <motion.div
                 key={index}
-                className="cursor-pointer rounded-2xl border border-white/10 bg-gradient-to-b from-secondary/40 to-secondary/10 p-6 shadow-[inset_0_2px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:border-white/20"
+                className="cursor-pointer rounded-2xl border border-border/50 bg-gradient-to-b from-secondary/40 to-secondary/10 p-6 shadow-[inset_0_2px_0_hsl(var(--foreground)/0.1)] transition-all duration-300 hover:border-border"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}

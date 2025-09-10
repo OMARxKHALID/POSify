@@ -5,21 +5,29 @@
 
 :root {
   --background: oklch(1 0 0);
-  --foreground: #121113; /* Updated foreground color to specified dark color */
+  --foreground: oklch(
+    0.15 0.01 264.5
+  ); /* Dark foreground color for light theme */
   --card: oklch(1 0 0);
-  --card-foreground: #121113; /* Updated card foreground to match */
+  --card-foreground: oklch(
+    0.15 0.01 264.5
+  ); /* Dark card foreground for light theme */
   --popover: oklch(1 0 0);
-  --popover-foreground: #121113; /* Updated popover foreground to match */
+  --popover-foreground: oklch(
+    0.15 0.01 264.5
+  ); /* Dark popover foreground for light theme */
   --primary: oklch(0.6716 0.1368 48.513);
-  --primary-foreground: oklch(1 0 0);
+  --primary-foreground: oklch(0.15 0.01 264.5);
   --secondary: oklch(0.536 0.0398 196.028);
-  --secondary-foreground: oklch(1 0 0);
+  --secondary-foreground: oklch(0.15 0.01 264.5);
   --muted: oklch(0.967 0.0029 264.5419);
   --muted-foreground: oklch(0.551 0.0234 264.3637);
   --accent: oklch(0.9491 0 0);
-  --accent-foreground: #121113; /* Updated accent foreground to match */
+  --accent-foreground: oklch(
+    0.15 0.01 264.5
+  ); /* Dark accent foreground for light theme */
   --destructive: oklch(0.6368 0.2078 25.3313);
-  --destructive-foreground: oklch(0.9851 0 0);
+  --destructive-foreground: oklch(0.15 0.01 264.5);
   --border: oklch(0.9276 0.0058 264.5313);
   --input: oklch(0.9276 0.0058 264.5313);
   --ring: oklch(0.6716 0.1368 48.513);
@@ -29,11 +37,15 @@
   --chart-4: oklch(0.6268 0 0);
   --chart-5: oklch(0.683 0 0);
   --sidebar: oklch(0.967 0.0029 264.5419);
-  --sidebar-foreground: #121113; /* Updated sidebar foreground to match */
+  --sidebar-foreground: oklch(
+    0.15 0.01 264.5
+  ); /* Dark sidebar foreground for light theme */
   --sidebar-primary: oklch(0.6716 0.1368 48.513);
-  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-primary-foreground: oklch(0.15 0.01 264.5);
   --sidebar-accent: oklch(1 0 0);
-  --sidebar-accent-foreground: #121113; /* Updated sidebar accent foreground to match */
+  --sidebar-accent-foreground: oklch(
+    0.15 0.01 264.5
+  ); /* Dark sidebar accent foreground for light theme */
   --sidebar-border: oklch(0.9276 0.0058 264.5313);
   --sidebar-ring: oklch(0.6716 0.1368 48.513);
   --font-sans: Geist Mono, ui-monospace, monospace;
@@ -175,15 +187,15 @@ body {
   letter-spacing: var(--tracking-normal);
 }
 
-/* Added custom text selection styling with orange background and dark text */
+/* Added custom text selection styling with primary color background and dark text */
 ::selection {
-  background-color: #e78a53;
-  color: #121113;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
 }
 
 ::-moz-selection {
-  background-color: #e78a53;
-  color: #121113;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
 }
 
 @layer base {
