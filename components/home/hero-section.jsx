@@ -1,7 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Sparkles } from "lucide-react";
 
 export function HeroSection() {
@@ -35,7 +37,7 @@ export function HeroSection() {
             >
               <h1
                 id="main-title"
-                className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl"
+                className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground lg:text-6xl xl:text-7xl"
               >
                 Modern POS for <strong>restaurants</strong> <span>&</span>{" "}
                 <br />
@@ -77,16 +79,16 @@ export function HeroSection() {
               </svg>
 
               <div className="flex items-center justify-center">
-                <a
+                <Link
                   href="/register"
-                  className="group cursor-pointer border border-border bg-card gap-2 h-[60px] flex items-center p-[10px] rounded-full"
+                  className="group cursor-pointer border border-border bg-card gap-2 h-[50px] sm:h-[60px] flex items-center p-[8px] sm:p-[10px] rounded-full w-full max-w-sm mx-auto"
                 >
-                  <div className="border border-border bg-primary h-[40px] rounded-full flex items-center justify-center text-primary-foreground">
-                    <p className="font-medium tracking-tight mr-3 ml-3 flex items-center gap-2 justify-center text-base">
+                  <div className="border border-border bg-primary h-[34px] sm:h-[40px] rounded-full flex items-center justify-center text-primary-foreground flex-1">
+                    <p className="font-medium tracking-tight mr-2 sm:mr-3 ml-2 sm:ml-3 flex items-center gap-2 justify-center text-sm sm:text-base">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
+                        width="16"
+                        height="16"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -102,11 +104,11 @@ export function HeroSection() {
                       Start Free Trial
                     </p>
                   </div>
-                  <div className="text-muted-foreground group-hover:ml-4 ease-in-out transition-all size-[24px] flex items-center justify-center rounded-full border-2 border-border">
+                  <div className="text-muted-foreground group-hover:ml-4 ease-in-out transition-all size-[20px] sm:size-[24px] flex items-center justify-center rounded-full border-2 border-border">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
+                      width="12"
+                      height="12"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -119,7 +121,7 @@ export function HeroSection() {
                       <path d="m12 5 7 7-7 7"></path>
                     </svg>
                   </div>
-                </a>
+                </Link>
               </div>
             </motion.div>
           </div>
@@ -132,6 +134,7 @@ export function HeroSection() {
             className="mt-auto pb-8"
           >
             <div className="text-center">
+              <Separator className="mx-auto mb-6 w-24" />
               <p className="text-sm text-muted-foreground mb-6">
                 Trusted by restaurants and retail businesses
               </p>

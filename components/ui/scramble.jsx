@@ -132,8 +132,16 @@ const ScrambleHover = ({
         }
       }, scrambleSpeed);
     } else {
-      setDisplayText(text);
-      revealedIndices.clear();
+      // Don't clear the text immediately, let it finish the current scramble
+      if (isScrambling) {
+        setTimeout(() => {
+          setDisplayText(text);
+          revealedIndices.clear();
+        }, 200);
+      } else {
+        setDisplayText(text);
+        revealedIndices.clear();
+      }
     }
 
     return () => {

@@ -4,6 +4,10 @@ const isProd = process.env.NODE_ENV === "production";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable static generation for better performance
+  output: "standalone",
+
+  // Turbopack configuration for development
   turbopack: {
     rules: {
       "*.svg": {
@@ -12,11 +16,43 @@ const nextConfig = {
       },
     },
   },
+
+  // Server external packages (moved from experimental)
+  serverExternalPackages: ["mongoose"],
+
+  // Experimental features
   experimental: {
-    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
+    optimizePackageImports: [
+      "lucide-react",
+      "@radix-ui/react-icons",
+      "@radix-ui/react-accordion",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-checkbox",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-label",
+      "@radix-ui/react-navigation-menu",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-progress",
+      "@radix-ui/react-scroll-area",
+      "@radix-ui/react-select",
+      "@radix-ui/react-separator",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-switch",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-toggle",
+      "@radix-ui/react-toggle-group",
+      "@radix-ui/react-tooltip",
+    ],
+    // Optimize CSS
+    optimizeCss: true,
   },
+
+  // Build configuration
   eslint: { ignoreDuringBuilds: false },
   typescript: { ignoreBuildErrors: false },
+
+  // Image optimization
   images: {
     unoptimized: false,
     formats: ["image/webp", "image/avif"],
@@ -33,9 +69,63 @@ const nextConfig = {
       { protocol: "https", hostname: "cdn.dribbble.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "via.placeholder.com" },
+      { protocol: "https", hostname: "framerusercontent.com" },
     ],
   },
-  compiler: { removeConsole: isProd },
+
+  // Compiler optimizations
+  compiler: {
+    removeConsole: isProd,
+    // Remove React dev tools in production
+    reactRemoveProperties: isProd ? { properties: ["^data-testid$"] } : false,
+  },
+
+  // Headers for security and performance
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "origin-when-cross-origin",
+          },
+          {
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
+          },
+        ],
+      },
+      {
+        source: "/api/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, max-age=0",
+          },
+        ],
+      },
+    ];
+  },
+
+  // Redirects for SEO
+  async redirects() {
+    return [
+      {
+        source: "/home",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withPWA({

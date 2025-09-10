@@ -1,7 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Check, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const pricingPlans = [
@@ -47,6 +49,12 @@ const pricingPlans = [
   },
 ];
 
+// Animation Variants
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
+
 export function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(false);
 
@@ -55,17 +63,16 @@ export function PricingSection() {
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
           className="mb-8 text-center"
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            variants={fadeUp}
             transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
             className="mb-3 inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/50 px-4 py-2 backdrop-blur-sm"
           >
             <Sparkles className="h-4 w-4 text-primary" />
@@ -84,10 +91,8 @@ export function PricingSection() {
 
           {/* Monthly / Annual Toggle */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={fadeUp}
             transition={{ duration: 0.5, delay: 0.2 }}
-            viewport={{ once: true }}
             className="mx-auto flex w-fit items-center gap-4 rounded-full border border-border/50 bg-card/50 p-1 backdrop-blur-sm"
           >
             <button
@@ -122,16 +127,16 @@ export function PricingSection() {
             const price =
               plan.price ??
               `$${isAnnual ? plan.annualPrice : plan.monthlyPrice}`;
-
             const priceSuffix = plan.price || (isAnnual ? "/year" : "/month");
 
             return (
               <motion.div
                 key={plan.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
                 whileHover={{ y: -5 }}
                 className={`relative rounded-2xl border p-8 backdrop-blur-sm transition-all duration-300 ${
                   plan.popular
@@ -178,17 +183,23 @@ export function PricingSection() {
                 </ul>
 
                 {/* CTA */}
-                <motion.button
+                <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`w-full rounded-lg px-6 py-3 font-medium transition-all duration-200 ${
-                    plan.popular
-                      ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-primary/40"
-                      : "border border-border bg-card text-card-foreground hover:bg-accent"
-                  }`}
                 >
-                  {plan.cta}
-                </motion.button>
+                  <Button
+                    asChild
+                    variant={plan.popular ? "default" : "outline"}
+                    size="lg"
+                    className={`w-full ${
+                      plan.popular
+                        ? "shadow-lg shadow-primary/25 hover:shadow-primary/40"
+                        : ""
+                    }`}
+                  >
+                    <Link href="/register">{plan.cta}</Link>
+                  </Button>
+                </motion.div>
               </motion.div>
             );
           })}
@@ -196,22 +207,21 @@ export function PricingSection() {
 
         {/* Bottom CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
           className="mt-16 text-center"
         >
           <p className="mb-4 text-muted-foreground">
             Need a custom solution for your business? We're here to help.
           </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="font-medium text-primary transition-colors hover:text-primary/80"
-          >
-            Schedule a demo →
-          </motion.button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button variant="link" asChild className="text-base">
+              <Link href="/demo">Schedule a demo →</Link>
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
     </section>

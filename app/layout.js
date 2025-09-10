@@ -16,8 +16,77 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "POSify - Point of Sale System",
-  description: "Modern POS system for restaurants and retail businesses",
+  title: {
+    default: "POSify - Modern Point of Sale System",
+    template: "%s | POSify",
+  },
+  description:
+    "Transform your restaurant or retail business with POSify's modern POS system. Features include menu management, order processing, real-time analytics, multi-location support, and white-label solutions.",
+  keywords: [
+    "POS system",
+    "point of sale",
+    "restaurant POS",
+    "retail POS",
+    "menu management",
+    "order processing",
+    "analytics",
+    "multi-location",
+    "white-label POS",
+    "SaaS POS",
+  ],
+  authors: [{ name: "POSify Team" }],
+  creator: "POSify",
+  publisher: "POSify",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://posify.com"
+  ),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "POSify - Modern Point of Sale System",
+    description:
+      "Transform your restaurant or retail business with POSify's modern POS system. Features include menu management, order processing, real-time analytics, and multi-location support.",
+    url: "/",
+    siteName: "POSify",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "POSify - Modern Point of Sale System",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "POSify - Modern Point of Sale System",
+    description:
+      "Transform your restaurant or retail business with POSify's modern POS system.",
+    images: ["/og-image.png"],
+    creator: "@posify",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     shortcut: [{ url: "/favicon.svg", type: "image/svg+xml" }],

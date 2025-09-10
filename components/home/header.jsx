@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useScroll } from "@/hooks/use-scroll";
 import { Logo } from "@/components/ui/logo";
+import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV_ITEMS = ["features", "pricing", "testimonials", "faq"];
@@ -35,16 +37,14 @@ export function Header() {
         }`}
       >
         {/* Logo */}
-        <a
+        <Link
           href="/"
-          target="_blank"
-          rel="noopener noreferrer"
           className={`flex items-center gap-2 transition-all duration-300 ${
             isScrolled ? "ml-4" : ""
           }`}
         >
           <Logo className="h-8 w-8" />
-        </a>
+        </Link>
 
         {/* Nav */}
         <nav className="absolute inset-0 hidden flex-1 items-center justify-center md:flex pointer-events-none">
@@ -60,40 +60,29 @@ export function Header() {
         </nav>
 
         {/* Actions */}
-        <div className="relative z-10 flex items-center gap-4">
+        <div className="relative z-10 flex items-center gap-2">
           <ThemeToggle />
-          <a
-            href="/login"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Log In
-          </a>
-          <a
-            href="/signup"
-            className="inline-block rounded-md bg-gradient-to-b from-primary to-primary/80 px-4 py-2 text-sm font-bold text-primary-foreground shadow-[inset_0_2px_0_hsl(var(--primary-foreground)/0.3)] transition duration-200 hover:-translate-y-0.5"
-          >
-            Sign Up
-          </a>
+          <Button variant="ghost" asChild>
+            <Link href="/admin/login">Log In</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/register">Register</Link>
+          </Button>
         </div>
       </header>
 
       {/* Mobile Header */}
-      <header className="sticky top-4 z-50 mx-4 flex items-center justify-between rounded-full border border-border/50 bg-background/80 px-4 py-3 shadow-lg backdrop-blur-sm md:hidden">
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2"
-        >
+      <header className="sticky top-4 z-50 mx-2 sm:mx-4 flex items-center justify-between rounded-full border border-border/50 bg-background/80 px-3 sm:px-4 py-2 sm:py-3 shadow-lg backdrop-blur-sm md:hidden">
+        <Link href="/" className="flex items-center gap-2">
           <Logo className="h-7 w-7" />
-        </a>
+        </Link>
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <button
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
             aria-label="Toggle menu"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-background/50 hover:bg-background/80 transition-colors"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border/50 bg-background/50 hover:bg-background/80 transition-colors touch-manipulation"
           >
             <div className="flex h-5 w-5 flex-col items-center justify-center space-y-1">
               <span
@@ -131,18 +120,16 @@ export function Header() {
                 </button>
               ))}
               <div className="mt-4 flex flex-col space-y-3 border-t border-border/50 pt-4">
-                <a
-                  href="/login"
-                  className="rounded-lg px-4 py-3 text-lg font-medium text-muted-foreground hover:bg-background/50 hover:text-foreground transition-colors"
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="justify-start h-12 text-lg"
                 >
-                  Log In
-                </a>
-                <a
-                  href="/signup"
-                  className="rounded-lg bg-gradient-to-b from-primary to-primary/80 px-4 py-3 text-center text-lg font-bold text-primary-foreground shadow-lg transition-transform duration-200 hover:-translate-y-0.5"
-                >
-                  Sign Up
-                </a>
+                  <Link href="/admin/login">Log In</Link>
+                </Button>
+                <Button asChild className="h-12 text-lg font-semibold">
+                  <Link href="/register">Register</Link>
+                </Button>
               </div>
             </nav>
           </div>

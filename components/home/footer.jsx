@@ -26,7 +26,9 @@ export function Footer() {
           const scrollTop = window.scrollY;
           const windowHeight = window.innerHeight;
           const documentHeight = document.documentElement.scrollHeight;
-          const nearBottom = scrollTop + windowHeight >= documentHeight - 100;
+
+          // More conservative approach - only show when truly at bottom
+          const nearBottom = scrollTop + windowHeight >= documentHeight - 50;
 
           setIsAtBottom(nearBottom);
           ticking = false;
@@ -44,7 +46,7 @@ export function Footer() {
     <AnimatePresence>
       {isAtBottom && (
         <motion.footer
-          className="fixed bottom-0 left-0 z-40 h-80 w-full border-t border-primary/20 bg-gradient-to-b from-primary to-primary/90 backdrop-blur-sm"
+          className="fixed bottom-0 left-0 z-50 h-80 w-full border-t border-primary/20 bg-gradient-to-b from-primary to-primary/90 backdrop-blur-sm"
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}

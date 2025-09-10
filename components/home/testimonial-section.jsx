@@ -1,4 +1,9 @@
+import Link from "next/link";
+import Image from "next/image";
 import { Marquee } from "@/components/ui/marquee";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 const testimonials = [
   {
@@ -65,30 +70,29 @@ const testimonialColumns = [
 
 const TestimonialCard = ({ img, name, username, body }) => {
   return (
-    <div className="relative w-full max-w-xs overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-b from-card/50 to-card/[0.02] p-10 shadow-[0px_2px_0px_0px_hsl(var(--foreground)/0.1)_inset]">
+    <Card className="relative w-full max-w-xs overflow-hidden border-border/50 bg-gradient-to-b from-card/50 to-card/[0.02] shadow-[0px_2px_0px_0px_hsl(var(--foreground)/0.1)_inset]">
       <div className="absolute -top-5 -left-5 -z-10 h-40 w-40 rounded-full bg-gradient-to-b from-primary/10 to-transparent blur-md"></div>
 
-      <div className="text-foreground/90 leading-relaxed">{body}</div>
+      <CardContent className="p-6">
+        <p className="text-foreground/90 leading-relaxed mb-4">{body}</p>
 
-      <div className="mt-5 flex items-center gap-2">
-        <img
-          src={img || "/placeholder.svg"}
-          alt={name}
-          height="40"
-          width="40"
-          className="h-10 w-10 rounded-full"
-          loading="lazy"
-        />
-        <div className="flex flex-col">
-          <div className="leading-5 font-medium tracking-tight text-foreground">
-            {name}
-          </div>
-          <div className="leading-5 tracking-tight text-muted-foreground">
-            {username}
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={img || "/placeholder.svg"} alt={name} />
+            <AvatarFallback>
+              {name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <div className="font-medium text-foreground">{name}</div>
+            <div className="text-sm text-muted-foreground">{username}</div>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -147,18 +151,22 @@ export function TestimonialSection() {
         </div>
 
         <div className="-mt-8 flex justify-center">
-          <button className="group relative inline-flex items-center gap-2 rounded-full border border-primary/30 bg-background/50 px-6 py-3 text-sm font-medium text-foreground transition-all hover:border-primary/60 hover:bg-primary/10 active:scale-95">
-            <div className="absolute inset-x-0 -top-px mx-auto h-px w-3/4 bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
-            <div className="absolute inset-x-0 -bottom-px mx-auto h-px w-3/4 bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
-            <svg
-              className="h-4 w-4 text-primary"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
-            </svg>
-            Share your experience
-          </button>
+          <Button
+            variant="outline"
+            asChild
+            className="border-primary/30 bg-background/50 hover:border-primary/60 hover:bg-primary/10"
+          >
+            <Link href="/testimonial" className="flex items-center gap-2">
+              <svg
+                className="h-4 w-4 text-primary"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
+              </svg>
+              Share your experience
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

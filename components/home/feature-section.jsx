@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState, Suspense } from "react";
+import Image from "next/image";
 import { useTheme } from "next-themes";
+import { motion, useInView } from "framer-motion";
 import Earth from "@/components/ui/globe";
 import ScrambleHover from "@/components/ui/scramble";
-import { motion, useInView } from "framer-motion";
-import { Suspense, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const featureCards = [
@@ -166,11 +166,12 @@ const MenuFeatureContent = ({ isHovering }) => (
   <div className="pointer-events-none flex grow items-center justify-center select-none relative">
     <div className="relative w-full h-[400px] rounded-[20px] overflow-hidden">
       <div className="absolute inset-0">
-        <img
+        <Image
           src="https://framerusercontent.com/images/UjqUIiBHmIcSH9vos9HlG2BF4bo.png"
           alt="Menu Management"
-          className="w-full h-full object-cover rounded-xl"
-          loading="lazy"
+          fill
+          className="object-cover rounded-xl"
+          priority={false}
         />
       </div>
 
@@ -213,7 +214,7 @@ const OrdersFeatureContent = ({ isHovering, globeColors }) => (
           className="cursor-pointer bg-gradient-to-t from-primary to-primary bg-clip-text text-transparent"
           isHovering={isHovering}
           setIsHovering={() => {}}
-          characters="abcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;':\,./<>?"
+          characters="abcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;':,./<>?"
         />
       </span>
     </h1>
@@ -311,9 +312,11 @@ const AnalyticsFeatureContent = ({
 const MultiLocationFeatureContent = () => (
   <div className="flex grow items-center justify-center select-none relative min-h-[300px] p-4">
     <div className="relative w-full max-w-sm">
-      <img
+      <Image
         src="/modern-grid-layout.png"
         alt="Multi-location Management"
+        width={500}
+        height={400}
         className="w-full h-auto rounded-lg shadow-lg"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>

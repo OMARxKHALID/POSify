@@ -35,8 +35,20 @@ export function FaqSection() {
     },
   ];
 
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
   return (
-    <section id="faq" className="relative overflow-hidden py-16 pb-100">
+    <section id="faq" className="relative overflow-hidden py-16 pb-32 z-10">
       {/* Background blur effects */}
       <div className="absolute top-1/2 -right-20 z-[-1] h-64 w-64 rounded-full bg-primary/20 opacity-80 blur-3xl" />
       <div className="absolute top-1/2 -left-20 z-[-1] h-64 w-64 rounded-full bg-primary/20 opacity-80 blur-3xl" />
@@ -70,18 +82,21 @@ export function FaqSection() {
         </motion.h2>
 
         {/* FAQ Items */}
-        <div className="mx-auto mt-6 flex max-w-xl flex-col gap-3">
+        <motion.div
+          className="mx-auto mt-6 flex max-w-xl flex-col gap-3"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+        >
           {faqs.map((faq, index) => {
             const isOpen = openItems.includes(index);
 
             return (
               <motion.div
                 key={index}
+                variants={itemVariants}
                 className="cursor-pointer rounded-2xl border border-border/50 bg-gradient-to-b from-secondary/40 to-secondary/10 p-6 shadow-[inset_0_2px_0_hsl(var(--foreground)/0.1)] transition-all duration-300 hover:border-border"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => toggleItem(index)}
@@ -137,7 +152,7 @@ export function FaqSection() {
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
