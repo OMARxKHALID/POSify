@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/card";
 import { PageLayout } from "@/components/dashboard/page-layout";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { FormActions } from "@/components/dashboard/form-actions";
-import { FormField } from "@/components/dashboard/form-field";
+import { FormActions } from "@/components/form/form-actions";
+import { FormField } from "@/components/form/form-field";
 import { useCreateUser, useUsers } from "@/hooks/use-users";
 import { canCreateUsers } from "@/lib/utils/user-utils";
 

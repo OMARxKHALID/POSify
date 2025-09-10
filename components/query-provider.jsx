@@ -9,9 +9,9 @@ export default function QueryProvider({ children }) {
     <QueryClientProvider client={queryClient}>
       {children}
       {/* Show devtools in development */}
-      {process.env.NODE_ENV === "development" && (
+      {/* {process.env.NODE_ENV === "development" && (
         <ReactQueryDevtools initialIsOpen={false} />
-      )}
+      )} */}
     </QueryClientProvider>
   );
 }

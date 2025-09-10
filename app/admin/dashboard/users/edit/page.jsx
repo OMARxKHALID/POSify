@@ -31,8 +31,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { PageLayout } from "@/components/dashboard/page-layout";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { FormActions } from "@/components/dashboard/form-actions";
-import { FormField } from "@/components/dashboard/form-field";
+import { FormActions } from "@/components/form/form-actions";
+import { FormField } from "@/components/form/form-field";
 import { useEditUser, useUsers } from "@/hooks/use-users";
 import {
   getStatusBadgeVariant,
