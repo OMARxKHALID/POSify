@@ -2,64 +2,66 @@ import { Marquee } from "@/components/ui/marquee";
 
 const testimonials = [
   {
-    name: "Arjun Mehta",
-    username: "@arjdev",
-    body: "v0 has completely changed the way I build UIs. Generate, copy-paste, done. No more design stress.",
+    name: "Sarah Chen",
+    username: "@sarahchen",
+    body: "POSify has transformed our restaurant operations. Order processing is now 3x faster and our staff loves the intuitive interface.",
     img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "Sara Lin",
-    username: "@sara.codes",
-    body: "Honestly shocked at how smooth the v0 generated components are out of the box. Just works perfectly.",
+    name: "Marcus Rodriguez",
+    username: "@marcusrod",
+    body: "The analytics dashboard gives us insights we never had before. We've increased our revenue by 25% since switching to POSify.",
     img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "Devon Carter",
-    username: "@devninja",
-    body: "Our team launched a client site in 2 days using v0 components. Saved so much development time.",
+    name: "Emily Johnson",
+    username: "@emilyj",
+    body: "Managing our 5 restaurant locations has never been easier. The centralized dashboard is a game-changer for our business.",
     img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "Priya Shah",
-    username: "@priyacodes",
-    body: "Generated a few components in v0 and everything blended perfectly with our codebase. Massive W.",
+    name: "David Kim",
+    username: "@davidkim",
+    body: "The menu management system is incredibly user-friendly. We can update prices and availability instantly across all locations.",
     img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "Leo Martin",
-    username: "@leobuilds",
-    body: "Found a beautiful hero section in v0, tweaked the prompt, and shipped in 15 minutes. Game changer.",
+    name: "Lisa Thompson",
+    username: "@lisathompson",
+    body: "Customer support is outstanding. They helped us migrate from our old system seamlessly. Highly recommend POSify!",
     img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "Chloe Winters",
-    username: "@chloewinters",
-    body: "v0 helped us prototype multiple landing pages without writing CSS once. Pure magic.",
+    name: "Alex Chen",
+    username: "@alexchen",
+    body: "The real-time reporting features help us make data-driven decisions. Our profit margins have improved significantly.",
     img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "Ayaan Malik",
-    username: "@ayaan_dev",
-    body: "As a solo founder, v0 lets me move fast without sacrificing design quality. Essential tool.",
+    name: "Rachel Green",
+    username: "@rachelgreen",
+    body: "POSify's inventory tracking has eliminated our stock issues. We never run out of popular items anymore.",
     img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "Monica Reeves",
-    username: "@monicareeves",
-    body: "Can't believe how polished the v0 generated components look. Clients are impressed every time.",
+    name: "James Wilson",
+    username: "@jameswilson",
+    body: "The mobile app for staff is incredibly intuitive. Training new employees takes half the time it used to.",
     img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "James Roy",
-    username: "@jamesrdev",
-    body: "v0 is a lifesaver when deadlines are tight. Generate a component, tweak, and deploy instantly.",
+    name: "Maria Garcia",
+    username: "@mariagarcia",
+    body: "Switching to POSify was the best business decision we made this year. Our operations are so much more efficient now.",
     img: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=150&h=150&fit=crop&crop=face",
   },
 ];
 
-const firstColumn = testimonials.slice(0, 3);
-const secondColumn = testimonials.slice(3, 6);
-const thirdColumn = testimonials.slice(6, 9);
+const testimonialColumns = [
+  testimonials.slice(0, 3),
+  testimonials.slice(3, 6),
+  testimonials.slice(6, 9),
+];
 
 const TestimonialCard = ({ img, name, username, body }) => {
   return (
@@ -75,6 +77,7 @@ const TestimonialCard = ({ img, name, username, body }) => {
           height="40"
           width="40"
           className="h-10 w-10 rounded-full"
+          loading="lazy"
         />
         <div className="flex flex-col">
           <div className="leading-5 font-medium tracking-tight text-white">
@@ -89,55 +92,58 @@ const TestimonialCard = ({ img, name, username, body }) => {
   );
 };
 
-export function TestimonialsSection() {
+export function TestimonialSection() {
   return (
-    <section id="testimonials" className="mb-24">
+    <section id="testimonials" className="py-16">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-[540px]">
           <div className="flex justify-center">
             <button
               type="button"
-              className="group relative z-[60] mx-auto rounded-full border border-white/20 bg-white/5 px-6 py-1 text-xs backdrop-blur transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-100 md:text-sm"
+              className="group relative z-10 mx-auto rounded-full border border-white/20 bg-white/5 px-6 py-1 text-xs backdrop-blur transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-100 md:text-sm"
             >
               <div className="absolute inset-x-0 -top-px mx-auto h-0.5 w-1/2 bg-gradient-to-r from-transparent via-[#e78a53] to-transparent shadow-2xl transition-all duration-500 group-hover:w-3/4"></div>
               <div className="absolute inset-x-0 -bottom-px mx-auto h-0.5 w-1/2 bg-gradient-to-r from-transparent via-[#e78a53] to-transparent shadow-2xl transition-all duration-500 group-hover:h-px"></div>
               <span className="relative text-white">Testimonials</span>
             </button>
           </div>
-          <h2 className="from-foreground/60 via-foreground to-foreground/60 dark:from-muted-foreground/55 dark:via-foreground dark:to-muted-foreground/55 mt-5 bg-gradient-to-r bg-clip-text text-center text-4xl font-semibold tracking-tighter text-transparent md:text-[54px] md:leading-[60px] __className_bb4e88 relative z-10">
-            What our users say
+          <h2 className="from-foreground/60 via-foreground to-foreground/60 dark:from-muted-foreground/55 dark:via-foreground dark:to-muted-foreground/55 mt-3 bg-gradient-to-r bg-clip-text text-center text-4xl font-semibold tracking-tighter text-transparent md:text-[54px] md:leading-[60px] __className_bb4e88 relative z-10">
+            What our customers say
           </h2>
 
-          <p className="mt-5 relative z-10 text-center text-lg text-zinc-500">
-            From intuitive design to powerful features, our app has become an
-            essential tool for users around the world.
+          <p className="mt-3 relative z-10 text-center text-lg text-zinc-500">
+            From small cafes to large restaurant chains, POSify is trusted by
+            businesses worldwide to streamline their operations.
           </p>
         </div>
 
-        <div className="my-16 flex max-h-[738px] justify-center gap-6 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)]">
-          <div>
-            <Marquee pauseOnHover vertical className="[--duration:20s]">
-              {firstColumn.map((testimonial) => (
-                <TestimonialCard key={testimonial.username} {...testimonial} />
-              ))}
-            </Marquee>
-          </div>
-
-          <div className="hidden md:block">
-            <Marquee reverse pauseOnHover vertical className="[--duration:25s]">
-              {secondColumn.map((testimonial) => (
-                <TestimonialCard key={testimonial.username} {...testimonial} />
-              ))}
-            </Marquee>
-          </div>
-
-          <div className="hidden lg:block">
-            <Marquee pauseOnHover vertical className="[--duration:30s]">
-              {thirdColumn.map((testimonial) => (
-                <TestimonialCard key={testimonial.username} {...testimonial} />
-              ))}
-            </Marquee>
-          </div>
+        <div className="my-8 flex max-h-[738px] justify-center gap-6 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)]">
+          {testimonialColumns.map((column, index) => (
+            <div
+              key={index}
+              className={
+                index === 0
+                  ? ""
+                  : index === 1
+                  ? "hidden md:block"
+                  : "hidden lg:block"
+              }
+            >
+              <Marquee
+                pauseOnHover
+                vertical
+                reverse={index === 1}
+                className={`[--duration:${20 + index * 5}s]`}
+              >
+                {column.map((testimonial) => (
+                  <TestimonialCard
+                    key={testimonial.username}
+                    {...testimonial}
+                  />
+                ))}
+              </Marquee>
+            </div>
+          ))}
         </div>
 
         <div className="-mt-8 flex justify-center">

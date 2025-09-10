@@ -11,18 +11,12 @@ export const FollowerPointerCard = ({ children, className, title }) => {
   const [rect, setRect] = useState(null);
   const [isInside, setIsInside] = useState(false);
 
-  useEffect(() => {
-    console.log("[v0] FollowerPointerCard mounted");
-    return () => {
-      console.log("[v0] FollowerPointerCard unmounted");
-    };
-  }, []);
+  // Removed console logs for production performance
 
   useEffect(() => {
-    console.log("[v0] isInside changed:", isInside);
-  }, [isInside]);
+    let resizeTicking = false;
+    let scrollTicking = false;
 
-  useEffect(() => {
     const updateRect = () => {
       if (ref.current) {
         setRect(ref.current.getBoundingClientRect());
@@ -31,11 +25,28 @@ export const FollowerPointerCard = ({ children, className, title }) => {
 
     updateRect();
 
-    const handleResize = () => updateRect();
-    const handleScroll = () => updateRect();
+    const handleResize = () => {
+      if (!resizeTicking) {
+        requestAnimationFrame(() => {
+          updateRect();
+          resizeTicking = false;
+        });
+        resizeTicking = true;
+      }
+    };
 
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      if (!scrollTicking) {
+        requestAnimationFrame(() => {
+          updateRect();
+          scrollTicking = false;
+        });
+        scrollTicking = true;
+      }
+    };
+
+    window.addEventListener("resize", handleResize, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("resize", handleResize);

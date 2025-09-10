@@ -20,6 +20,8 @@ const Earth = ({
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    if (!canvasRef.current) return;
+
     let width = 0;
     const onResize = () =>
       canvasRef.current && (width = canvasRef.current.offsetWidth);
@@ -27,7 +29,9 @@ const Earth = ({
     onResize();
     let phi = 0;
 
-    onResize();
+    // Ensure we have a valid width before creating globe
+    if (width === 0) width = 400;
+
     const globe = createGlobe(canvasRef.current, {
       devicePixelRatio: 2,
       width: width * 2,
@@ -44,18 +48,15 @@ const Earth = ({
       glowColor: glowColor,
       opacity: 1,
       offset: [0, 0],
-      markers: [
-        // longitude latitude
-      ],
+      markers: [],
       onRender: (state) => {
-        // Called on every animation frame.
-        // `state` will be an empty object, return updated params.\
         state.phi = phi;
         phi += 0.003;
       },
     });
 
     return () => {
+      window.removeEventListener("resize", onResize);
       globe.destroy();
     };
   }, [dark]);

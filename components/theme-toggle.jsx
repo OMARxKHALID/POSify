@@ -45,6 +45,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       className="h-9 w-9 p-0"
       title={getTooltip()}
+      style={{ pointerEvents: "auto" }}
     >
       {getIcon()}
       <span className="sr-only">{getTooltip()}</span>
