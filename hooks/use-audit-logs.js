@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { apiClient } from "@/lib/api-client";
 import { getDefaultQueryOptions, queryKeys } from "@/lib/hooks/hook-utils";
 
@@ -27,13 +28,17 @@ const buildQueryParams = (filters) => {
  * Hook to fetch audit logs with filtering and pagination
  */
 export const useAuditLogs = (filters = {}, options = {}) => {
+  const { data: session } = useSession();
+
   const queryOptions = getDefaultQueryOptions({
     staleTime: 2 * 60 * 1000, // 2 minutes (shorter than users since audit logs change more frequently)
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
     ...options,
   });
 
   return useQuery({
-    queryKey: queryKeys.auditLogs(filters),
+    queryKey: [...queryKeys.auditLogs(filters), session?.user?.id], // Include session user ID to force refresh on session change
     queryFn: async () => {
       const queryParams = buildQueryParams(filters);
       const data = await apiClient.get(`/dashboard/audit-logs?${queryParams}`);

@@ -14,6 +14,7 @@ import {
  */
 const handleUsersData = async (queryParams, request) => {
   const currentUser = await getAuthenticatedUser();
+
   let users = [];
   let organizationData = null;
 
@@ -44,6 +45,7 @@ const handleUsersData = async (queryParams, request) => {
   }
 
   const formattedUsers = users.map(formatUserData);
+
   return apiSuccess("USERS_RETRIEVED_SUCCESSFULLY", {
     users: formattedUsers,
     organization: organizationData,

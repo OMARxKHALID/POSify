@@ -4,6 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
@@ -17,13 +18,17 @@ import {
  * Hook to fetch users based on authenticated user's role and permissions
  */
 export const useUsers = (options = {}) => {
+  const { data: session } = useSession();
+
   const queryOptions = getDefaultQueryOptions({
     staleTime: 3 * 60 * 1000, // 3 minutes (users data changes moderately)
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
     ...options,
   });
 
   return useQuery({
-    queryKey: queryKeys.users,
+    queryKey: [...queryKeys.users, session?.user?.id], // Include session user ID in query key to force refresh on session change
     queryFn: async () => {
       const data = await apiClient.get("/dashboard/users");
       return data;

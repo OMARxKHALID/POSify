@@ -446,7 +446,9 @@ export default function AnalyticsPage() {
                 searchPlaceholder="Search inventory..."
                 showAddButton={true}
                 addButtonText="Add Item"
-                onAddClick={() => console.log("Add inventory item")}
+                onAddClick={() => {
+                  // TODO: Implement add inventory item functionality
+                }}
               />
             </CardContent>
           </Card>

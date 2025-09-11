@@ -18,23 +18,37 @@ const handleAvailableStaff = async (queryParams, request) => {
   const { organizationId } = queryParams;
   const currentUser = await getAuthenticatedUser();
 
-  // Only super_admin can view available staff for transfer
-  if (!hasRole(currentUser, "super_admin")) {
+  // Only super_admin or admin (organization owner) can view available staff for transfer
+  if (!hasRole(currentUser, "super_admin") && !hasRole(currentUser, "admin")) {
     return forbidden("INSUFFICIENT_PERMISSIONS");
   }
 
-  // Validate organization exists
+  // If admin, they can only view staff from their own organization
+  if (
+    hasRole(currentUser, "admin") &&
+    currentUser.organizationId?.toString() !== organizationId
+  ) {
+    return forbidden("INSUFFICIENT_PERMISSIONS");
+  }
+
+  // Validate organization exists and is active
   const organization = await Organization.findById(organizationId)
     .populate("owner", "name email role")
-    .select("name owner");
+    .select("name owner status");
   if (!organization) {
     return notFound("ORGANIZATION_NOT_FOUND");
   }
 
-  // Get all staff members in the organization
+  // Validate organization is active
+  if (organization.status !== "active") {
+    return badRequest("ORGANIZATION_INACTIVE");
+  }
+
+  // Get all active staff members in the organization
   const staffMembers = await User.find({
     organizationId: organizationId,
     role: "staff",
+    status: "active", // Only active staff can receive ownership
   })
     .select("-password -inviteToken -__v")
     .sort({ name: 1 });

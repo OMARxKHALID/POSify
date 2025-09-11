@@ -21,19 +21,33 @@ import {
  */
 const handleOwnershipTransfer = async (validatedData, request) => {
   const { organizationId, newOwnerId } = validatedData;
+
   const currentUser = await getAuthenticatedUser();
 
-  // Only super_admin can transfer ownership
-  if (!hasRole(currentUser, "super_admin")) {
+  // Only super_admin or admin (organization owner) can transfer ownership
+  if (!hasRole(currentUser, "super_admin") && !hasRole(currentUser, "admin")) {
     return forbidden("INSUFFICIENT_PERMISSIONS");
   }
 
-  // Find organization with current owner
+  // If admin, they can only transfer ownership of their own organization
+  if (
+    hasRole(currentUser, "admin") &&
+    currentUser.organizationId?.toString() !== organizationId
+  ) {
+    return forbidden("INSUFFICIENT_PERMISSIONS");
+  }
+
+  // Find organization with current owner and validate status
   const organization = await Organization.findById(organizationId).select(
-    "owner name"
+    "owner name status usage"
   );
   if (!organization) {
     return notFound("ORGANIZATION_NOT_FOUND");
+  }
+
+  // Validate organization is active
+  if (organization.status !== "active") {
+    return badRequest("ORGANIZATION_INACTIVE");
   }
 
   // Find new owner (must be staff in the same organization)
@@ -53,11 +67,38 @@ const handleOwnershipTransfer = async (validatedData, request) => {
     return badRequest("INVALID_NEW_OWNER");
   }
 
+  // Validate new owner is active
+  if (newOwner.status !== "active") {
+    return badRequest("INACTIVE_NEW_OWNER");
+  }
+
+  // For admin users, ensure they are the current owner
+  if (
+    hasRole(currentUser, "admin") &&
+    organization.owner.toString() !== currentUser._id.toString()
+  ) {
+    return forbidden("INSUFFICIENT_PERMISSIONS");
+  }
+
+  // Prevent self-transfer
+  if (newOwnerId === currentUser._id.toString()) {
+    return badRequest("CANNOT_TRANSFER_TO_SELF");
+  }
+
   const oldOwnerId = organization.owner;
+
   const session = await mongoose.startSession();
 
   try {
     await session.withTransaction(async () => {
+      // Double-check ownership hasn't changed during the request (concurrent protection)
+      const currentOrg = await Organization.findById(organizationId).session(
+        session
+      );
+      if (currentOrg.owner.toString() !== oldOwnerId.toString()) {
+        throw new Error("OWNERSHIP_ALREADY_TRANSFERRED");
+      }
+
       // Update organization owner
       await Organization.findByIdAndUpdate(
         organizationId,
@@ -95,23 +136,55 @@ const handleOwnershipTransfer = async (validatedData, request) => {
         );
       }
 
+      // Update organization usage tracking (no change in user count, just ownership)
+      // Note: currentUsers count remains the same as we're not adding/removing users
+
       // Log the ownership transfer
       await logUpdate(
         "Organization",
-        { owner: oldOwnerId },
-        { owner: newOwnerId },
+        { _id: organizationId, owner: oldOwnerId },
+        { _id: organizationId, owner: newOwnerId },
+        currentUser,
+        request
+      );
+
+      // Log the user role changes for audit trail
+      await logUpdate(
+        "User",
+        { _id: newOwnerId, role: "staff" },
+        { _id: newOwnerId, role: "admin" },
+        currentUser,
+        request
+      );
+
+      await logUpdate(
+        "User",
+        { _id: oldOwnerId, role: "admin" },
+        { _id: oldOwnerId, role: "staff" },
         currentUser,
         request
       );
     });
 
-    return apiSuccess("OWNERSHIP_TRANSFERRED_SUCCESSFULLY", {
+    const response = apiSuccess("OWNERSHIP_TRANSFERRED_SUCCESSFULLY", {
       organizationId,
       oldOwnerId,
       newOwnerId,
       organizationName: organization.name,
+      ownershipTransferred: true,
+      message:
+        "Organization ownership has been transferred successfully. You will be logged out.",
+      logoutRequired: true,
     });
+
+    return response;
   } catch (error) {
+    // Handle specific business logic errors
+    if (error.message === "OWNERSHIP_ALREADY_TRANSFERRED") {
+      return badRequest("OWNERSHIP_ALREADY_TRANSFERRED");
+    }
+
+    // Handle unexpected errors
     return serverError("TRANSFER_FAILED");
   } finally {
     await session.endSession();

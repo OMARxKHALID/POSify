@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { User } from "@/models/user";
+import { Organization } from "@/models/organization";
 import { userEditSchema } from "@/schemas/auth-schema";
 import { DEFAULT_PERMISSIONS } from "@/constants";
 import { logUpdate } from "@/lib/helpers/audit-helpers";
@@ -137,8 +138,8 @@ const handleUserEdit = async (validatedData, queryParams, request) => {
   const oldUser = targetUser.toObject ? targetUser.toObject() : targetUser;
   updateData.lastModifiedBy = currentUser._id;
 
-  // Note: Ownership transfer is handled separately via dedicated transfer endpoint
-  // This prevents automatic ownership changes when multiple staff members exist
+  // Note: Ownership transfer is handled via dedicated /api/dashboard/organizations/transfer-ownership endpoint
+  // This prevents automatic ownership changes when editing user roles
 
   // Update user with transaction
   const session = await mongoose.startSession();

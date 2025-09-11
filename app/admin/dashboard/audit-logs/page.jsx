@@ -61,6 +61,7 @@ export default function AuditLogsPage() {
   const {
     auditLogs,
     pagination,
+    appliedFilters,
     currentUser,
     isLoading,
     isError,
