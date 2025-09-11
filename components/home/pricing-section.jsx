@@ -49,37 +49,26 @@ const pricingPlans = [
   },
 ];
 
-// Animation Variants
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
 export function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(false);
 
   return (
-    <section className="relative px-4 py-16">
+    <motion.section
+      className="relative px-4 py-16"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8 text-center"
-        >
-          <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.5 }}
-            className="mb-3 inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/50 px-4 py-2 backdrop-blur-sm"
-          >
+        <div className="mb-8 text-center">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/50 px-4 py-2 backdrop-blur-sm">
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-foreground/80">
               Pricing
             </span>
-          </motion.div>
+          </div>
 
           <h2 className="mb-2 bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text text-4xl font-bold text-transparent md:text-5xl">
             Choose your plan
@@ -89,12 +78,8 @@ export function PricingSection() {
             Start with our free trial. Upgrade anytime as your business grows.
           </p>
 
-          {/* Monthly / Annual Toggle */}
-          <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mx-auto flex w-fit items-center gap-4 rounded-full border border-border/50 bg-card/50 p-1 backdrop-blur-sm"
-          >
+          {/* Toggle */}
+          <div className="mx-auto flex w-fit items-center gap-4 rounded-full border border-border/50 bg-card/50 p-1 backdrop-blur-sm">
             <button
               onClick={() => setIsAnnual(false)}
               className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
@@ -118,26 +103,20 @@ export function PricingSection() {
                 Save 20%
               </span>
             </button>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Pricing Cards */}
         <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-3">
-          {pricingPlans.map((plan, index) => {
+          {pricingPlans.map((plan) => {
             const price =
               plan.price ??
               `$${isAnnual ? plan.annualPrice : plan.monthlyPrice}`;
             const priceSuffix = plan.price || (isAnnual ? "/year" : "/month");
 
             return (
-              <motion.div
+              <div
                 key={plan.name}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
                 className={`relative rounded-2xl border p-8 backdrop-blur-sm transition-all duration-300 ${
                   plan.popular
                     ? "border-primary/30 bg-gradient-to-b from-primary/10 to-transparent shadow-lg shadow-primary/10"
@@ -182,48 +161,34 @@ export function PricingSection() {
                   ))}
                 </ul>
 
-                {/* CTA */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                {/* CTA Button */}
+                <Button
+                  asChild
+                  variant={plan.popular ? "default" : "outline"}
+                  size="lg"
+                  className={`w-full ${
+                    plan.popular
+                      ? "shadow-lg shadow-primary/25 hover:shadow-primary/40"
+                      : ""
+                  }`}
                 >
-                  <Button
-                    asChild
-                    variant={plan.popular ? "default" : "outline"}
-                    size="lg"
-                    className={`w-full ${
-                      plan.popular
-                        ? "shadow-lg shadow-primary/25 hover:shadow-primary/40"
-                        : ""
-                    }`}
-                  >
-                    <Link href="/register">{plan.cta}</Link>
-                  </Button>
-                </motion.div>
-              </motion.div>
+                  <Link href="/register">{plan.cta}</Link>
+                </Button>
+              </div>
             );
           })}
         </div>
 
         {/* Bottom CTA */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-16 text-center"
-        >
+        <div className="mt-16 text-center">
           <p className="mb-4 text-muted-foreground">
             Need a custom solution for your business? We're here to help.
           </p>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant="link" asChild className="text-base">
-              <Link href="/demo">Schedule a demo →</Link>
-            </Button>
-          </motion.div>
-        </motion.div>
+          <Button variant="link" asChild className="text-base">
+            <Link href="/demo">Schedule a demo →</Link>
+          </Button>
+        </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

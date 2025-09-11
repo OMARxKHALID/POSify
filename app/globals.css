@@ -250,3 +250,27 @@ body {
 .animate-shiny-text {
   animation: shiny-text 3s ease-in-out infinite;
 }
+
+/* Geometric background pattern - light mode */
+.geometric-pattern {
+  background-color: #fafafa;
+  background-image: radial-gradient(
+      circle at 25% 25%,
+      #e5e5e5 0.5px,
+      transparent 1px
+    ),
+    radial-gradient(circle at 75% 75%, #d4d4d4 0.5px, transparent 1px);
+  background-size: 10px 10px;
+  image-rendering: pixelated;
+}
+
+/* Geometric background pattern - dark mode */
+.dark .geometric-pattern {
+  background-color: #0a0a0a;
+  background-image: radial-gradient(
+      circle at 25% 25%,
+      #222222 0.5px,
+      transparent 1px
+    ),
+    radial-gradient(circle at 75% 75%, #111111 0.5px, transparent 1px);
+}
