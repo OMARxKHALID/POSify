@@ -35,7 +35,7 @@ import { Building2, Crown, ChevronDown, Check } from "lucide-react";
 
 // Import navigation permissions and helper functions
 import { NAVIGATION_PERMISSIONS } from "@/constants";
-import { filterNavigationByPermissions } from "@/lib/helpers/permissions";
+import { filterNavigationByPermissions } from "@/lib/utils/permission-utils";
 
 // Helper Components
 function OrganizationSwitcher({ user, organizations = [] }) {

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { User } from "@/models/user";
 import { Organization } from "@/models/organization";
 import { organizationTransferSchema } from "@/schemas/auth-schema";
@@ -8,14 +9,12 @@ import {
   hasRole,
   createMethodHandler,
   createPostHandler,
-} from "@/lib/api-utils";
-import {
   apiSuccess,
   badRequest,
   notFound,
   forbidden,
   serverError,
-} from "@/lib/api-utils";
+} from "@/lib/api";
 
 /**
  * Handle organization ownership transfer from current admin to a staff member
@@ -55,41 +54,56 @@ const handleOwnershipTransfer = async (validatedData, request) => {
   }
 
   const oldOwnerId = organization.owner;
+  const session = await mongoose.startSession();
 
   try {
-    // Update organization owner
-    await Organization.findByIdAndUpdate(organizationId, {
-      owner: newOwnerId,
-      lastModifiedBy: currentUser._id,
+    await session.withTransaction(async () => {
+      // Update organization owner
+      await Organization.findByIdAndUpdate(
+        organizationId,
+        {
+          owner: newOwnerId,
+          lastModifiedBy: currentUser._id,
+        },
+        { session }
+      );
+
+      // Promote new owner to admin
+      await User.findByIdAndUpdate(
+        newOwnerId,
+        {
+          role: "admin",
+          permissions: DEFAULT_PERMISSIONS.admin,
+          permissionsUpdatedAt: new Date(),
+          lastModifiedBy: currentUser._id,
+        },
+        { session }
+      );
+
+      // Demote old owner to staff (if they still exist)
+      const oldOwner = await User.findById(oldOwnerId);
+      if (oldOwner && oldOwner.role === "admin") {
+        await User.findByIdAndUpdate(
+          oldOwnerId,
+          {
+            role: "staff",
+            permissions: DEFAULT_PERMISSIONS.staff,
+            permissionsUpdatedAt: new Date(),
+            lastModifiedBy: currentUser._id,
+          },
+          { session }
+        );
+      }
+
+      // Log the ownership transfer
+      await logUpdate(
+        "Organization",
+        { owner: oldOwnerId },
+        { owner: newOwnerId },
+        currentUser,
+        request
+      );
     });
-
-    // Promote new owner to admin
-    await User.findByIdAndUpdate(newOwnerId, {
-      role: "admin",
-      permissions: DEFAULT_PERMISSIONS.admin,
-      permissionsUpdatedAt: new Date(),
-      lastModifiedBy: currentUser._id,
-    });
-
-    // Demote old owner to staff (if they still exist)
-    const oldOwner = await User.findById(oldOwnerId);
-    if (oldOwner && oldOwner.role === "admin") {
-      await User.findByIdAndUpdate(oldOwnerId, {
-        role: "staff",
-        permissions: DEFAULT_PERMISSIONS.staff,
-        permissionsUpdatedAt: new Date(),
-        lastModifiedBy: currentUser._id,
-      });
-    }
-
-    // Log the ownership transfer
-    await logUpdate(
-      "Organization",
-      { owner: oldOwnerId },
-      { owner: newOwnerId },
-      currentUser,
-      request
-    );
 
     return apiSuccess("OWNERSHIP_TRANSFERRED_SUCCESSFULLY", {
       organizationId,
@@ -99,6 +113,8 @@ const handleOwnershipTransfer = async (validatedData, request) => {
     });
   } catch (error) {
     return serverError("TRANSFER_FAILED");
+  } finally {
+    await session.endSession();
   }
 };
 

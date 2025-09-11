@@ -4,9 +4,12 @@ import {
   cleanUserResponse,
   createMethodHandler,
   createPostHandler,
-} from "@/lib/api-utils";
+  apiSuccess,
+  conflict,
+  serverError,
+  checkUserExists,
+} from "@/lib/api";
 import { DEFAULT_PERMISSIONS } from "@/constants";
-import { apiSuccess, conflict, serverError } from "@/lib/api-utils";
 
 /**
  * Handle super admin registration with full system permissions
@@ -21,10 +24,8 @@ const handleSuperAdminRegistration = async (validatedData) => {
   }
 
   // Check for existing user with same email
-  const existingUser = await User.findOne({ email: email.toLowerCase() });
-  if (existingUser) {
-    return conflict("USER_EXISTS");
-  }
+  const userExistsError = await checkUserExists(email);
+  if (userExistsError) return userExistsError;
 
   try {
     // Create new super admin with full permissions

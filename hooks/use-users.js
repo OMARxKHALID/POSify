@@ -49,7 +49,7 @@ export const useCreateUser = () => {
     },
     onSuccess: () => {
       invalidateQueries.users(queryClient);
-      handleHookSuccess("User created successfully!");
+      handleHookSuccess("USER_CREATED_SUCCESSFULLY");
     },
     ...getDefaultMutationOptions({ operation: "User creation" }),
   });
@@ -72,7 +72,7 @@ export const useEditUser = () => {
     },
     onSuccess: () => {
       invalidateQueries.users(queryClient);
-      handleHookSuccess("User updated successfully!");
+      handleHookSuccess("USER_UPDATED_SUCCESSFULLY");
     },
     ...getDefaultMutationOptions({ operation: "User update" }),
   });
@@ -94,7 +94,7 @@ export const useDeleteUser = () => {
     },
     onSuccess: () => {
       invalidateQueries.users(queryClient);
-      handleHookSuccess("User deleted successfully!");
+      handleHookSuccess("USER_DELETED_SUCCESSFULLY");
     },
     ...getDefaultMutationOptions({ operation: "User deletion" }),
   });

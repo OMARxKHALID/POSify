@@ -30,7 +30,7 @@ export default function RegisterPage() {
     try {
       const result = await userRegistrationMutation.mutateAsync(data);
       if (result) {
-        router.push("/organization/register");
+        router.push("/admin/login");
       }
     } catch {
       // Error handled inside hook via toast

@@ -1,11 +1,13 @@
-import { Organization } from "@/models/organization";
 import { Order } from "@/models/order";
 import {
   getAuthenticatedUser,
   createMethodHandler,
   createGetHandler,
-} from "@/lib/api-utils";
-import { apiSuccess, badRequest, notFound } from "@/lib/api-utils";
+  serverError,
+  apiSuccess,
+  badRequest,
+  validateOrganizationExists,
+} from "@/lib/api";
 
 /**
  * Generate empty analytics structure for new organizations
@@ -102,7 +104,7 @@ const generateMockInventory = () => [
  */
 const generateAnalyticsData = async (organizationId, timeRange = "30d") => {
   const now = new Date();
-  const daysToShow = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+  const daysToShow = getDaysFromTimeRange(timeRange);
   const startDate = new Date(now.getTime() - daysToShow * 24 * 60 * 60 * 1000);
 
   // Get orders with proper status filtering
@@ -221,43 +223,53 @@ const generateAnalyticsData = async (organizationId, timeRange = "30d") => {
  * Validate time range parameter against allowed values
  */
 const validateTimeRange = (timeRange) => {
-  return ["7d", "30d", "90d"].includes(timeRange);
+  const allowedRanges = ["7d", "30d", "90d"];
+  return allowedRanges.includes(timeRange);
+};
+
+/**
+ * Get days count from time range string
+ */
+const getDaysFromTimeRange = (timeRange) => {
+  const rangeMap = { "7d": 7, "30d": 30, "90d": 90 };
+  return rangeMap[timeRange] || 30;
 };
 
 /**
  * Handle analytics data request with role-based access control
  */
 const handleAnalyticsData = async (queryParams, request) => {
-  const user = await getAuthenticatedUser();
-  const timeRange = queryParams.timeRange || "30d";
+  try {
+    const user = await getAuthenticatedUser();
+    const timeRange = queryParams.timeRange || "30d";
 
-  if (!validateTimeRange(timeRange)) {
-    return badRequest("INVALID_TIME_RANGE");
-  }
+    // Validate time range parameter
+    if (!validateTimeRange(timeRange)) {
+      return badRequest("INVALID_TIME_RANGE");
+    }
 
-  if (user.role === "super_admin") {
-    return apiSuccess(
-      "ANALYTICS_RETRIEVED_SUCCESSFULLY_SUPER_ADMIN",
-      generateEmptyAnalytics()
+    // Super admin gets empty analytics
+    if (user.role === "super_admin") {
+      return apiSuccess(
+        "ANALYTICS_RETRIEVED_SUCCESSFULLY_SUPER_ADMIN",
+        generateEmptyAnalytics()
+      );
+    }
+
+    // Validate organization exists
+    const organization = await validateOrganizationExists(user);
+    if (!organization || organization.error) return organization;
+
+    // Generate analytics data
+    const analyticsData = await generateAnalyticsData(
+      user.organizationId,
+      timeRange
     );
-  }
 
-  if (!user.organizationId) {
-    return notFound("ORGANIZATION_NOT_FOUND");
+    return apiSuccess("ANALYTICS_RETRIEVED_SUCCESSFULLY", analyticsData);
+  } catch (error) {
+    return serverError("ANALYTICS_FETCH_FAILED");
   }
-
-  const organization = await Organization.findById(user.organizationId).select(
-    "-__v"
-  );
-  if (!organization) {
-    return notFound("ORGANIZATION_NOT_FOUND");
-  }
-
-  const analyticsData = await generateAnalyticsData(
-    user.organizationId,
-    timeRange
-  );
-  return apiSuccess("ANALYTICS_RETRIEVED_SUCCESSFULLY", analyticsData);
 };
 
 /**

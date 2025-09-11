@@ -49,6 +49,8 @@ import {
   getStatusBadgeVariant,
   getStatusIcon,
   getUserInitials,
+} from "@/lib/utils/ui-utils";
+import {
   canEditUser,
   canDeleteUser,
   canCreateUsers,

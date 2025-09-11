@@ -6,15 +6,13 @@ import {
   cleanUserResponse,
   createMethodHandler,
   createPostHandler,
-} from "@/lib/api-utils";
-import { DEFAULT_PERMISSIONS } from "@/constants";
-import {
   apiSuccess,
   notFound,
   badRequest,
   conflict,
   serverError,
-} from "@/lib/api-utils";
+} from "@/lib/api";
+import { DEFAULT_PERMISSIONS } from "@/constants";
 
 /**
  * Handle organization registration with user role elevation to admin

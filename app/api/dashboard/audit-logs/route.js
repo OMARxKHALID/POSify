@@ -5,8 +5,10 @@ import {
   hasRole,
   createMethodHandler,
   createGetHandler,
-} from "@/lib/api-utils";
-import { apiSuccess, forbidden, serverError } from "@/lib/api-utils";
+  apiSuccess,
+  forbidden,
+  serverError,
+} from "@/lib/api";
 
 /**
  * Build database filter object for audit logs query with role-based access

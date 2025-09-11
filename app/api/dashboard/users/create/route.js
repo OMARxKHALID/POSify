@@ -1,5 +1,4 @@
 import { User } from "@/models/user";
-import { Organization } from "@/models/organization";
 import { userCreationSchema } from "@/schemas/auth-schema";
 import { DEFAULT_PERMISSIONS } from "@/constants";
 import { logCreate } from "@/lib/helpers/audit-helpers";
@@ -9,15 +8,13 @@ import {
   cleanUserResponse,
   createMethodHandler,
   createPostHandler,
-} from "@/lib/api-utils";
-import {
   apiSuccess,
   forbidden,
-  conflict,
-  notFound,
   badRequest,
   serverError,
-} from "@/lib/api-utils";
+  checkUserExists,
+  validateOrganizationExists,
+} from "@/lib/api";
 
 /**
  * Handle user creation with admin permissions and organization validation
@@ -30,21 +27,11 @@ const handleUserCreation = async (validatedData, request) => {
     return forbidden("INSUFFICIENT_PERMISSIONS");
   }
 
-  const existingUser = await User.findOne({ email: email.toLowerCase() });
-  if (existingUser) {
-    return conflict("USER_EXISTS");
-  }
+  const userExistsError = await checkUserExists(email);
+  if (userExistsError) return userExistsError;
 
-  if (!currentUser.organizationId) {
-    return notFound("ORGANIZATION_NOT_FOUND");
-  }
-
-  const organization = await Organization.findById(
-    currentUser.organizationId
-  ).select("-__v");
-  if (!organization) {
-    return notFound("ORGANIZATION_NOT_FOUND");
-  }
+  const organization = await validateOrganizationExists(currentUser);
+  if (!organization || organization.error) return organization;
 
   if (role !== "staff") {
     return badRequest("INVALID_ROLE_FOR_ADMIN");

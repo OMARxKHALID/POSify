@@ -52,7 +52,7 @@ import {
   getActionBadgeVariant,
   getResourceBadgeVariant,
 } from "@/lib/utils/audit-log-utils";
-import { getRoleBadgeVariant } from "@/lib/utils/user-utils";
+import { getRoleBadgeVariant } from "@/lib/utils/ui-utils";
 
 // Column helper for table
 const columnHelper = createColumnHelper();

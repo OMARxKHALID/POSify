@@ -4,8 +4,10 @@ import {
   cleanUserResponse,
   createMethodHandler,
   createPostHandler,
-} from "@/lib/api-utils";
-import { apiSuccess, conflict, serverError } from "@/lib/api-utils";
+  apiSuccess,
+  serverError,
+  checkUserExists,
+} from "@/lib/api";
 
 /**
  * Handle user registration with pending role
@@ -14,10 +16,8 @@ const handleUserRegistration = async (validatedData) => {
   const { name, email, password } = validatedData;
 
   // Check for existing user with same email
-  const existingUser = await User.findOne({ email: email.toLowerCase() });
-  if (existingUser) {
-    return conflict("USER_EXISTS");
-  }
+  const userExistsError = await checkUserExists(email);
+  if (userExistsError) return userExistsError;
 
   try {
     // Create new user with pending role

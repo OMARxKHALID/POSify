@@ -1,12 +1,13 @@
 import { User } from "@/models/user";
-import { Organization } from "@/models/organization";
 import {
   getAuthenticatedUser,
   formatUserData,
   createMethodHandler,
   createGetHandler,
-} from "@/lib/api-utils";
-import { apiSuccess, notFound, forbidden } from "@/lib/api-utils";
+  apiSuccess,
+  forbidden,
+  validateOrganizationExists,
+} from "@/lib/api";
 
 /**
  * Handle users data request with role-based access control
@@ -25,16 +26,8 @@ const handleUsersData = async (queryParams, request) => {
       break;
 
     case "admin":
-      if (!currentUser.organizationId) {
-        return notFound("ORGANIZATION_NOT_FOUND");
-      }
-
-      const organization = await Organization.findById(
-        currentUser.organizationId
-      ).select("-__v");
-      if (!organization) {
-        return notFound("ORGANIZATION_NOT_FOUND");
-      }
+      const organization = await validateOrganizationExists(currentUser);
+      if (!organization || organization.error) return organization;
 
       organizationData = { id: organization._id, name: organization.name };
       users = await User.find({ organizationId: currentUser.organizationId })

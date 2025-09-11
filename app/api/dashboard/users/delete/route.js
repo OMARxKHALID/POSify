@@ -6,14 +6,12 @@ import {
   cleanUserResponse,
   createMethodHandler,
   createDeleteHandler,
-} from "@/lib/api-utils";
-import {
   apiSuccess,
   notFound,
   forbidden,
   serverError,
   badRequest,
-} from "@/lib/api-utils";
+} from "@/lib/api";
 
 /**
  * Handle user deletion with role-based permissions and organization scoping

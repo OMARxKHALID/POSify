@@ -6,8 +6,10 @@ import {
   formatUserData,
   createMethodHandler,
   createGetHandler,
-} from "@/lib/api-utils";
-import { apiSuccess, notFound, forbidden } from "@/lib/api-utils";
+  apiSuccess,
+  notFound,
+  forbidden,
+} from "@/lib/api";
 
 /**
  * Handle getting available staff members for ownership transfer

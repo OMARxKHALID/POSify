@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { User } from "@/models/user";
 import { userEditSchema } from "@/schemas/auth-schema";
 import { DEFAULT_PERMISSIONS } from "@/constants";
@@ -7,14 +8,12 @@ import {
   cleanUserResponse,
   createMethodHandler,
   createPutHandler,
-} from "@/lib/api-utils";
-import {
   apiSuccess,
   badRequest,
   notFound,
   forbidden,
   serverError,
-} from "@/lib/api-utils";
+} from "@/lib/api";
 
 /**
  * Handle user editing with role-based permissions and validation
@@ -141,30 +140,36 @@ const handleUserEdit = async (validatedData, queryParams, request) => {
   // Note: Ownership transfer is handled separately via dedicated transfer endpoint
   // This prevents automatic ownership changes when multiple staff members exist
 
-  // Update user
-  let updatedUser;
-  try {
-    updatedUser = await User.findByIdAndUpdate(userId, updateData, {
-      new: true,
-      runValidators: true,
-    }).select("-password -inviteToken -__v");
+  // Update user with transaction
+  const session = await mongoose.startSession();
 
-    if (!updatedUser) {
-      return serverError("UPDATE_FAILED");
-    }
-  } catch (updateError) {
+  try {
+    await session.withTransaction(async () => {
+      const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+        new: true,
+        runValidators: true,
+        session,
+      }).select("-password -inviteToken -__v");
+
+      if (!updatedUser) {
+        throw new Error("UPDATE_FAILED");
+      }
+
+      await logUpdate("User", oldUser, updatedUser, currentUser, request);
+    });
+
+    // Fetch updated user after transaction
+    const updatedUser = await User.findById(userId).select(
+      "-password -inviteToken -__v"
+    );
+    const userResponse = cleanUserResponse(updatedUser);
+
+    return apiSuccess("USER_UPDATED_SUCCESSFULLY", userResponse);
+  } catch (error) {
     return serverError("UPDATE_FAILED");
+  } finally {
+    await session.endSession();
   }
-
-  try {
-    await logUpdate("User", oldUser, updatedUser, currentUser, request);
-  } catch (auditError) {
-    // Logging failure should not block response
-  }
-
-  const userResponse = cleanUserResponse(updatedUser);
-
-  return apiSuccess("USER_UPDATED_SUCCESSFULLY", userResponse);
 };
 
 /**

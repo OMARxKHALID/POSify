@@ -27,9 +27,7 @@ export function useUserRegistration() {
     },
     onSuccess: async (data, variables) => {
       invalidateQueries.users(queryClient);
-      handleHookSuccess(
-        "User registered successfully. Please create an organization to complete setup."
-      );
+      handleHookSuccess("USER_REGISTERED_SUCCESSFULLY");
     },
     ...getDefaultMutationOptions({ operation: "User registration" }),
   });
@@ -49,7 +47,7 @@ export function useSuperAdminRegistration() {
     },
     onSuccess: async (data, variables) => {
       invalidateQueries.users(queryClient);
-      handleHookSuccess("Super admin registered successfully");
+      handleHookSuccess("SUPER_ADMIN_REGISTERED_SUCCESSFULLY");
     },
     ...getDefaultMutationOptions({ operation: "Super admin registration" }),
   });
@@ -74,9 +72,7 @@ export function useOrganizationRegistration() {
       invalidateQueries.user(queryClient, variables.userId);
 
       // Show success toast
-      handleHookSuccess(
-        "Organization created successfully! Welcome to your dashboard."
-      );
+      handleHookSuccess("ORGANIZATION_REGISTERED_SUCCESSFULLY");
     },
     ...getDefaultMutationOptions({ operation: "Organization registration" }),
   });

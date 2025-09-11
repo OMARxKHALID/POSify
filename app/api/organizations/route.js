@@ -5,8 +5,9 @@ import {
   formatOrganizationData,
   createMethodHandler,
   createGetHandler,
-} from "@/lib/api-utils";
-import { apiSuccess, notFound } from "@/lib/api-utils";
+  apiSuccess,
+  notFound,
+} from "@/lib/api";
 
 /**
  * Handle organization data request for authenticated user

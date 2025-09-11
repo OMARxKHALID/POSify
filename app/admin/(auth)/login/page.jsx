@@ -16,8 +16,11 @@ import { PageLoading } from "@/components/ui/loading";
 import { GeometricBackground } from "@/components/ui/geometric-background";
 
 import { toast } from "sonner";
-import { getErrorMessage } from "@/lib/helpers/error-messages";
-import { getRedirectPath } from "@/lib/helpers/auth-redirects";
+import {
+  getErrorMessage,
+  getSuccessMessage,
+} from "@/lib/helpers/error-helpers";
+import { getRedirectPath } from "@/lib/helpers/redirect-helpers";
 import { loginSchema } from "@/schemas/auth-schema";
 import { FORM_DEFAULTS, DEFAULT_REDIRECTS, AUTH_ROUTES } from "@/constants";
 
@@ -79,10 +82,10 @@ export default function AdminLoginPage() {
       if (result?.error) {
         toast.error(getErrorMessage(result.error));
       } else if (result?.ok) {
-        toast.success("Login successful! Redirecting...");
+        toast.success(getSuccessMessage("LOGIN_SUCCESSFUL"));
       }
     } catch {
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error(getErrorMessage("UNEXPECTED_ERROR"));
     } finally {
       setLoading(false);
     }

@@ -38,6 +38,8 @@ import {
   getStatusBadgeVariant,
   getStatusIcon,
   getUserInitials,
+} from "@/lib/utils/ui-utils";
+import {
   canEditUser,
   canChangeRole,
   canChangeStatus,
@@ -320,7 +322,7 @@ export default function EditUserPage() {
             <CardContent className="space-y-4">
               {isCurrentUser ? (
                 <div className="flex items-start gap-3">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-blue-600 flex-shrink-0">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground flex-shrink-0">
                     <User className="h-3 w-3" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -336,7 +338,7 @@ export default function EditUserPage() {
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 text-green-600 flex-shrink-0">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground flex-shrink-0">
                       <User className="h-3 w-3" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -349,7 +351,7 @@ export default function EditUserPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-purple-600 flex-shrink-0">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground flex-shrink-0">
                       <Shield className="h-3 w-3" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -362,7 +364,7 @@ export default function EditUserPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 text-orange-600 flex-shrink-0">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground flex-shrink-0">
                       <UserCheck className="h-3 w-3" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -388,7 +390,7 @@ export default function EditUserPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-600 flex-shrink-0">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-muted-foreground flex-shrink-0">
                   <CheckCircle className="h-3 w-3" />
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -396,7 +398,7 @@ export default function EditUserPage() {
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 flex-shrink-0">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-muted-foreground flex-shrink-0">
                   <Lock className="h-3 w-3" />
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
