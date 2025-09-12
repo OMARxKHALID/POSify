@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Home, ArrowLeft, Search } from "lucide-react";
+import { Home, Search } from "lucide-react";
 
 export const metadata = {
   title: "Page Not Found",
@@ -28,26 +28,11 @@ export default function NotFound() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="text-center text-sm text-muted-foreground">
-            <p>Here are some helpful links:</p>
-          </div>
           <div className="flex flex-col gap-2">
             <Button asChild className="w-full">
               <Link href="/">
                 <Home className="mr-2 h-4 w-4" />
                 Go to homepage
-              </Link>
-            </Button>
-            <Button variant="outline" asChild className="w-full">
-              <Link href="/#features">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                View features
-              </Link>
-            </Button>
-            <Button variant="outline" asChild className="w-full">
-              <Link href="/#pricing">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                View pricing
               </Link>
             </Button>
           </div>

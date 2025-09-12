@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import {
   Card,
   CardAction,
@@ -27,7 +26,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAnalytics } from "@/hooks/use-analytics";
 import { BarChart, Bar, XAxis, CartesianGrid, Area, AreaChart } from "recharts";
-import { TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
+import { TrendingUp, AlertTriangle } from "lucide-react";
 
 // Chart configurations
 const chartConfig = {

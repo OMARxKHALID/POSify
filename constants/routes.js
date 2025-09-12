@@ -19,6 +19,7 @@ export const ADMIN_ROUTES = {
   USERS: "/admin/dashboard/users",
   AUDIT_LOGS: "/admin/dashboard/audit-logs",
   MENU: "/admin/dashboard/menu",
+  CATEGORIES: "/admin/dashboard/categories",
 };
 
 // Organization Routes

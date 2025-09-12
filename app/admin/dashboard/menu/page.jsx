@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -9,9 +9,7 @@ import {
   Edit,
   Trash2,
   Utensils,
-  DollarSign,
   Clock,
-  Star,
   ChevronDown,
   Eye,
   EyeOff,
@@ -37,10 +35,19 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { KPICard, KPICardsGrid } from "@/components/ui/kpi-card";
 import { PageLayout } from "@/components/dashboard/page-layout";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { useMenuManagement } from "@/hooks/use-menu";
+import {
+  formatCategoryDisplay,
+  findCategoryById,
+} from "@/lib/utils/category-utils";
+import {
+  formatPrice,
+  formatPrepTime,
+  getAvailabilityStatus,
+  getSpecialStatus,
+} from "@/lib/utils/menu-utils";
 
 // Column helper for table
 const columnHelper = createColumnHelper();
@@ -52,9 +59,6 @@ export default function MenuPage() {
     isLoading,
     isError,
     error,
-    refetch,
-    createMenuItem,
-    editMenuItem,
     deleteMenuItem,
   } = useMenuManagement();
 
@@ -63,13 +67,9 @@ export default function MenuPage() {
     () => menuData?.menuItems || [],
     [menuData?.menuItems]
   );
-  const currentUser = useMemo(
-    () => menuData?.currentUser,
-    [menuData?.currentUser]
-  );
-  const organization = useMemo(
-    () => menuData?.organization,
-    [menuData?.organization]
+  const categories = useMemo(
+    () => menuData?.categories || [],
+    [menuData?.categories]
   );
 
   // Delete confirmation dialog state
@@ -110,8 +110,7 @@ export default function MenuPage() {
         const price = row.getValue("price");
         return (
           <div className="font-mono font-medium flex items-center gap-1">
-            <DollarSign className="h-3 w-3" />
-            {price?.toFixed(2) || "0.00"}
+            {formatPrice(price)}
           </div>
         );
       },
@@ -136,7 +135,25 @@ export default function MenuPage() {
                 >
                   All
                 </DropdownMenuCheckboxItem>
-                {/* Add category filters here when categories are implemented */}
+                <DropdownMenuCheckboxItem
+                  checked={column.getFilterValue() === "uncategorized"}
+                  onCheckedChange={(checked) =>
+                    column.setFilterValue(checked ? "uncategorized" : undefined)
+                  }
+                >
+                  Uncategorized
+                </DropdownMenuCheckboxItem>
+                {categories.map((category) => (
+                  <DropdownMenuCheckboxItem
+                    key={category.id}
+                    checked={column.getFilterValue() === category.id}
+                    onCheckedChange={(checked) =>
+                      column.setFilterValue(checked ? category.id : undefined)
+                    }
+                  >
+                    {formatCategoryDisplay(category)}
+                  </DropdownMenuCheckboxItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -144,10 +161,9 @@ export default function MenuPage() {
       },
       cell: ({ row }) => {
         const categoryId = row.getValue("categoryId");
+        const category = findCategoryById(categories, categoryId);
         return (
-          <Badge variant="secondary">
-            {categoryId?.name || "Uncategorized"}
-          </Badge>
+          <Badge variant="secondary">{formatCategoryDisplay(category)}</Badge>
         );
       },
     }),
@@ -155,6 +171,7 @@ export default function MenuPage() {
       header: "Status",
       cell: ({ row }) => {
         const available = row.getValue("available");
+        const status = getAvailabilityStatus(available);
         return (
           <div className="flex items-center gap-2">
             {available ? (
@@ -162,9 +179,7 @@ export default function MenuPage() {
             ) : (
               <EyeOff className="h-3 w-3 text-muted-foreground" />
             )}
-            <Badge variant={available ? "default" : "secondary"}>
-              {available ? "Available" : "Unavailable"}
-            </Badge>
+            <Badge variant={status.variant}>{status.text}</Badge>
           </div>
         );
       },
@@ -176,7 +191,7 @@ export default function MenuPage() {
         return (
           <div className="text-sm text-muted-foreground flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            {prepTime ? `${prepTime} min` : "N/A"}
+            {formatPrepTime(prepTime)}
           </div>
         );
       },
@@ -185,17 +200,8 @@ export default function MenuPage() {
       header: "Special",
       cell: ({ row }) => {
         const isSpecial = row.getValue("isSpecial");
-        return isSpecial ? (
-          <Badge
-            variant="outline"
-            className="text-yellow-600 border-yellow-600"
-          >
-            <Star className="h-3 w-3 mr-1" />
-            Special
-          </Badge>
-        ) : (
-          <span className="text-muted-foreground">-</span>
-        );
+        const status = getSpecialStatus(isSpecial);
+        return <Badge variant={status.variant}>{status.text}</Badge>;
       },
     }),
     columnHelper.accessor("createdAt", {
@@ -285,18 +291,6 @@ export default function MenuPage() {
     router.push("/admin/dashboard/menu/create");
   };
 
-  // Calculate stats
-  const totalItems = menuItems.length;
-  const availableItems = menuItems.filter((item) => item.available).length;
-  const specialItems = menuItems.filter((item) => item.isSpecial).length;
-  const averagePrice =
-    menuItems.length > 0
-      ? (
-          menuItems.reduce((sum, item) => sum + (item.price || 0), 0) /
-          menuItems.length
-        ).toFixed(2)
-      : "0.00";
-
   return (
     <PageLayout
       isLoading={isLoading}
@@ -308,35 +302,6 @@ export default function MenuPage() {
         description="Manage your restaurant menu items, pricing, and availability"
         icon={Utensils}
       />
-
-      {/* Stats Cards */}
-      <KPICardsGrid>
-        <KPICard
-          title="Total Items"
-          value={totalItems}
-          icon={Utensils}
-          period={`${availableItems} available`}
-        />
-        <KPICard
-          title="Average Price"
-          value={`$${averagePrice}`}
-          icon={DollarSign}
-          period="Per menu item"
-        />
-        <KPICard
-          title="Special Items"
-          value={specialItems}
-          icon={Star}
-          period="Featured items"
-        />
-        <KPICard
-          title="Availability"
-          value={`${Math.round((availableItems / totalItems) * 100) || 0}%`}
-          icon={Eye}
-          period="Items in stock"
-        />
-      </KPICardsGrid>
-
       {/* Menu Items Table */}
       <Card>
         <CardHeader>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +32,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { FormField } from "@/components/form/form-field";
 import { FormActions } from "@/components/form/form-actions";
 import { useCreateMenuItem, useMenu } from "@/hooks/use-menu";
+import { formatCategoryOptions } from "@/lib/utils/category-utils";
 
 export default function CreateMenuItemPage() {
   const router = useRouter();
@@ -39,6 +40,10 @@ export default function CreateMenuItemPage() {
   const { data: menuData, isLoading: menuLoading } = useMenu();
 
   const currentUser = menuData?.currentUser;
+  const categories = menuData?.categories || [];
+
+  // Show warning if categories failed to load
+  const categoriesError = !menuLoading && categories.length === 0 && menuData;
 
   // Initialize form with validation
   const form = useForm({
@@ -149,12 +154,23 @@ export default function CreateMenuItemPage() {
                     label="Category"
                     icon={Tag}
                     component="select"
-                    placeholder="Select category"
-                    disabled={createMenuItemMutation.isPending}
-                    options={[
-                      { value: "uncategorized", label: "Uncategorized" },
-                    ]}
+                    placeholder={
+                      categoriesError
+                        ? "Categories unavailable"
+                        : "Select category"
+                    }
+                    disabled={
+                      createMenuItemMutation.isPending || categoriesError
+                    }
+                    options={formatCategoryOptions(categories)}
                   />
+                  {categoriesError && (
+                    <p className="text-sm text-amber-600 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      Categories could not be loaded. You can still create menu
+                      items without categories.
+                    </p>
+                  )}
 
                   <FormField
                     control={form.control}

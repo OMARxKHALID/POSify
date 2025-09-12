@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { PageLoading } from "@/components/ui/loading";
 import { ErrorBoundary } from "@/components/error-boundary";
 

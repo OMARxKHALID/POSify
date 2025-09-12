@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { Menu } from "@/models/menu";
+import { Category } from "@/models/category";
 import { menuFormSchema } from "@/schemas/menu-schema";
+import { formatCategoryForAPI } from "@/lib/utils/category-utils";
+import { formatMenuItemForAPI } from "@/lib/utils/menu-utils";
 import { logUpdate } from "@/lib/helpers/audit-helpers";
 import {
   getAuthenticatedUser,
@@ -15,26 +18,8 @@ import {
   validateOrganizationExists,
 } from "@/lib/api";
 
-/**
- * Format menu item data for API response
- */
-const formatMenuData = (menuItem) => {
-  return {
-    id: menuItem._id,
-    name: menuItem.name,
-    description: menuItem.description,
-    price: menuItem.price,
-    image: menuItem.image,
-    icon: menuItem.icon,
-    available: menuItem.available,
-    prepTime: menuItem.prepTime,
-    isSpecial: menuItem.isSpecial,
-    categoryId: menuItem.categoryId,
-    organizationId: menuItem.organizationId,
-    createdAt: menuItem.createdAt,
-    updatedAt: menuItem.updatedAt,
-  };
-};
+// Using utility function for consistent formatting
+const formatMenuData = formatMenuItemForAPI;
 
 /**
  * Handle menu item editing with role-based permissions and validation
@@ -73,6 +58,12 @@ const handleMenuItemEdit = async (validatedData, queryParams, request) => {
   // Validate organization exists
   const organization = await validateOrganizationExists(currentUser);
   if (!organization || organization.error) return organization;
+
+  // Fetch categories for the organization
+  const categories = await Category.find({
+    organizationId: currentUser.organizationId,
+    isActive: true,
+  }).sort({ name: 1 });
 
   // Check for duplicate menu item name within the same organization
   if (updateData.name && updateData.name !== targetMenuItem.name) {
@@ -138,8 +129,12 @@ const handleMenuItemEdit = async (validatedData, queryParams, request) => {
     const updatedMenuItem = await Menu.findById(menuItemId);
 
     const menuResponse = formatMenuData(updatedMenuItem);
+    const formattedCategories = categories.map(formatCategoryForAPI);
 
-    return apiSuccess("MENU_ITEM_UPDATED_SUCCESSFULLY", menuResponse);
+    return apiSuccess("MENU_ITEM_UPDATED_SUCCESSFULLY", {
+      menuItem: menuResponse,
+      categories: formattedCategories,
+    });
   } catch (error) {
     return serverError("UPDATE_FAILED");
   } finally {

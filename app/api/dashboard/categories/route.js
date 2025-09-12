@@ -1,7 +1,4 @@
-import { Menu } from "@/models/menu";
 import { Category } from "@/models/category";
-import { formatCategoryForAPI } from "@/lib/utils/category-utils";
-import { formatMenuItemForAPI } from "@/lib/utils/menu-utils";
 import {
   getAuthenticatedUser,
   hasRole,
@@ -13,17 +10,31 @@ import {
   validateOrganizationExists,
 } from "@/lib/api";
 
-// Using utility function for consistent formatting
-const formatMenuData = formatMenuItemForAPI;
+/**
+ * Format category data for API response
+ */
+const formatCategoryData = (category) => ({
+  id: category._id,
+  organizationId: category.organizationId,
+  name: category.name,
+  icon: category.icon,
+  image: category.image,
+  description: category.description,
+  isActive: category.isActive,
+  createdAt: category.createdAt,
+  updatedAt: category.updatedAt,
+  createdBy: category.createdBy,
+  lastModifiedBy: category.lastModifiedBy,
+});
 
 /**
- * Handle menu data request with role-based access control
+ * Handle categories data request with role-based access control
  */
-const handleMenuData = async (queryParams, request) => {
+const handleCategoriesData = async (queryParams, request) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
-    // Only admin can access menu management
+    // Only admin can access categories
     if (!hasRole(currentUser, ["admin"])) {
       return forbidden("INSUFFICIENT_PERMISSIONS");
     }
@@ -34,22 +45,14 @@ const handleMenuData = async (queryParams, request) => {
 
     const organizationData = { id: organization._id, name: organization.name };
 
-    // Fetch categories for the organization
+    // Admin can only see categories from their organization
     const categories = await Category.find({
-      organizationId: currentUser.organizationId,
-      isActive: true,
-    }).sort({ name: 1 });
-
-    // Admin can only see menu items from their organization
-    const menuItems = await Menu.find({
       organizationId: currentUser.organizationId,
     }).sort({ createdAt: -1 });
 
-    const formattedMenuItems = menuItems.map(formatMenuData);
-    const formattedCategories = categories.map(formatCategoryForAPI);
+    const formattedCategories = categories.map(formatCategoryData);
 
-    return apiSuccess("MENU_RETRIEVED_SUCCESSFULLY", {
-      menuItems: formattedMenuItems,
+    return apiSuccess("CATEGORIES_RETRIEVED_SUCCESSFULLY", {
       categories: formattedCategories,
       organization: organizationData,
       currentUser: {
@@ -59,15 +62,15 @@ const handleMenuData = async (queryParams, request) => {
       },
     });
   } catch (error) {
-    return serverError("MENU_RETRIEVAL_FAILED");
+    return serverError("CATEGORIES_RETRIEVAL_FAILED");
   }
 };
 
 /**
- * GET /api/dashboard/menu
- * Get menu items based on authenticated user's role and permissions
+ * GET /api/dashboard/categories
+ * Get categories based on authenticated user's role and permissions
  */
-export const GET = createGetHandler(handleMenuData);
+export const GET = createGetHandler(handleCategoriesData);
 
 // Fallback for unsupported HTTP methods
 export const { POST, PUT, DELETE } = createMethodHandler(["GET"]);

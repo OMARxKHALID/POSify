@@ -18,6 +18,7 @@ import {
   HelpCircle,
   Shield,
   Utensils,
+  FolderOpen,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "./routes";
 
@@ -67,6 +68,13 @@ export const NAVIGATION_PERMISSIONS = {
       url: ADMIN_ROUTES.MENU,
       icon: Utensils,
       permissions: ["menu:manage"],
+      roles: ["admin"],
+    },
+    {
+      title: "Categories",
+      url: ADMIN_ROUTES.CATEGORIES,
+      icon: FolderOpen,
+      permissions: ["category:manage"],
       roles: ["admin"],
     },
     {

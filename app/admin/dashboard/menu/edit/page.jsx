@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,6 +36,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { FormActions } from "@/components/form/form-actions";
 import { FormField } from "@/components/form/form-field";
 import { useEditMenuItem, useMenu } from "@/hooks/use-menu";
+import { formatCategoryOptions } from "@/lib/utils/category-utils";
 
 export default function EditMenuItemPage() {
   const router = useRouter();
@@ -47,6 +48,7 @@ export default function EditMenuItemPage() {
 
   const currentUser = menuData?.currentUser;
   const menuItems = menuData?.menuItems || [];
+  const categories = menuData?.categories || [];
   const targetMenuItem =
     menuItems.find((item) => item.id === menuItemId) || null;
 
@@ -268,9 +270,7 @@ export default function EditMenuItemPage() {
                     component="select"
                     placeholder="Select category"
                     disabled={isMutating}
-                    options={[
-                      { value: "uncategorized", label: "Uncategorized" },
-                    ]}
+                    options={formatCategoryOptions(categories)}
                   />
 
                   <FormField
@@ -346,7 +346,7 @@ export default function EditMenuItemPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-600 flex-shrink-0">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-muted-foreground flex-shrink-0">
                   <CheckCircle className="h-3 w-3" />
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -354,7 +354,7 @@ export default function EditMenuItemPage() {
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 flex-shrink-0">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-muted-foreground flex-shrink-0">
                   <DollarSign className="h-3 w-3" />
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -362,7 +362,7 @@ export default function EditMenuItemPage() {
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-100 text-orange-600 flex-shrink-0">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-muted-foreground flex-shrink-0">
                   <Eye className="h-3 w-3" />
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -370,7 +370,7 @@ export default function EditMenuItemPage() {
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-100 text-purple-600 flex-shrink-0">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-muted-foreground flex-shrink-0">
                   <Star className="h-3 w-3" />
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
