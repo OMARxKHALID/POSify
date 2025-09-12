@@ -1,5 +1,4 @@
 import { Menu } from "@/models/menu";
-import { Category } from "@/models/category";
 import {
   getAuthenticatedUser,
   hasRole,
@@ -25,9 +24,7 @@ const formatMenuData = (menuItem) => {
     available: menuItem.available,
     prepTime: menuItem.prepTime,
     isSpecial: menuItem.isSpecial,
-    displayOrder: menuItem.displayOrder,
-    tags: menuItem.tags,
-    category: menuItem.category,
+    categoryId: menuItem.categoryId,
     organizationId: menuItem.organizationId,
     createdAt: menuItem.createdAt,
     updatedAt: menuItem.updatedAt,
@@ -41,68 +38,26 @@ const handleMenuData = async (queryParams, request) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
-    // Only admin and super_admin can access menu management
-    if (!hasRole(currentUser, ["admin", "super_admin"])) {
+    // Only admin can access menu management
+    if (!hasRole(currentUser, ["admin"])) {
       return forbidden("INSUFFICIENT_PERMISSIONS");
     }
 
-    let menuItems = [];
-    let categories = [];
-    let organizationData = null;
+    // Validate organization exists
+    const organization = await validateOrganizationExists(currentUser);
+    if (!organization || organization.error) return organization;
 
-    switch (currentUser.role) {
-    case "super_admin":
-      // Super admin can see all menu items across organizations
-      menuItems = await Menu.find({})
-        .populate("category", "name icon")
-        .populate("organizationId", "name")
-        .sort({ organizationId: 1, displayOrder: 1, createdAt: -1 });
+    const organizationData = { id: organization._id, name: organization.name };
 
-      categories = await Category.find({})
-        .populate("organizationId", "name")
-        .sort({ organizationId: 1, displayOrder: 1 });
-      break;
-
-    case "admin":
-      // Validate organization exists
-      const organization = await validateOrganizationExists(currentUser);
-      if (!organization || organization.error) return organization;
-
-      organizationData = { id: organization._id, name: organization.name };
-
-      // Admin can only see menu items from their organization
-      menuItems = await Menu.find({
-        organizationId: currentUser.organizationId,
-      })
-        .populate("category", "name icon")
-        .sort({ displayOrder: 1, createdAt: -1 });
-
-      categories = await Category.find({
-        organizationId: currentUser.organizationId,
-      }).sort({ displayOrder: 1 });
-      break;
-
-    default:
-      return forbidden("INSUFFICIENT_PERMISSIONS");
-    }
+    // Admin can only see menu items from their organization
+    const menuItems = await Menu.find({
+      organizationId: currentUser.organizationId,
+    }).sort({ createdAt: -1 });
 
     const formattedMenuItems = menuItems.map(formatMenuData);
-    const formattedCategories = categories.map((category) => ({
-      id: category._id,
-      name: category.name,
-      icon: category.icon,
-      image: category.image,
-      description: category.description,
-      displayOrder: category.displayOrder,
-      isActive: category.isActive,
-      organizationId: category.organizationId,
-      createdAt: category.createdAt,
-      updatedAt: category.updatedAt,
-    }));
 
     return apiSuccess("MENU_RETRIEVED_SUCCESSFULLY", {
       menuItems: formattedMenuItems,
-      categories: formattedCategories,
       organization: organizationData,
       currentUser: {
         id: currentUser._id,
@@ -111,7 +66,7 @@ const handleMenuData = async (queryParams, request) => {
       },
     });
   } catch (error) {
-    return serverError("FETCH_FAILED");
+    return serverError("MENU_RETRIEVAL_FAILED");
   }
 };
 

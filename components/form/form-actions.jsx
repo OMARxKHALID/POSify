@@ -12,6 +12,7 @@ export function FormActions({
   submitIcon: SubmitIcon,
   showCancel = true,
   className = "",
+  disabled = false,
 }) {
   const router = useRouter();
 
@@ -33,7 +34,7 @@ export function FormActions({
       )}
       <Button
         type="submit"
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         className="flex items-center gap-2"
       >
         {isLoading ? (

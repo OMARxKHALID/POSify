@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { Menu } from "@/models/menu";
-import { Category } from "@/models/category";
-import { menuSchema } from "@/schemas/menu-schema";
+import { menuFormSchema } from "@/schemas/menu-schema";
 import { logUpdate } from "@/lib/helpers/audit-helpers";
 import {
   getAuthenticatedUser,
@@ -9,26 +8,46 @@ import {
   createMethodHandler,
   createPutHandler,
   apiSuccess,
-  badRequest,
   notFound,
   forbidden,
+  badRequest,
   serverError,
   validateOrganizationExists,
 } from "@/lib/api";
 
 /**
+ * Format menu item data for API response
+ */
+const formatMenuData = (menuItem) => {
+  return {
+    id: menuItem._id,
+    name: menuItem.name,
+    description: menuItem.description,
+    price: menuItem.price,
+    image: menuItem.image,
+    icon: menuItem.icon,
+    available: menuItem.available,
+    prepTime: menuItem.prepTime,
+    isSpecial: menuItem.isSpecial,
+    categoryId: menuItem.categoryId,
+    organizationId: menuItem.organizationId,
+    createdAt: menuItem.createdAt,
+    updatedAt: menuItem.updatedAt,
+  };
+};
+
+/**
  * Handle menu item editing with role-based permissions and validation
  */
 const handleMenuItemEdit = async (validatedData, queryParams, request) => {
-  try {
-    const { menuItemId } = queryParams;
-    const updateData = validatedData;
-    const currentUser = await getAuthenticatedUser();
+  const { menuItemId } = queryParams;
+  const updateData = validatedData;
+  const currentUser = await getAuthenticatedUser();
 
-    // Only admin and super_admin can edit menu items
-    if (!hasRole(currentUser, ["admin", "super_admin"])) {
-      return forbidden("INSUFFICIENT_PERMISSIONS");
-    }
+  // Only admin can edit menu items
+  if (!hasRole(currentUser, ["admin"])) {
+    return forbidden("INSUFFICIENT_PERMISSIONS");
+  }
 
   // Validate menu item ID parameter
   if (!menuItemId || typeof menuItemId !== "string") {
@@ -41,47 +60,25 @@ const handleMenuItemEdit = async (validatedData, queryParams, request) => {
     return notFound("MENU_ITEM_NOT_FOUND");
   }
 
-  // Role-based organization checks
-  if (currentUser.role === "admin") {
-    // Admin can only edit menu items from their organization
-    if (
-      !currentUser.organizationId ||
-      !targetMenuItem.organizationId ||
-      currentUser.organizationId.toString() !==
-        targetMenuItem.organizationId.toString()
-    ) {
-      return forbidden("INSUFFICIENT_PERMISSIONS");
-    }
-
-    // Validate organization exists
-    const organization = await validateOrganizationExists(currentUser);
-    if (!organization || organization.error) return organization;
+  // Admin can only edit menu items from their organization
+  if (
+    !currentUser.organizationId ||
+    !targetMenuItem.organizationId ||
+    currentUser.organizationId.toString() !==
+      targetMenuItem.organizationId.toString()
+  ) {
+    return forbidden("INSUFFICIENT_PERMISSIONS");
   }
 
-  // Validate category if being updated
-  if (updateData.category) {
-    const categoryDoc = await Category.findById(updateData.category);
-    if (!categoryDoc) {
-      return badRequest("CATEGORY_NOT_FOUND");
-    }
-
-    // For admin users, ensure category belongs to their organization
-    if (currentUser.role === "admin") {
-      if (
-        !categoryDoc.organizationId ||
-        categoryDoc.organizationId.toString() !==
-          currentUser.organizationId.toString()
-      ) {
-        return forbidden("CATEGORY_NOT_IN_ORGANIZATION");
-      }
-    }
-  }
+  // Validate organization exists
+  const organization = await validateOrganizationExists(currentUser);
+  if (!organization || organization.error) return organization;
 
   // Check for duplicate menu item name within the same organization
   if (updateData.name && updateData.name !== targetMenuItem.name) {
     const existingMenuItem = await Menu.findOne({
       organizationId: targetMenuItem.organizationId,
-      name: { $regex: new RegExp(`^${updateData.name}$`, "i") },
+      name: updateData.name.trim(),
       _id: { $ne: menuItemId },
     });
 
@@ -102,11 +99,6 @@ const handleMenuItemEdit = async (validatedData, queryParams, request) => {
   }
   if (updateData.icon) {
     updateData.icon = updateData.icon.trim();
-  }
-  if (updateData.tags) {
-    updateData.tags = updateData.tags
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0);
   }
 
   const oldMenuItem = targetMenuItem.toObject
@@ -143,27 +135,9 @@ const handleMenuItemEdit = async (validatedData, queryParams, request) => {
     });
 
     // Fetch updated menu item after transaction
-    const updatedMenuItem = await Menu.findById(menuItemId)
-      .populate("category", "name icon")
-      .populate("organizationId", "name");
+    const updatedMenuItem = await Menu.findById(menuItemId);
 
-    const menuResponse = {
-      id: updatedMenuItem._id,
-      name: updatedMenuItem.name,
-      description: updatedMenuItem.description,
-      price: updatedMenuItem.price,
-      image: updatedMenuItem.image,
-      icon: updatedMenuItem.icon,
-      available: updatedMenuItem.available,
-      prepTime: updatedMenuItem.prepTime,
-      isSpecial: updatedMenuItem.isSpecial,
-      displayOrder: updatedMenuItem.displayOrder,
-      tags: updatedMenuItem.tags,
-      category: updatedMenuItem.category,
-      organizationId: updatedMenuItem.organizationId,
-      createdAt: updatedMenuItem.createdAt,
-      updatedAt: updatedMenuItem.updatedAt,
-    };
+    const menuResponse = formatMenuData(updatedMenuItem);
 
     return apiSuccess("MENU_ITEM_UPDATED_SUCCESSFULLY", menuResponse);
   } catch (error) {
@@ -178,7 +152,7 @@ const handleMenuItemEdit = async (validatedData, queryParams, request) => {
  * Update a menu item based on role-based permissions
  */
 export const PUT = createPutHandler(
-  menuSchema,
+  menuFormSchema,
   async (validatedData, request) => {
     const url = new URL(request.url);
     const menuItemId = url.searchParams.get("menuItemId");

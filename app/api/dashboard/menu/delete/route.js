@@ -15,14 +15,35 @@ import {
 } from "@/lib/api";
 
 /**
+ * Format menu item data for API response
+ */
+const formatMenuData = (menuItem) => {
+  return {
+    id: menuItem._id,
+    name: menuItem.name,
+    description: menuItem.description,
+    price: menuItem.price,
+    image: menuItem.image,
+    icon: menuItem.icon,
+    available: menuItem.available,
+    prepTime: menuItem.prepTime,
+    isSpecial: menuItem.isSpecial,
+    categoryId: menuItem.categoryId,
+    organizationId: menuItem.organizationId,
+    createdAt: menuItem.createdAt,
+    updatedAt: menuItem.updatedAt,
+  };
+};
+
+/**
  * Handle menu item deletion with role-based permissions and organization scoping
  */
 const handleMenuItemDelete = async (queryParams, request) => {
   const { menuItemId } = queryParams;
   const currentUser = await getAuthenticatedUser();
 
-  // Only admin and super_admin can delete menu items
-  if (!hasRole(currentUser, ["admin", "super_admin"])) {
+  // Only admin can delete menu items
+  if (!hasRole(currentUser, ["admin"])) {
     return forbidden("INSUFFICIENT_PERMISSIONS");
   }
 
@@ -37,22 +58,19 @@ const handleMenuItemDelete = async (queryParams, request) => {
     return notFound("MENU_ITEM_NOT_FOUND");
   }
 
-  // Role-based organization checks
-  if (currentUser.role === "admin") {
-    // Admin can only delete menu items from their organization
-    if (
-      !currentUser.organizationId ||
-      !targetMenuItem.organizationId ||
-      currentUser.organizationId.toString() !==
-        targetMenuItem.organizationId.toString()
-    ) {
-      return forbidden("INSUFFICIENT_PERMISSIONS");
-    }
-
-    // Validate organization exists
-    const organization = await validateOrganizationExists(currentUser);
-    if (!organization || organization.error) return organization;
+  // Admin can only delete menu items from their organization
+  if (
+    !currentUser.organizationId ||
+    !targetMenuItem.organizationId ||
+    currentUser.organizationId.toString() !==
+      targetMenuItem.organizationId.toString()
+  ) {
+    return forbidden("INSUFFICIENT_PERMISSIONS");
   }
+
+  // Validate organization exists
+  const organization = await validateOrganizationExists(currentUser);
+  if (!organization || organization.error) return organization;
 
   // Check for critical dependencies before deletion
   // Check if menu item is referenced in any orders
@@ -61,53 +79,28 @@ const handleMenuItemDelete = async (queryParams, request) => {
   });
 
   if (orderCount > 0) {
-    return badRequest("MENU_ITEM_HAS_ORDERS", {
-      message: "Cannot delete menu item that has been ordered",
-      orderCount,
-    });
+    return badRequest("MENU_ITEM_HAS_ORDERS");
   }
 
   // Store menu item data for audit trail
   const menuItemToDelete = { ...targetMenuItem.toObject() };
 
-  // Delete menu item from database
-  let deletedMenuItem;
   try {
-    deletedMenuItem = await Menu.findByIdAndDelete(menuItemId);
+    // Delete menu item from database
+    const deletedMenuItem = await Menu.findByIdAndDelete(menuItemId);
     if (!deletedMenuItem) {
       return serverError("DELETE_FAILED");
     }
+
+    // Log the deletion
+    await logDelete("Menu", menuItemToDelete, currentUser, request);
+
+    const menuResponse = formatMenuData(deletedMenuItem);
+
+    return apiSuccess("MENU_ITEM_DELETED_SUCCESSFULLY", menuResponse);
   } catch (error) {
     return serverError("DELETE_FAILED");
   }
-
-  // Log menu item deletion for audit trail
-  try {
-    await logDelete("Menu", menuItemToDelete, currentUser, request);
-  } catch (auditError) {
-    // Don't fail the deletion if audit logging fails
-  }
-
-  // Prepare response data
-  const menuResponse = {
-    id: deletedMenuItem._id,
-    name: deletedMenuItem.name,
-    description: deletedMenuItem.description,
-    price: deletedMenuItem.price,
-    image: deletedMenuItem.image,
-    icon: deletedMenuItem.icon,
-    available: deletedMenuItem.available,
-    prepTime: deletedMenuItem.prepTime,
-    isSpecial: deletedMenuItem.isSpecial,
-    displayOrder: deletedMenuItem.displayOrder,
-    tags: deletedMenuItem.tags,
-    category: deletedMenuItem.category,
-    organizationId: deletedMenuItem.organizationId,
-    createdAt: deletedMenuItem.createdAt,
-    updatedAt: deletedMenuItem.updatedAt,
-  };
-
-  return apiSuccess("MENU_ITEM_DELETED_SUCCESSFULLY", menuResponse);
 };
 
 /**

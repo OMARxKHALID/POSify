@@ -17,6 +17,7 @@ import {
   Bell,
   HelpCircle,
   Shield,
+  Utensils,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "./routes";
 
@@ -62,11 +63,11 @@ export const NAVIGATION_PERMISSIONS = {
       roles: ["super_admin", "admin", "staff"],
     },
     {
-      title: "Products",
-      url: "/admin/dashboard/products",
-      icon: Package,
+      title: "Menu",
+      url: ADMIN_ROUTES.MENU,
+      icon: Utensils,
       permissions: ["menu:manage"],
-      roles: ["super_admin", "admin"],
+      roles: ["admin"],
     },
     {
       title: "Receipts",

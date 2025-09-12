@@ -1,7 +1,5 @@
-import mongoose from "mongoose";
 import { Menu } from "@/models/menu";
-import { Category } from "@/models/category";
-import { menuSchema } from "@/schemas/menu-schema";
+import { menuFormSchema } from "@/schemas/menu-schema";
 import { logCreate } from "@/lib/helpers/audit-helpers";
 import {
   getAuthenticatedUser,
@@ -16,60 +14,59 @@ import {
 } from "@/lib/api";
 
 /**
+ * Format menu item data for API response
+ */
+const formatMenuData = (menuItem) => {
+  return {
+    id: menuItem._id,
+    name: menuItem.name,
+    description: menuItem.description,
+    price: menuItem.price,
+    image: menuItem.image,
+    icon: menuItem.icon,
+    available: menuItem.available,
+    prepTime: menuItem.prepTime,
+    isSpecial: menuItem.isSpecial,
+    categoryId: menuItem.categoryId,
+    organizationId: menuItem.organizationId,
+    createdAt: menuItem.createdAt,
+    updatedAt: menuItem.updatedAt,
+  };
+};
+
+/**
  * Handle menu item creation with admin permissions and organization validation
  */
 const handleMenuItemCreation = async (validatedData, request) => {
-  try {
-    const {
-      category,
-      name,
-      price,
-      description,
-      image,
-      icon,
-      available = true,
-      prepTime,
-      isSpecial = false,
-      displayOrder = 0,
-      tags = [],
-    } = validatedData;
-    const currentUser = await getAuthenticatedUser();
+  const {
+    name,
+    price,
+    description,
+    image,
+    icon,
+    available = true,
+    prepTime,
+    isSpecial = false,
+  } = validatedData;
 
-    // Only admin and super_admin can create menu items
-    if (!hasRole(currentUser, ["admin", "super_admin"])) {
-      return forbidden("INSUFFICIENT_PERMISSIONS");
-    }
+  // Extract categoryId separately and handle "uncategorized" case
+  const { categoryId } = validatedData;
 
-  // Validate organization exists for admin users
-  if (currentUser.role === "admin") {
-    const organization = await validateOrganizationExists(currentUser);
-    if (!organization || organization.error) return organization;
+  const currentUser = await getAuthenticatedUser();
+
+  // Only admin can create menu items
+  if (!hasRole(currentUser, ["admin"])) {
+    return forbidden("INSUFFICIENT_PERMISSIONS");
   }
 
-  // Validate category exists and belongs to the organization
-  const categoryDoc = await Category.findById(category);
-  if (!categoryDoc) {
-    return badRequest("CATEGORY_NOT_FOUND");
-  }
-
-  // For admin users, ensure category belongs to their organization
-  if (currentUser.role === "admin") {
-    if (
-      !categoryDoc.organizationId ||
-      categoryDoc.organizationId.toString() !==
-        currentUser.organizationId.toString()
-    ) {
-      return forbidden("CATEGORY_NOT_IN_ORGANIZATION");
-    }
-  }
+  // Validate organization exists
+  const organization = await validateOrganizationExists(currentUser);
+  if (!organization || organization.error) return organization;
 
   // Check for duplicate menu item name within the same organization
   const existingMenuItem = await Menu.findOne({
-    organizationId:
-      currentUser.role === "admin"
-        ? currentUser.organizationId
-        : categoryDoc.organizationId,
-    name: { $regex: new RegExp(`^${name}$`, "i") },
+    organizationId: currentUser.organizationId,
+    name: name.trim(),
   });
 
   if (existingMenuItem) {
@@ -78,11 +75,8 @@ const handleMenuItemCreation = async (validatedData, request) => {
 
   try {
     const newMenuItem = new Menu({
-      organizationId:
-        currentUser.role === "admin"
-          ? currentUser.organizationId
-          : categoryDoc.organizationId,
-      category,
+      organizationId: currentUser.organizationId,
+      categoryId, // This will be undefined if "uncategorized" due to schema transform
       name: name.trim(),
       price,
       description: description?.trim(),
@@ -91,48 +85,39 @@ const handleMenuItemCreation = async (validatedData, request) => {
       available,
       prepTime,
       isSpecial,
-      displayOrder,
-      tags: tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0),
       createdBy: currentUser._id,
     });
 
     await newMenuItem.save();
     await logCreate("Menu", newMenuItem, currentUser, request);
 
-    // Populate the created menu item for response
-    const populatedMenuItem = await Menu.findById(newMenuItem._id)
-      .populate("category", "name icon")
-      .populate("organizationId", "name");
-
-    const menuResponse = {
-      id: populatedMenuItem._id,
-      name: populatedMenuItem.name,
-      description: populatedMenuItem.description,
-      price: populatedMenuItem.price,
-      image: populatedMenuItem.image,
-      icon: populatedMenuItem.icon,
-      available: populatedMenuItem.available,
-      prepTime: populatedMenuItem.prepTime,
-      isSpecial: populatedMenuItem.isSpecial,
-      displayOrder: populatedMenuItem.displayOrder,
-      tags: populatedMenuItem.tags,
-      category: populatedMenuItem.category,
-      organizationId: populatedMenuItem.organizationId,
-      createdAt: populatedMenuItem.createdAt,
-      updatedAt: populatedMenuItem.updatedAt,
-    };
+    // Format menu item for response
+    const menuResponse = formatMenuData(newMenuItem);
 
     return apiSuccess("MENU_ITEM_CREATED_SUCCESSFULLY", menuResponse, 201);
   } catch (error) {
+    // Handle Mongoose validation errors
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return badRequest(`VALIDATION_ERROR: ${validationErrors.join(", ")}`);
+    }
+
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      return badRequest("MENU_ITEM_NAME_EXISTS");
+    }
+
     return serverError("MENU_ITEM_CREATION_FAILED");
   }
 };
 
 /**
  * POST /api/dashboard/menu/create
- * Create a new menu item (admin/super_admin only)
+ * Create a new menu item (admin only)
  */
-export const POST = createPostHandler(menuSchema, handleMenuItemCreation);
+export const POST = createPostHandler(menuFormSchema, handleMenuItemCreation);
 
 // Fallback for unsupported HTTP methods
 export const { GET, PUT, DELETE } = createMethodHandler(["POST"]);
