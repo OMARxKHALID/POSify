@@ -34,8 +34,8 @@ const handleCategoriesData = async (queryParams, request) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
-    // Only admin can access categories
-    if (!hasRole(currentUser, ["admin"])) {
+    // Admin and staff can access categories
+    if (!hasRole(currentUser, ["admin", "staff"])) {
       return forbidden("INSUFFICIENT_PERMISSIONS");
     }
 

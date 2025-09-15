@@ -23,8 +23,8 @@ const handleMenuData = async (queryParams, request) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
-    // Only admin can access menu management
-    if (!hasRole(currentUser, ["admin"])) {
+    // Admin and staff can access menu data
+    if (!hasRole(currentUser, ["admin", "staff"])) {
       return forbidden("INSUFFICIENT_PERMISSIONS");
     }
 
@@ -43,7 +43,9 @@ const handleMenuData = async (queryParams, request) => {
     // Admin can only see menu items from their organization
     const menuItems = await Menu.find({
       organizationId: currentUser.organizationId,
-    }).sort({ createdAt: -1 });
+    })
+      .populate("categoryId", "name icon")
+      .sort({ createdAt: -1 });
 
     const formattedMenuItems = menuItems.map(formatMenuData);
     const formattedCategories = categories.map(formatCategoryForAPI);

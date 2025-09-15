@@ -27,6 +27,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAnalytics } from "@/hooks/use-analytics";
 import { BarChart, Bar, XAxis, CartesianGrid, Area, AreaChart } from "recharts";
 import { TrendingUp, AlertTriangle } from "lucide-react";
+import { useState } from "react";
 
 // Chart configurations
 const chartConfig = {
@@ -111,7 +112,7 @@ const inventoryColumns = [
 
 // Analytics Dashboard Page
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = React.useState("30d");
+  const [timeRange, setTimeRange] = useState("30d");
 
   // Fetch analytics data from API
   const {

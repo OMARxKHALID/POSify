@@ -16,10 +16,14 @@ export const ADMIN_ROUTES = {
   OVERVIEW: "/admin/dashboard/overview",
   ANALYTICS: "/admin/dashboard/analytics",
   SETTINGS: "/admin/dashboard/settings",
+  ORGANIZATION: "/admin/dashboard/organization",
   USERS: "/admin/dashboard/users",
   AUDIT_LOGS: "/admin/dashboard/audit-logs",
   MENU: "/admin/dashboard/menu",
   CATEGORIES: "/admin/dashboard/categories",
+  ORDERS: "/admin/dashboard/orders",
+  REPORTS: "/admin/dashboard/reports",
+  NOTIFICATIONS: "/admin/dashboard/notifications",
 };
 
 // Organization Routes

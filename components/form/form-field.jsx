@@ -56,8 +56,8 @@ export function FormField({
             </SelectTrigger>
           </FormControl>
           <SelectContent>
-            {options?.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+            {options?.map((option, index) => (
+              <SelectItem key={`${option.value}-${index}`} value={option.value}>
                 {option.label}
               </SelectItem>
             ))}
