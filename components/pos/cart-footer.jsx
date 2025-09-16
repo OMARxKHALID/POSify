@@ -15,6 +15,9 @@ export function CartFooter({
   onRemoveCartDiscount,
   currency,
   settings,
+  isLoading = false,
+  hasError = false,
+  onRetrySettings,
 }) {
   const subtotalAfterDiscounts =
     totals.subtotal - totals.itemDiscounts - totals.discount;
@@ -98,9 +101,29 @@ export function CartFooter({
             Apply Discount
           </Button>
         )}
-        <Button onClick={onPaymentModalOpen} className="w-full" size="sm">
-          Proceed to Payment
-        </Button>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-2 text-sm text-muted-foreground">
+            Loading settings...
+          </div>
+        ) : hasError ? (
+          <div className="space-y-2">
+            <div className="text-xs text-red-600 text-center">
+              Settings failed to load
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRetrySettings}
+              className="w-full"
+            >
+              Retry
+            </Button>
+          </div>
+        ) : (
+          <Button onClick={onPaymentModalOpen} className="w-full" size="sm">
+            Proceed to Payment
+          </Button>
+        )}
       </div>
     </div>
   );

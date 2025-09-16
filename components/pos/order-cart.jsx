@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useCartStore } from "@/lib/store/use-cart-store";
@@ -13,13 +13,131 @@ import { DiscountModal } from "./discount-modal";
 import { CartHeader } from "./cart-header";
 import { CartFooter } from "./cart-footer";
 import { CartItemsList } from "./cart-items-list";
+import { generateIdempotencyKey } from "@/lib/utils";
 
-function generateIdempotencyKey() {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
+/**
+ * Prepare order data for submission
+ */
+const prepareOrderData = (
+  orderItems,
+  totals,
+  orgSettings,
+  customerData,
+  idempotencyKey
+) => {
+  const {
+    customerName,
+    paymentMethod,
+    mobileNumber,
+    deliveryType,
+    tip = 0,
+  } = customerData;
+
+  const subtotalAfterDiscounts =
+    totals.subtotal - totals.itemDiscounts - totals.discount;
+  const taxBreakdown = getTaxBreakdown(
+    subtotalAfterDiscounts,
+    orgSettings?.taxes
+  );
+
+  const deliveryCharge =
+    deliveryType === "delivery"
+      ? orgSettings?.operational?.deliverySettings?.deliveryCharge || 0
+      : 0;
+
+  let serviceCharge = 0;
+  if (orgSettings?.business?.serviceCharge?.enabled) {
+    const base =
+      orgSettings.business.serviceCharge.applyOn === "total"
+        ? totals.total
+        : totals.subtotal;
+    serviceCharge =
+      (orgSettings.business.serviceCharge.percentage / 100) * base;
   }
-  return Date.now().toString(36) + Math.random().toString(36).slice(2);
-}
+
+  return {
+    organizationId: orgSettings?.organizationId,
+    items: orderItems.map((item) => ({
+      menuItem: item._id || item.id,
+      name: item.name || "Unknown Item",
+      quantity: Number(item.quantity || 1),
+      price: Number(item.price || 0),
+      discount: Number(item.discount || 0),
+      prepTime: Number(item.prepTime || 15),
+    })),
+    customerName: customerName?.trim() || "Guest",
+    mobileNumber: mobileNumber?.trim() || "",
+    subtotal: Number(totals.subtotal),
+    total: Number(totals.total + deliveryCharge + serviceCharge + tip),
+    paymentMethod,
+    status:
+      orgSettings?.operational?.orderManagement?.defaultStatus || "pending",
+    deliveryType: deliveryType || "dine-in",
+    tax:
+      taxBreakdown?.length > 0
+        ? taxBreakdown.map((tax) => ({
+            id: tax.id || `tax-${tax.name.toLowerCase().replace(/\s+/g, "-")}`,
+            name: tax.name,
+            rate: tax.rate,
+            type: "percentage",
+            amount: Number(tax.amount),
+          }))
+        : [],
+    discount: Number(totals.discount + totals.itemDiscounts),
+    promoDiscount: 0,
+    serviceCharge: Number(serviceCharge),
+    tip: Number(tip),
+    isPaid: false,
+    refundStatus: "none",
+    returns: [],
+    deliveryInfo: {
+      address: "",
+      deliveryCharge: Number(deliveryCharge),
+      estimatedDeliveryTime: undefined,
+      deliveryStatus: "pending",
+      deliveryPartner: "",
+    },
+    notes: "",
+    idempotencyKey,
+  };
+};
+
+/**
+ * Validate order prerequisites
+ */
+const validateOrderPrerequisites = (
+  orderItems,
+  status,
+  settingsLoading,
+  settingsError
+) => {
+  if (!orderItems.length) {
+    return { isValid: false, error: "No items in cart" };
+  }
+
+  if (status !== "authenticated") {
+    return {
+      isValid: false,
+      error: "You must be logged in to place an order.",
+    };
+  }
+
+  if (settingsLoading) {
+    return {
+      isValid: false,
+      error: "Settings are still loading. Please wait and try again.",
+    };
+  }
+
+  if (settingsError) {
+    return {
+      isValid: false,
+      error: "Failed to load settings. Please refresh and try again.",
+    };
+  }
+
+  return { isValid: true };
+};
 
 export function OrderCart({ toggleCart, isMobile = false }) {
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
@@ -46,203 +164,91 @@ export function OrderCart({ toggleCart, isMobile = false }) {
   } = useSettings();
 
   const createOrder = useCreateOrder();
+
   const currency = settings?.currency || "USD";
   const hasItems = orderItems.length > 0;
   const totalItems = getTotalQuantity();
-
   const totals = useCartCalculations(orderItems, cartDiscount, settings?.taxes);
 
-  const handlePlaceOrder = useCallback(
-    async (
-      customerName,
-      paymentMethod,
-      mobileNumber,
-      deliveryType,
-      tableNumber,
-      tip = 0
-    ) => {
-      if (!orderItems.length) return;
-      if (status !== "authenticated") {
-        toast.error("You must be logged in to place an order.");
-        return;
-      }
-      if (isSubmitting) return;
-      if (settingsLoading) {
-        toast.error("Settings are still loading. Please wait and try again.");
-        return;
-      }
-      if (settingsError) {
-        toast.error("Failed to load settings. Please refresh and try again.");
-        return;
-      }
+  const handlePlaceOrder = async (
+    customerName,
+    paymentMethod,
+    mobileNumber,
+    deliveryType,
+    tip = 0
+  ) => {
+    // Early validation
+    const validation = validateOrderPrerequisites(
+      orderItems,
+      status,
+      settingsLoading,
+      settingsError
+    );
+    if (!validation.isValid) {
+      toast.error(validation.error);
+      return;
+    }
 
-      let orgSettings = settings;
-      if (!settings?.organizationId) {
-        try {
-          const result = await refetchSettings();
-          if (!result?.data?.organizationId) {
-            toast.error(
-              "Organization not found. Please refresh and try again."
-            );
-            return;
-          }
-          orgSettings = result.data;
-        } catch {
+    if (isSubmitting) return;
+
+    // Ensure we have organization settings
+    let orgSettings = settings;
+    if (!settings?.organizationId) {
+      try {
+        const result = await refetchSettings();
+        if (!result?.data?.organizationId) {
           toast.error("Organization not found. Please refresh and try again.");
           return;
         }
+        orgSettings = result.data;
+      } catch {
+        toast.error("Organization not found. Please refresh and try again.");
+        return;
       }
+    }
 
-      setIsSubmitting(true);
-      const idempotencyKey = pendingOrderKey || generateIdempotencyKey();
-      setPendingOrderKey(idempotencyKey);
+    setIsSubmitting(true);
+    const idempotencyKey = pendingOrderKey || generateIdempotencyKey();
+    setPendingOrderKey(idempotencyKey);
 
-      const subtotalAfterDiscounts =
-        totals.subtotal - totals.itemDiscounts - totals.discount;
-      const taxBreakdown = getTaxBreakdown(
-        subtotalAfterDiscounts,
-        orgSettings?.taxes
+    try {
+      // Prepare order data using extracted utility
+      const orderData = prepareOrderData(
+        orderItems,
+        totals,
+        orgSettings,
+        { customerName, paymentMethod, mobileNumber, deliveryType, tip },
+        idempotencyKey
       );
 
-      const deliveryCharge =
-        deliveryType === "delivery"
-          ? orgSettings?.operational?.deliverySettings?.deliveryCharge || 0
-          : 0;
+      // Submit order
+      const response = await createOrder.mutateAsync(orderData);
 
-      let serviceCharge = 0;
-      if (orgSettings?.business?.serviceCharge?.enabled) {
-        const base =
-          orgSettings.business.serviceCharge.applyOn === "total"
-            ? totals.total
-            : totals.subtotal;
-        serviceCharge =
-          (orgSettings.business.serviceCharge.percentage / 100) * base;
-      }
+      // Success handling
+      clearCart();
+      setPendingOrderKey(null);
+      setPaymentModalOpen(false);
 
-      const orderData = {
-        organizationId: orgSettings?.organizationId,
-        items: orderItems.map((item) => ({
-          menuItem: item._id || item.id,
-          name: item.name || "Unknown Item",
-          quantity: Number(item.quantity || 1),
-          price: Number(item.price || 0),
-          discount: Number(item.discount || 0),
-          prepTime: Number(item.prepTime || 15),
-        })),
-        tableNumber: tableNumber || "",
-        customerName: customerName?.trim() || "Guest",
-        mobileNumber: mobileNumber?.trim() || "",
-        subtotal: Number(totals.subtotal),
-        total: Number(totals.total + deliveryCharge + serviceCharge + tip),
-        paymentMethod,
-        status:
-          orgSettings?.operational?.orderManagement?.defaultStatus || "pending",
-        deliveryType: deliveryType || "dine-in",
-        tax:
-          taxBreakdown?.length > 0
-            ? taxBreakdown.map((tax) => ({
-                id:
-                  tax.id ||
-                  `tax-${tax.name.toLowerCase().replace(/\s+/g, "-")}`,
-                name: tax.name,
-                rate: tax.rate,
-                type: "percentage",
-                amount: Number(tax.amount),
-              }))
-            : [],
-        discount: Number(totals.discount + totals.itemDiscounts),
-        promoDiscount: 0,
-        couponCode: "",
-        serviceCharge: Number(serviceCharge),
-        tip: Number(tip),
-        isPaid: false,
-        refundStatus: "none",
-        returns: [],
-        deliveryInfo: {
-          address: "",
-          deliveryCharge: Number(deliveryCharge),
-          estimatedDeliveryTime: undefined,
-          deliveryStatus: "pending",
-          deliveryPartner: "",
-        },
-        notes: "",
-        source: "pos",
-        idempotencyKey,
-      };
+      if (isMobile) toggleCart();
+    } catch (error) {
+      console.error("Order placement failed:", error);
+      toast.error("Order Failed", {
+        id: idempotencyKey,
+        description:
+          error?.message || "Failed to place order. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-      try {
-        const response = await createOrder.mutateAsync(orderData);
-        clearCart();
-        setPendingOrderKey(null);
+  // Show cart items immediately, handle settings loading separately
+  const showSettingsError = settingsError && !settings;
+  const showSettingsLoading = settingsLoading && !settings;
 
-        toast.success("Order completed successfully!", {
-          id: idempotencyKey,
-          description: `Order #${response?.orderNumber || "N/A"} for ${
-            customerName || "Guest"
-          }`,
-        });
-
-        setPaymentModalOpen(false);
-        if (isMobile) toggleCart();
-      } catch (error) {
-        console.error("Order placement failed:", error);
-        toast.error("Order Failed", {
-          id: idempotencyKey,
-          description:
-            error?.message || "Failed to place order. Please try again.",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [
-      orderItems,
-      totals,
-      isMobile,
-      status,
-      settings,
-      settingsLoading,
-      settingsError,
-      toggleCart,
-      createOrder,
-      isSubmitting,
-      pendingOrderKey,
-      clearCart,
-      refetchSettings,
-    ]
-  );
-
-  if (settingsLoading) {
-    return (
-      <div className="flex flex-col h-full min-h-0">
-        <CartHeader
-          totalItems={0}
-          onClearCart={() => {}}
-          onToggleCart={toggleCart}
-          isMobile={isMobile}
-        />
-        <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">
-          Loading settings...
-        </div>
-      </div>
-    );
-  }
-
-  if (settingsError) {
-    return (
-      <div className="flex flex-col h-full min-h-0">
-        <CartHeader
-          totalItems={0}
-          onClearCart={() => {}}
-          onToggleCart={toggleCart}
-          isMobile={isMobile}
-        />
-        <div className="flex-1 flex items-center justify-center text-sm text-red-600">
-          Failed to load settings
-        </div>
-      </div>
-    );
-  }
+  // Simple modal handlers - no memoization needed
+  const handleDiscountModalOpen = () => setDiscountModalOpen(true);
+  const handleDiscountModalClose = () => setDiscountModalOpen(false);
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -270,11 +276,14 @@ export function OrderCart({ toggleCart, isMobile = false }) {
             <CartFooter
               totals={totals}
               cartDiscount={cartDiscount}
-              onDiscountModalOpen={() => setDiscountModalOpen(true)}
+              onDiscountModalOpen={handleDiscountModalOpen}
               onPaymentModalOpen={() => setPaymentModalOpen(true)}
               onRemoveCartDiscount={removeCartDiscount}
               currency={currency}
               settings={settings}
+              isLoading={showSettingsLoading}
+              hasError={showSettingsError}
+              onRetrySettings={refetchSettings}
             />
           </>
         )}
@@ -282,7 +291,7 @@ export function OrderCart({ toggleCart, isMobile = false }) {
 
       <DiscountModal
         open={discountModalOpen}
-        onClose={() => setDiscountModalOpen(false)}
+        onClose={handleDiscountModalClose}
       />
 
       <PaymentModal

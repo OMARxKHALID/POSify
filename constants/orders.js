@@ -15,8 +15,6 @@ export const ORDER_STATUSES = [
 
 export const REFUND_STATUSES = ["none", "partial", "full"];
 
-export const ORDER_SOURCES = ["web", "mobile", "pos", "api"];
-
 export const DELIVERY_TYPES = ["dine-in", "takeaway", "delivery"];
 
 export const DELIVERY_STATUSES = [

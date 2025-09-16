@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { CategoryNav } from "@/components/pos/category-nav";
 import { SearchBar } from "@/components/pos/search-bar";
 import { MenuGrid } from "@/components/pos/menu-grid";
@@ -18,11 +20,79 @@ import {
 import { PageLoading } from "@/components/ui/loading";
 import { useMounted } from "@/hooks/use-mounted";
 
+/**
+ * Login prompt component for unauthenticated users
+ */
+function LoginPrompt() {
+  const router = useRouter();
+
+  const handleLogin = () => {
+    router.push("/admin/login");
+  };
+
+  return (
+    <div className="h-screen w-full overflow-hidden flex items-center justify-center bg-background">
+      <div className="text-center text-muted-foreground max-w-md mx-auto p-6">
+        <div className="text-6xl mb-4">🔒</div>
+        <h3 className="text-lg font-semibold mb-2 text-foreground">
+          Login Required
+        </h3>
+        <p className="text-sm mb-6 text-muted-foreground">
+          You need to be logged in to access the POS system. Please sign in with
+          your staff or admin account.
+        </p>
+        <button
+          onClick={handleLogin}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+        >
+          Go to Login
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function POSpage() {
   const isMounted = useMounted();
+  const { data: session, status } = useSession();
 
   if (!isMounted) {
     return <PageLoading />;
+  }
+
+  // Show loading while checking authentication
+  if (status === "loading") {
+    return <PageLoading />;
+  }
+
+  // Show login prompt if not authenticated
+  if (status === "unauthenticated" || !session) {
+    return <LoginPrompt />;
+  }
+
+  // Check if user has required role (admin or staff)
+  const userRole = session?.user?.role;
+  if (!userRole || !["admin", "staff"].includes(userRole)) {
+    return (
+      <div className="h-screen w-full overflow-hidden flex items-center justify-center bg-background">
+        <div className="text-center text-muted-foreground max-w-md mx-auto p-6">
+          <div className="text-6xl mb-4">🚫</div>
+          <h3 className="text-lg font-semibold mb-2 text-foreground">
+            Access Denied
+          </h3>
+          <p className="text-sm mb-6 text-muted-foreground">
+            You don't have the required permissions to access the POS system.
+            Only staff and admin users can use this feature.
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return <POSmain />;
@@ -80,7 +150,7 @@ export function POSmain() {
       {/* ---------------- Mobile Layout ---------------- */}
       <div className="flex flex-col h-full lg:hidden">
         <div className="flex flex-col flex-1 overflow-hidden bg-card">
-          <div className="flex-shrink-0 p-4 space-y-4">
+          <div className="flex-shrink-0 p-4 space-y-3">
             <POSHeader />
             <CategoryNav
               selectedCategory={selectedCategory}
@@ -130,7 +200,7 @@ export function POSmain() {
           <ResizablePanelGroup direction="horizontal" className="h-full">
             <ResizablePanel defaultSize={75} minSize={50}>
               <div className="flex flex-col h-full overflow-hidden bg-card">
-                <div className="flex-shrink-0 p-4 space-y-4">
+                <div className="flex-shrink-0 p-4 space-y-3">
                   <POSHeader />
                   <CategoryNav
                     selectedCategory={selectedCategory}
@@ -164,7 +234,7 @@ export function POSmain() {
           </ResizablePanelGroup>
         ) : (
           <div className="flex flex-col flex-1 overflow-hidden bg-card">
-            <div className="flex-shrink-0 p-4 space-y-4">
+            <div className="flex-shrink-0 p-4 space-y-3">
               <POSHeader />
               <CategoryNav
                 selectedCategory={selectedCategory}

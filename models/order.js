@@ -7,7 +7,6 @@ import {
   DELIVERY_TYPES,
   DELIVERY_STATUSES,
   REFUND_STATUSES,
-  ORDER_SOURCES,
   TAX_TYPES,
   DEFAULT_PREP_TIME,
   DEFAULT_CUSTOMER_NAME,
@@ -171,10 +170,6 @@ const OrderSchema = new Schema(
       type: String,
       trim: true,
     },
-    tableNumber: {
-      type: String,
-      trim: true,
-    },
     deliveryType: {
       type: String,
       enum: DELIVERY_TYPES,
@@ -195,10 +190,6 @@ const OrderSchema = new Schema(
     promoDiscount: {
       type: Number,
       default: 0,
-    },
-    couponCode: {
-      type: String,
-      trim: true,
     },
     serviceCharge: {
       type: Number,
@@ -229,11 +220,6 @@ const OrderSchema = new Schema(
     notes: {
       type: String,
       trim: true,
-    },
-    source: {
-      type: String,
-      enum: ORDER_SOURCES,
-      default: "pos",
     },
 
     // Delivery information

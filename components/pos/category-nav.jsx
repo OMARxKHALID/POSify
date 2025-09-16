@@ -15,9 +15,10 @@ export function CategoryNav({
       return menuItems.length;
     }
     return menuItems.filter((item) => {
+      // Handle both populated category object and categoryId string
       const itemCategoryId =
-        item.categoryId ||
         (item.category && (item.category.id || item.category._id)) ||
+        item.categoryId ||
         (typeof item.category === "string" ? item.category : null);
       return itemCategoryId === categoryId;
     }).length;
@@ -42,7 +43,7 @@ export function CategoryNav({
   // Show loading state when loading or no categories
   if (isLoading || categories.length === 0) {
     return (
-      <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide max-w-full pb-3">
+      <div className="flex gap-2 mb-2 pb-3 overflow-x-auto scrollbar-hide max-w-full">
         {[...Array(5)].map((_, idx) => (
           <div
             key={idx}
@@ -62,7 +63,7 @@ export function CategoryNav({
   }
 
   return (
-    <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide max-w-full pb-3">
+    <div className="flex gap-2 mb-2 pb-3 overflow-x-auto scrollbar-hide max-w-full">
       {displayCategories.map((cat, idx) => {
         const selected = selectedCategory === cat.id;
         return (

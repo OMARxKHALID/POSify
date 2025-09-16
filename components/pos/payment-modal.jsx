@@ -46,7 +46,6 @@ export function PaymentModal({
       paymentMethod: "",
       mobileNumber: "",
       deliveryType: "dine-in",
-      tableNumber: "",
       tip: 0,
     },
   });
@@ -64,52 +63,22 @@ export function PaymentModal({
   }, [open, form]);
 
   const handleConfirmOrder = form.handleSubmit((data) => {
-    console.log("💳 [DEBUG] Payment Modal - Starting order confirmation:", {
-      ...data,
-      total,
-      tipPercentage,
-      tipAmount,
-      finalTotal,
-    });
-
     setError("");
 
     if (total <= 0) {
-      console.log(
-        "💳 [DEBUG] Payment Modal - Validation failed: Invalid total amount"
-      );
       setError("Order total must be greater than $0");
       return;
     }
 
     try {
-      console.log(
-        "💳 [DEBUG] Payment Modal - Calling onConfirm with parameters:",
-        {
-          customerName: data.customerName,
-          paymentMethod: data.paymentMethod,
-          mobileNumber: data.mobileNumber,
-          deliveryType: data.deliveryType,
-          tableNumber: data.tableNumber,
-          tip: tipAmount,
-        }
-      );
-
       onConfirm(
         data.customerName,
         data.paymentMethod,
         data.mobileNumber,
         data.deliveryType,
-        data.tableNumber,
         tipAmount
       );
-
-      console.log("💳 [DEBUG] Payment Modal - Order confirmation successful");
     } catch (error) {
-      console.error(
-        "💳 [DEBUG] Payment Modal - Order confirmation failed:",
-        error
-      );
       setError("Failed to place order. Please try again.");
       toast.error("Failed to place order");
     }

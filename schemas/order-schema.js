@@ -6,7 +6,6 @@ import {
   DELIVERY_TYPES,
   DELIVERY_STATUSES,
   REFUND_STATUSES,
-  ORDER_SOURCES,
   TAX_TYPES,
   DEFAULT_PREP_TIME,
   DEFAULT_CUSTOMER_NAME,
@@ -68,7 +67,6 @@ export const paymentFormSchema = z.object({
   }),
   mobileNumber: z.string().trim().optional(),
   deliveryType: z.enum(DELIVERY_TYPES).default("dine-in"),
-  tableNumber: z.string().trim().optional(),
   tip: z.number().min(0).default(0),
 });
 
@@ -109,7 +107,6 @@ export const orderSchema = organizationBaseSchema.extend({
   // Optional fields
   customerName: z.string().trim().default(DEFAULT_CUSTOMER_NAME),
   mobileNumber: z.string().trim().optional(),
-  tableNumber: z.string().trim().optional(),
   status: z.enum(ORDER_STATUSES).default("pending"),
   deliveryType: z.enum(DELIVERY_TYPES).default("dine-in"),
   servedBy: z.string().optional(), // User ID reference
@@ -118,7 +115,6 @@ export const orderSchema = organizationBaseSchema.extend({
   tax: z.array(taxSchema).default([]),
   discount: z.number().min(0).default(0),
   promoDiscount: z.number().min(0).default(0),
-  couponCode: z.string().trim().optional(),
   serviceCharge: z.number().min(0).default(0),
   tip: z.number().min(0).default(0),
 
@@ -131,7 +127,6 @@ export const orderSchema = organizationBaseSchema.extend({
   deliveryInfo: deliveryInfoSchema.default({}),
 
   // Order details
-  source: z.enum(ORDER_SOURCES).default("pos"),
   notes: z.string().trim().optional(),
   idempotencyKey: z.string().trim().optional(),
 

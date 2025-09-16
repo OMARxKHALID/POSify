@@ -57,31 +57,17 @@ export function ItemDetailModal({
       return;
     }
 
-    console.log("🛒 [DEBUG] Starting add to cart process:", {
-      item: {
-        id: normalizedItem._id,
-        name: normalizedItem.name,
-        price: normalizedItem.price,
-        available: normalizedItem.available,
-      },
-      quantity: data.quantity,
-    });
-
     setIsAdding(true);
 
     const cartItem = normalizedItem;
 
-    console.log("🛒 [DEBUG] Cart item prepared:", cartItem);
-
     try {
       addToCart(cartItem, data.quantity);
-      console.log("🛒 [DEBUG] Item successfully added to cart");
 
       form.reset();
-      toast.success(`${normalizedItem.name} added to cart`);
       onClose();
     } catch (error) {
-      console.error("🛒 [DEBUG] Failed to add item to cart:", error);
+      console.error("Failed to add item to cart:", error);
       toast.error("Failed to add item to cart");
     } finally {
       setIsAdding(false);

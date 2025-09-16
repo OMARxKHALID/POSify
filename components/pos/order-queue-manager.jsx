@@ -59,38 +59,9 @@ const OrderItemDisplay = ({ items }) => (
 export function OrderQueueManager({ trigger }) {
   const [isSyncing] = useState(false);
 
-  const mockQueuedOrders = [
-    {
-      id: "1",
-      customerName: "John Doe",
-      orderNumber: "A101",
-      tableNumber: "5",
-      queuedAt: new Date(),
-      items: [
-        { name: "Burger", quantity: 2 },
-        { name: "Fries", quantity: 1 },
-      ],
-      total: 18.5,
-    },
-    {
-      id: "2",
-      customerName: "Jane Smith",
-      orderNumber: "A102",
-      queuedAt: new Date(),
-      items: [{ name: "Pizza", quantity: 1 }],
-      total: 12.0,
-    },
-  ];
-
-  const mockFailedOrders = [
-    {
-      id: "f1",
-      customerName: "Alice",
-      total: 25.0,
-      error: "Network error",
-      items: [{ name: "Pasta", quantity: 2 }],
-    },
-  ];
+  // TODO: Replace with real data from API
+  const mockQueuedOrders = [];
+  const mockFailedOrders = [];
 
   const renderFailedOrders = () =>
     mockFailedOrders.length > 0 && (
@@ -147,9 +118,6 @@ export function OrderQueueManager({ trigger }) {
                 </h3>
                 {o.orderNumber && (
                   <Badge variant="secondary">Order: {o.orderNumber}</Badge>
-                )}
-                {o.tableNumber && (
-                  <Badge variant="outline">Table: {o.tableNumber}</Badge>
                 )}
               </div>
 
