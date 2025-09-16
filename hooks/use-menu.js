@@ -4,9 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
 import { apiClient } from "@/lib/api-client";
-import { mockMenuItems } from "@/lib/mockup-data";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
@@ -16,33 +14,21 @@ import {
 } from "@/lib/hooks/hook-utils";
 
 /**
- * Hook to fetch menu items based on authenticated user's role and permissions
+ * Hook to fetch menu items
  */
 export const useMenu = (options = {}) => {
-  const { data: session } = useSession();
-
   const queryOptions = getDefaultQueryOptions({
-    staleTime: 3 * 60 * 1000, // 3 minutes (menu data changes moderately)
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    staleTime: 3 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     ...options,
   });
 
   return useQuery({
-    queryKey: [...queryKeys.menu, session?.user?.id], // Include session user ID in query key to force refresh on session change
+    queryKey: queryKeys.menu,
     queryFn: async () => {
-      try {
-        const data = await apiClient.get("/dashboard/menu");
-        return data;
-      } catch (error) {
-        // Fallback to mock data if API is not available
-        console.warn("Menu API not available, using mock data:", error.message);
-        return {
-          menuItems: mockMenuItems,
-          success: true,
-          message: "Using mock data",
-        };
-      }
+      const data = await apiClient.get("/dashboard/menu");
+      return data;
     },
     ...queryOptions,
   });
@@ -50,7 +36,7 @@ export const useMenu = (options = {}) => {
 
 /**
  * Menu Item Creation Hook
- * Creates a new menu item (admin only)
+ * Creates a new menu item
  */
 export const useCreateMenuItem = () => {
   const queryClient = useQueryClient();

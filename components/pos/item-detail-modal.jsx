@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit3, Clock, DollarSign } from "lucide-react";
+import { Plus, Clock, DollarSign } from "lucide-react";
 
 import {
   Dialog,
@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { QuantityControl } from "@/components/ui/quantity-control";
 import { useCartStore } from "@/lib/store/use-cart-store";
@@ -40,8 +39,7 @@ export function ItemDetailModal({
 
   const isAvailable = item.available !== false;
 
-  const handleAddToCart = async (e) => {
-    e.preventDefault();
+  const handleAddToCart = async () => {
     if (!item || !isAvailable) return;
 
     setIsAdding(true);
@@ -66,57 +64,53 @@ export function ItemDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm mx-auto p-4">
-        <DialogHeader className="pb-2">
+      <DialogContent className="max-w-sm mx-auto flex flex-col p-4">
+        <DialogHeader className="flex-shrink-0 pb-2">
           <DialogTitle className="text-lg">Item Details</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Item Info */}
-          <Card>
-            <CardContent className="p-3">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <div className="w-14 h-14 rounded-md bg-muted flex items-center justify-center text-xl">
-                    {item.icon}
-                  </div>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm mb-1">{item.name}</h3>
-
-                  <p className="text-xs text-muted-foreground mb-1 line-clamp-2">
-                    {item.description}
-                  </p>
-
-                  <div className="flex items-center gap-3 text-xs">
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="h-3 w-3" />
-                      <span className="font-semibold text-primary">
-                        ${item.price.toFixed(2)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      <span>{item.prepTime || 10} min</span>
-                    </div>
-                  </div>
-
-                  {!isAvailable && (
-                    <Badge variant="secondary" className="mt-1 text-xs">
-                      Unavailable
-                    </Badge>
-                  )}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 space-y-4 overflow-y-auto pr-1">
+            {/* Item Info */}
+            <div className="flex items-start gap-3 p-3 bg-muted rounded-md">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 rounded-md bg-background flex items-center justify-center text-xl">
+                  {item.icon}
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Customization Form */}
-          <form onSubmit={handleAddToCart} className="space-y-3">
-            <div className="space-y-1">
-              <label className="text-xs font-medium">Quantity</label>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm mb-1">{item.name}</h3>
+
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                  {item.description}
+                </p>
+
+                <div className="flex items-center gap-3 text-xs">
+                  <div className="flex items-center gap-1">
+                    <DollarSign className="h-3 w-3" />
+                    <span className="font-semibold text-primary">
+                      ${item.price.toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    <span>{item.prepTime || 10} min</span>
+                  </div>
+                </div>
+
+                {!isAvailable && (
+                  <Badge variant="secondary" className="mt-2 text-xs">
+                    Unavailable
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {/* Quantity */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Quantity</label>
               <QuantityControl
                 value={quantity}
                 onChange={setQuantity}
@@ -126,10 +120,10 @@ export function ItemDetailModal({
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-medium flex items-center gap-1">
-                <Edit3 className="h-3 w-3" />
-                Instructions
+            {/* Special Instructions */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Special Instructions
               </label>
               <Textarea
                 value={specialInstructions}
@@ -139,47 +133,46 @@ export function ItemDetailModal({
               />
             </div>
 
-            <Separator />
-
             {/* Total */}
-            <div className="flex items-center justify-between text-sm font-semibold">
-              <span>Total:</span>
-              <span className="text-primary">
-                ${(item.price * quantity).toFixed(2)}
-              </span>
+            <div className="bg-muted p-3 rounded-md">
+              <div className="flex items-center justify-between text-sm font-semibold">
+                <span>Total:</span>
+                <span className="text-primary">
+                  ${(item.price * quantity).toFixed(2)}
+                </span>
+              </div>
             </div>
+          </div>
 
-            {/* Actions */}
-            <div className="flex gap-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                size="sm"
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={!isAvailable || isAdding}
-                size="sm"
-                className="flex-1"
-              >
-                {isAdding ? (
-                  <>
-                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-3 w-3 mr-1" />
-                    Add
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
+          {/* Actions */}
+          <div className="flex gap-2 pt-4 flex-shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1 h-9"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={!isAvailable || isAdding}
+              className="flex-1 h-9"
+            >
+              {isAdding ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add to Cart
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

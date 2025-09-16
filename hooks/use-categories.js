@@ -4,9 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
 import { apiClient } from "@/lib/api-client";
-import { mockCategories } from "@/lib/mockup-data";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
@@ -16,36 +14,21 @@ import {
 } from "@/lib/hooks/hook-utils";
 
 /**
- * Hook to fetch categories based on authenticated user's role and permissions
+ * Hook to fetch categories
  */
 export const useCategories = (options = {}) => {
-  const { data: session } = useSession();
-
   const queryOptions = getDefaultQueryOptions({
-    staleTime: 3 * 60 * 1000, // 3 minutes (categories data changes moderately)
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    staleTime: 3 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     ...options,
   });
 
   return useQuery({
-    queryKey: [...queryKeys.categories, session?.user?.id], // Include session user ID in query key to force refresh on session change
+    queryKey: queryKeys.categories,
     queryFn: async () => {
-      try {
-        const data = await apiClient.get("/dashboard/categories");
-        return data;
-      } catch (error) {
-        // Fallback to mock data if API is not available
-        console.warn(
-          "Categories API not available, using mock data:",
-          error.message
-        );
-        return {
-          categories: mockCategories,
-          success: true,
-          message: "Using mock data",
-        };
-      }
+      const data = await apiClient.get("/dashboard/categories");
+      return data;
     },
     ...queryOptions,
   });
@@ -53,7 +36,7 @@ export const useCategories = (options = {}) => {
 
 /**
  * Category Creation Hook
- * Creates a new category (admin only)
+ * Creates a new category
  */
 export const useCreateCategory = () => {
   const queryClient = useQueryClient();

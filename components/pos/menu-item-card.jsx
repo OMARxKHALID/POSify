@@ -6,18 +6,49 @@ import { cn } from "@/lib/utils";
 
 export function MenuItemCard({ item, onItemSelect }) {
   const getCategoryColor = (category) => {
-    switch (category.toLowerCase()) {
-      case "burger":
-        return "bg-amber-100 text-amber-800";
-      case "pizza":
-        return "bg-red-100 text-red-800";
-      case "sushi":
-        return "bg-green-100 text-green-800";
-      case "drink":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+    if (!category) return "bg-muted text-muted-foreground";
+
+    const categoryName =
+      typeof category === "string" ? category : category.name || "";
+
+    const colorMap = {
+      burger: "bg-amber-100 text-amber-800",
+      pizza: "bg-red-100 text-red-800",
+      sushi: "bg-green-100 text-green-800",
+      drink: "bg-blue-100 text-blue-800",
+      dessert: "bg-purple-100 text-purple-800",
+      salad: "bg-green-100 text-green-800",
+      pasta: "bg-orange-100 text-orange-800",
+      appetizer: "bg-yellow-100 text-yellow-800",
+    };
+
+    return (
+      colorMap[categoryName.toLowerCase()] || "bg-muted text-muted-foreground"
+    );
+  };
+
+  const getCategoryName = (category) => {
+    if (!category) return "Unknown";
+    return typeof category === "string" ? category : category.name || "Unknown";
+  };
+
+  const getItemIcon = (item) => {
+    if (item.icon) return item.icon;
+
+    const categoryName = getCategoryName(item.category).toLowerCase();
+
+    const iconMap = {
+      burger: "🍔",
+      pizza: "🍕",
+      sushi: "🍣",
+      drink: "🥤",
+      dessert: "🍰",
+      salad: "🥗",
+      pasta: "🍝",
+      appetizer: "🍗",
+    };
+
+    return iconMap[categoryName] || "🍽️";
   };
 
   return (
@@ -27,12 +58,12 @@ export function MenuItemCard({ item, onItemSelect }) {
     >
       <CardContent className="p-0 h-full flex flex-col">
         <div className="flex-1 bg-card flex items-center justify-center">
-          <span className="text-4xl">{item.icon}</span>
+          <span className="text-4xl">{getItemIcon(item)}</span>
         </div>
 
         <div className="p-3 flex flex-col items-start space-y-2 bg-card">
           <h3 className="text-sm font-semibold text-card-foreground leading-tight line-clamp-2">
-            {item.name}
+            {item.name || "Unnamed Item"}
           </h3>
 
           <div className="flex items-center justify-between w-full">
@@ -42,10 +73,10 @@ export function MenuItemCard({ item, onItemSelect }) {
                 getCategoryColor(item.category)
               )}
             >
-              {item.category}
+              {getCategoryName(item.category)}
             </Badge>
             <p className="text-sm font-bold text-card-foreground">
-              ${item.price.toFixed(2)}
+              ${(item.price || 0).toFixed(2)}
             </p>
           </div>
         </div>
