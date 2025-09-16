@@ -29,8 +29,8 @@ const handleTaxesData = async (queryParams, request) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
-    // Only admin can access settings
-    if (!hasRole(currentUser, ["admin"])) {
+    // Admin and staff can access settings (staff need it for order creation)
+    if (!hasRole(currentUser, ["admin", "staff"])) {
       return forbidden("INSUFFICIENT_PERMISSIONS");
     }
 
@@ -60,8 +60,8 @@ const handleTaxesUpdate = async (validatedData, request) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
-    // Only admin can update settings
-    if (!hasRole(currentUser, ["admin"])) {
+    // Admin and staff can update settings (staff need it for order creation)
+    if (!hasRole(currentUser, ["admin", "staff"])) {
       return forbidden("INSUFFICIENT_PERMISSIONS");
     }
 
@@ -108,6 +108,6 @@ export const GET = createGetHandler(handleTaxesData);
  * POST /api/dashboard/settings/taxes
  * Update tax settings
  */
-export const POST = createPostHandler(handleTaxesUpdate, taxesUpdateSchema);
+export const POST = createPostHandler(taxesUpdateSchema, handleTaxesUpdate);
 
 export const { PUT, DELETE } = createMethodHandler(["GET", "POST"]);

@@ -51,14 +51,6 @@ const OrderItemSchema = new Schema(
       type: Number,
       default: DEFAULT_PREP_TIME,
     },
-    specialInstructions: {
-      type: String,
-      trim: true,
-    },
-    bulkPriceApplied: {
-      type: Boolean,
-      default: false,
-    },
   },
   { _id: false }
 );
@@ -268,42 +260,6 @@ const OrderSchema = new Schema(
       },
     },
 
-    // Kitchen information
-    kitchenInfo: {
-      prepStartTime: {
-        type: Date,
-      },
-      prepCompleteTime: {
-        type: Date,
-      },
-      estimatedPrepTime: {
-        type: Number,
-      },
-      kitchenNotes: {
-        type: String,
-        trim: true,
-      },
-    },
-
-    // Manager approval
-    managerApproval: {
-      required: {
-        type: Boolean,
-        default: false,
-      },
-      approvedBy: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-      approvedAt: {
-        type: Date,
-      },
-      reason: {
-        type: String,
-        trim: true,
-      },
-    },
-
     idempotencyKey: {
       type: String,
       trim: true,
@@ -321,7 +277,6 @@ OrderSchema.index({ organizationId: 1, status: 1 });
 OrderSchema.index({ organizationId: 1, servedBy: 1 });
 OrderSchema.index({ organizationId: 1, deliveryType: 1 });
 OrderSchema.index({ organizationId: 1, "deliveryInfo.deliveryStatus": 1 });
-OrderSchema.index({ organizationId: 1, "kitchenInfo.prepStartTime": 1 });
 OrderSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
 
 // Additional indexes for common query patterns

@@ -68,15 +68,49 @@ export const useCreateOrder = () => {
 
   return useMutation({
     mutationFn: async (orderData) => {
+      console.log("🔄 [DEBUG] useCreateOrder - Starting order creation:", {
+        orderData: {
+          ...orderData,
+          items: orderData.items?.map((item) => ({
+            menuItem: item.menuItem,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        },
+        organizationId: orderData.organizationId,
+        itemsCount: orderData.items?.length,
+        total: orderData.total,
+        customerName: orderData.customerName,
+        paymentMethod: orderData.paymentMethod,
+      });
+
       const response = await apiClient.post(
         "/dashboard/orders/create",
         orderData
       );
+
+      console.log(
+        "🔄 [DEBUG] useCreateOrder - Order creation response:",
+        response
+      );
       return response;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log(
+        "🔄 [DEBUG] useCreateOrder - Order creation successful:",
+        data
+      );
       invalidateQueries.orders(queryClient);
       handleHookSuccess("ORDER_CREATED_SUCCESSFULLY");
+    },
+    onError: (error) => {
+      console.error("🔄 [DEBUG] useCreateOrder - Order creation failed:", {
+        error: error.message,
+        code: error.code,
+        statusCode: error.statusCode,
+        details: error.details,
+      });
     },
     ...getDefaultMutationOptions({ operation: "Order creation" }),
   });

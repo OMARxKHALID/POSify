@@ -24,8 +24,8 @@ const handlePaymentData = async (queryParams, request) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
-    // Only admin can access settings
-    if (!hasRole(currentUser, ["admin"])) {
+    // Admin and staff can access settings (staff need it for order creation)
+    if (!hasRole(currentUser, ["admin", "staff"])) {
       return forbidden("INSUFFICIENT_PERMISSIONS");
     }
 
@@ -58,8 +58,8 @@ const handlePaymentUpdate = async (validatedData, request) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
-    // Only admin can update settings
-    if (!hasRole(currentUser, ["admin"])) {
+    // Admin and staff can update settings (staff need it for order creation)
+    if (!hasRole(currentUser, ["admin", "staff"])) {
       return forbidden("INSUFFICIENT_PERMISSIONS");
     }
 
@@ -110,8 +110,8 @@ export const GET = createGetHandler(handlePaymentData);
  * Update payment settings
  */
 export const POST = createPostHandler(
-  handlePaymentUpdate,
-  paymentSettingsSchema
+  paymentSettingsSchema,
+  handlePaymentUpdate
 );
 
 export const { PUT, DELETE } = createMethodHandler(["GET", "POST"]);

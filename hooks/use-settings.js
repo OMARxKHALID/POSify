@@ -21,18 +21,99 @@ export const useSettings = (options = {}) => {
   const { data: session } = useSession();
 
   const queryOptions = getDefaultQueryOptions({
-    staleTime: 10 * 60 * 1000, // 10 minutes (settings don't change frequently)
-    refetchOnMount: false, // Don't refetch on mount unless needed
+    staleTime: 5 * 60 * 1000, // 5 minutes (settings don't change frequently)
+    refetchOnMount: false, // Don't refetch on mount to prevent multiple requests
     refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
+    retry: 1, // Only retry once to prevent multiple requests
     ...options,
   });
 
+  const queryKey = [...queryKeys.settings(), session?.user?.id];
+
+  console.log(
+    "🔧 [DEBUG] useSettings - Query key:",
+    queryKey,
+    "Session user ID:",
+    session?.user?.id
+  );
+
   return useQuery({
-    queryKey: [...queryKeys.settings(), session?.user?.id],
+    queryKey,
     queryFn: async () => {
-      const data = await apiClient.get("/dashboard/settings");
-      return data;
+      console.log(
+        "🔧 [DEBUG] useSettings - Fetching settings for user:",
+        session?.user?.id,
+        "Timestamp:",
+        new Date().toISOString()
+      );
+      try {
+        const data = await apiClient.get("/dashboard/settings");
+        console.log("🔧 [DEBUG] useSettings - API response:", data);
+
+        // Extract data with fallbacks for robustness
+        const { settings, organization, currentUser } = data;
+        const organizationId = settings?.organizationId || organization?.id;
+        const userRole = currentUser?.role;
+
+        // Enhanced debugging to identify the issue
+        console.log("🔧 [DEBUG] useSettings - Extracted data:", {
+          settingsOrganizationId: settings?.organizationId,
+          organizationId: organization?.id,
+          finalOrganizationId: organizationId,
+          userRole,
+          hasSettings: !!settings,
+          hasOrganization: !!organization,
+          hasCurrentUser: !!currentUser,
+        });
+
+        // ✅ Future-proof data structure with proper organizationId extraction
+        const result = {
+          // Core settings data (flattened for easy access)
+          ...settings,
+
+          // Organization context
+          organizationId,
+          organizationName: organization?.name,
+          organization,
+
+          // User context
+          currentUser,
+          userRole,
+          userId: currentUser?.id,
+
+          // Role-based convenience flags
+          isAdmin: userRole === "admin",
+          isStaff: userRole === "staff",
+          isOwner:
+            userRole === "admin" && organization?.owner === currentUser?.id,
+
+          // Raw response for advanced use cases
+          _raw: data,
+        };
+
+        // Additional validation to ensure organizationId is present
+        if (!result.organizationId) {
+          console.error(
+            "🔧 [DEBUG] useSettings - No organizationId found in result:",
+            result
+          );
+          throw new Error("Organization ID not found in settings response");
+        }
+
+        console.log("🔧 [DEBUG] useSettings - Final result:", {
+          organizationId: result.organizationId,
+          hasOrganizationId: !!result.organizationId,
+          resultKeys: Object.keys(result),
+        });
+
+        return result;
+      } catch (error) {
+        console.error("🔧 [DEBUG] useSettings - API error:", error);
+        throw error;
+      }
     },
+    enabled: !!session?.user?.id, // Only run when user is authenticated
     ...queryOptions,
   });
 };

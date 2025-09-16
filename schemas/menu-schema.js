@@ -31,6 +31,16 @@ export const menuFormSchema = z.object({
 });
 
 /**
+ * Item detail form schema for ItemDetailModal
+ */
+export const itemDetailFormSchema = z.object({
+  quantity: z
+    .number()
+    .min(1, "Quantity must be at least 1")
+    .max(99, "Maximum quantity is 99"),
+});
+
+/**
  * Menu schema for API validation (with organizationId)
  * Aligns with the Mongoose Menu model
  */

@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils/format-utils";
 
 export function MenuItemCard({ item, onItemSelect }) {
   const getCategoryColor = (category) => {
@@ -58,7 +59,7 @@ export function MenuItemCard({ item, onItemSelect }) {
     >
       <CardContent className="p-0 h-full flex flex-col">
         <div className="flex-1 bg-card flex items-center justify-center">
-          <span className="text-4xl">{getItemIcon(item)}</span>
+          <span className="text-6xl">{getItemIcon(item)}</span>
         </div>
 
         <div className="p-3 flex flex-col items-start space-y-2 bg-card">
@@ -76,7 +77,7 @@ export function MenuItemCard({ item, onItemSelect }) {
               {getCategoryName(item.category)}
             </Badge>
             <p className="text-sm font-bold text-card-foreground">
-              ${(item.price || 0).toFixed(2)}
+              {formatCurrency(item.price || 0)}
             </p>
           </div>
         </div>

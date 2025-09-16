@@ -170,5 +170,5 @@ const handleRefundProcessing = async (validatedData, request) => {
  * POST /api/dashboard/orders/[id]/refund
  * Process order refund
  */
-export const POST = createPostHandler(handleRefundProcessing, refundSchema);
+export const POST = createPostHandler(refundSchema, handleRefundProcessing);
 export const { GET, PUT, DELETE } = createMethodHandler(["POST"]);

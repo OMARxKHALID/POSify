@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { QuantityControl } from "@/components/ui/quantity-control";
+import { formatCurrency } from "@/lib/utils/format-utils";
 
 const OrderItem = React.memo(function OrderItem({
   item,
@@ -33,19 +34,13 @@ const OrderItem = React.memo(function OrderItem({
         </h4>
 
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-          <span>${originalPrice.toFixed(2)} each</span>
+          <span>{formatCurrency(originalPrice)} each</span>
           {item.discount > 0 && (
             <Badge variant="secondary" className="text-[9px] px-1 py-0">
               {item.discount}% off
             </Badge>
           )}
         </div>
-
-        {item.specialInstructions && (
-          <p className="text-[10px] text-muted-foreground italic leading-tight">
-            "{item.specialInstructions}"
-          </p>
-        )}
       </div>
 
       <div className="flex flex-col items-end gap-1 min-w-0">
@@ -58,7 +53,7 @@ const OrderItem = React.memo(function OrderItem({
         />
 
         <div className="text-xs font-semibold text-card-foreground">
-          ${(finalPrice * item.quantity).toFixed(2)}
+          {formatCurrency(finalPrice * item.quantity)}
         </div>
 
         <div className="flex items-center gap-1">

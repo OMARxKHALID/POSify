@@ -117,5 +117,5 @@ const handleStatusUpdate = async (validatedData, request) => {
  * PUT /api/dashboard/orders/[id]/status
  * Update order status
  */
-export const PUT = createPutHandler(handleStatusUpdate, statusUpdateSchema);
+export const PUT = createPutHandler(statusUpdateSchema, handleStatusUpdate);
 export const { GET, POST, DELETE } = createMethodHandler(["PUT"]);

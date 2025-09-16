@@ -24,8 +24,8 @@ const handleSettingsData = async (queryParams, request) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
-    // Only admin can access settings
-    if (!hasRole(currentUser, ["admin"])) {
+    // Admin and staff can access settings (staff need it for order creation)
+    if (!hasRole(currentUser, ["admin", "staff"])) {
       return forbidden("INSUFFICIENT_PERMISSIONS");
     }
 
@@ -60,8 +60,8 @@ const handleSettingsUpdate = async (validatedData, request) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
-    // Only admin can update settings
-    if (!hasRole(currentUser, ["admin"])) {
+    // Admin and staff can update settings (staff need it for order creation)
+    if (!hasRole(currentUser, ["admin", "staff"])) {
       return forbidden("INSUFFICIENT_PERMISSIONS");
     }
 
@@ -109,6 +109,6 @@ export const GET = createGetHandler(handleSettingsData);
  * PUT /api/dashboard/settings
  * Update organization settings
  */
-export const PUT = createPutHandler(handleSettingsUpdate, settingsSchema);
+export const PUT = createPutHandler(settingsSchema, handleSettingsUpdate);
 
 export const { POST, DELETE } = createMethodHandler(["GET", "PUT"]);

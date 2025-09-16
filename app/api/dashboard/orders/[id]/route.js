@@ -178,7 +178,7 @@ export const GET = createGetHandler(handleOrderData);
  * PUT /api/dashboard/orders/[id]
  * Update an order
  */
-export const PUT = createPutHandler(handleOrderUpdate, orderSchema);
+export const PUT = createPutHandler(orderSchema, handleOrderUpdate);
 
 /**
  * DELETE /api/dashboard/orders/[id]

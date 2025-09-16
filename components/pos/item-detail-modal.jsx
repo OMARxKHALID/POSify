@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Clock, DollarSign } from "lucide-react";
+import { toast } from "sonner";
+import { itemDetailFormSchema } from "@/schemas/menu-schema";
 
 import {
   Dialog,
@@ -10,20 +14,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { QuantityControl } from "@/components/ui/quantity-control";
 import { useCartStore } from "@/lib/store/use-cart-store";
+import { normalizeItem } from "@/lib/utils/common-utils";
 
 export function ItemDetailModal({
   open = false,
   onClose = () => {},
   selectedItem = null,
 }) {
-  const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
-  const [specialInstructions, setSpecialInstructions] = useState("");
+
+  const form = useForm({
+    resolver: zodResolver(itemDetailFormSchema),
+    defaultValues: {
+      quantity: 1,
+    },
+  });
 
   const { addToCart } = useCartStore();
 
@@ -39,28 +47,46 @@ export function ItemDetailModal({
 
   const isAvailable = item.available !== false;
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = form.handleSubmit(async (data) => {
     if (!item || !isAvailable) return;
+
+    const normalizedItem = normalizeItem(item);
+    if (!normalizedItem) {
+      console.error("🛒 [ERROR] Invalid item provided to add to cart");
+      toast.error("Invalid item. Please try again.");
+      return;
+    }
+
+    console.log("🛒 [DEBUG] Starting add to cart process:", {
+      item: {
+        id: normalizedItem._id,
+        name: normalizedItem.name,
+        price: normalizedItem.price,
+        available: normalizedItem.available,
+      },
+      quantity: data.quantity,
+    });
 
     setIsAdding(true);
 
-    const cartItem = {
-      ...item,
-      _id: item.id || item._id,
-      specialInstructions: specialInstructions.trim(),
-    };
+    const cartItem = normalizedItem;
+
+    console.log("🛒 [DEBUG] Cart item prepared:", cartItem);
 
     try {
-      addToCart(cartItem, quantity);
-      setQuantity(1);
-      setSpecialInstructions("");
+      addToCart(cartItem, data.quantity);
+      console.log("🛒 [DEBUG] Item successfully added to cart");
+
+      form.reset();
+      toast.success(`${normalizedItem.name} added to cart`);
       onClose();
     } catch (error) {
-      console.error("Failed to add item to cart:", error);
+      console.error("🛒 [DEBUG] Failed to add item to cart:", error);
+      toast.error("Failed to add item to cart");
     } finally {
       setIsAdding(false);
     }
-  };
+  });
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -112,25 +138,17 @@ export function ItemDetailModal({
             <div className="space-y-2">
               <label className="text-sm font-medium">Quantity</label>
               <QuantityControl
-                value={quantity}
-                onChange={setQuantity}
+                value={form.watch("quantity")}
+                onChange={(value) => form.setValue("quantity", value)}
                 min={1}
                 max={99}
                 className="justify-start"
               />
-            </div>
-
-            {/* Special Instructions */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Special Instructions
-              </label>
-              <Textarea
-                value={specialInstructions}
-                onChange={(e) => setSpecialInstructions(e.target.value)}
-                placeholder="Special requests..."
-                className="min-h-[60px] text-sm"
-              />
+              {form.formState.errors.quantity && (
+                <p className="text-xs text-red-600">
+                  {form.formState.errors.quantity.message}
+                </p>
+              )}
             </div>
 
             {/* Total */}
@@ -138,7 +156,7 @@ export function ItemDetailModal({
               <div className="flex items-center justify-between text-sm font-semibold">
                 <span>Total:</span>
                 <span className="text-primary">
-                  ${(item.price * quantity).toFixed(2)}
+                  ${(item.price * form.watch("quantity")).toFixed(2)}
                 </span>
               </div>
             </div>

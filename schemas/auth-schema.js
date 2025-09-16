@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { USER_ROLES, USER_STATUSES } from "@/constants";
 
 /**
  * Base password validation schema
@@ -31,7 +32,7 @@ export const userCreationSchema = z.object({
   name: z.string().min(1, "Name is required").trim(),
   email: z.string().email("Invalid email format").toLowerCase().trim(),
   password: passwordSchema,
-  role: z.enum(["staff"]).default("staff"),
+  role: z.enum(USER_ROLES).default("staff"),
   permissions: z.array(z.string()).optional(),
 });
 
@@ -54,8 +55,8 @@ export const userEditSchema = z.object({
       (val) => !val || val.trim() === "" || val.length >= 6,
       "Password must be at least 6 characters"
     ),
-  role: z.enum(["admin", "staff"]).optional(),
-  status: z.enum(["active", "inactive", "suspended"]).optional(),
+  role: z.enum(USER_ROLES).optional(),
+  status: z.enum(USER_STATUSES).optional(),
   permissions: z.array(z.string()).optional(),
 });
 

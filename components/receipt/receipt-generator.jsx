@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils/format-utils";
 
-export function ReceiptGenerator({ order, onClose }) {
-  if (!order) return null;
+export function ReceiptGenerator({ open, orderData, totals, onPrinted }) {
+  if (!open || !orderData) return null;
 
   const handlePrint = () => {
     window.print();
+    onPrinted?.();
   };
 
   return (
@@ -22,14 +23,14 @@ export function ReceiptGenerator({ order, onClose }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center">
-            <h3 className="font-semibold">Order #{order.orderNumber}</h3>
+            <h3 className="font-semibold">Order #{orderData.orderNumber}</h3>
             <p className="text-sm text-muted-foreground">
-              {new Date(order.createdAt).toLocaleString()}
+              {new Date(orderData.createdAt).toLocaleString()}
             </p>
           </div>
 
           <div className="space-y-2">
-            {order.items?.map((item, index) => (
+            {orderData.items?.map((item, index) => (
               <div key={index} className="flex justify-between">
                 <span>
                   {item.name} x{item.quantity}
@@ -42,15 +43,19 @@ export function ReceiptGenerator({ order, onClose }) {
           <div className="border-t pt-2 space-y-1">
             <div className="flex justify-between">
               <span>Subtotal:</span>
-              <span>{formatCurrency(order.subtotal)}</span>
+              <span>
+                {formatCurrency(totals?.subtotal || orderData.subtotal)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Tax:</span>
-              <span>{formatCurrency(order.taxAmount || 0)}</span>
+              <span>
+                {formatCurrency(totals?.tax || orderData.taxAmount || 0)}
+              </span>
             </div>
             <div className="flex justify-between font-semibold">
               <span>Total:</span>
-              <span>{formatCurrency(order.total)}</span>
+              <span>{formatCurrency(totals?.total || orderData.total)}</span>
             </div>
           </div>
 
@@ -58,7 +63,7 @@ export function ReceiptGenerator({ order, onClose }) {
             <Button onClick={handlePrint} className="flex-1">
               Print Receipt
             </Button>
-            <Button variant="outline" onClick={onClose} className="flex-1">
+            <Button variant="outline" onClick={onPrinted} className="flex-1">
               Close
             </Button>
           </div>

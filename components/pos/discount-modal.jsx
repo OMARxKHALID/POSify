@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Percent, DollarSign } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Percent, DollarSign, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
+import { discountFormSchema } from "@/schemas/order-schema";
 
 import {
   Dialog,
@@ -14,14 +18,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
+import { useCartStore } from "@/lib/store/use-cart-store";
+import { formatCurrency } from "@/lib/utils/format-utils";
 
-export function DiscountModal({ open = true, onClose = () => {} }) {
-  const [discountType, setDiscountType] = useState("percentage");
-  const [discountValue, setDiscountValue] = useState(0);
+export function DiscountModal({ open = false, onClose = () => {} }) {
+  const [isApplying, setIsApplying] = useState(false);
+  const [error, setError] = useState("");
 
-  // Mock subtotal
-  const subtotal = 50.0;
+  const form = useForm({
+    resolver: zodResolver(discountFormSchema),
+    defaultValues: {
+      discountType: "percentage",
+      discountValue: 0,
+    },
+  });
+
+  const { orderItems, applyCartDiscount, cartDiscount, removeCartDiscount } =
+    useCartStore();
+
+  // Calculate actual subtotal from cart items
+  const subtotal = orderItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
   const maxDiscountPercentage = 50;
+
+  const discountType = form.watch("discountType");
+  const discountValue = form.watch("discountValue");
 
   const discountAmount =
     discountType === "percentage"
@@ -29,6 +52,59 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
       : Math.min(discountValue, subtotal);
 
   const finalAmount = subtotal - discountAmount;
+
+  const handleApplyDiscount = form.handleSubmit(async (data) => {
+    setError("");
+
+    if (subtotal <= 0) {
+      setError("No items in cart to apply discount to");
+      return;
+    }
+
+    setIsApplying(true);
+
+    try {
+      if (data.discountType === "percentage") {
+        // Validate percentage
+        if (data.discountValue > maxDiscountPercentage) {
+          setError(`Maximum discount allowed is ${maxDiscountPercentage}%`);
+          setIsApplying(false);
+          return;
+        }
+        applyCartDiscount(data.discountValue);
+        toast.success(`${data.discountValue}% discount applied`);
+      } else {
+        // Validate fixed amount
+        if (data.discountValue > subtotal) {
+          setError("Discount amount cannot exceed subtotal");
+          setIsApplying(false);
+          return;
+        }
+        // Convert fixed amount to percentage
+        const percentage = (data.discountValue / subtotal) * 100;
+        applyCartDiscount(percentage);
+        toast.success(`${formatCurrency(data.discountValue)} discount applied`);
+      }
+
+      // Reset form and close
+      form.reset();
+      setError("");
+      onClose();
+    } catch (error) {
+      console.error("Failed to apply discount:", error);
+      setError("Failed to apply discount. Please try again.");
+    } finally {
+      setIsApplying(false);
+    }
+  });
+
+  const handleRemoveDiscount = () => {
+    removeCartDiscount();
+    form.reset();
+    setError("");
+    toast.success("Discount removed");
+    onClose();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -38,14 +114,51 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Error Display */}
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-center gap-2 text-red-800 text-sm">
+                <AlertTriangle className="h-4 w-4" />
+                {error}
+              </div>
+            </div>
+          )}
+
+          {/* Current Applied Discount */}
+          {cartDiscount > 0 && (
+            <div className="bg-muted border rounded-md p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  Current Discount Applied
+                </span>
+                <span className="text-sm font-semibold text-primary">
+                  {cartDiscount}%
+                </span>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Discount Amount:</span>
+                <span>-{formatCurrency((cartDiscount / 100) * subtotal)}</span>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleRemoveDiscount}
+                className="w-full h-8 text-xs"
+              >
+                Remove Discount
+              </Button>
+            </div>
+          )}
+
           {/* Discount Type */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Discount Type</Label>
             <RadioGroup
               value={discountType}
               onValueChange={(value) => {
-                setDiscountType(value);
-                setDiscountValue(0);
+                form.setValue("discountType", value);
+                form.setValue("discountValue", 0);
               }}
               className="flex gap-4"
             >
@@ -62,6 +175,11 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
                 </Label>
               </div>
             </RadioGroup>
+            {form.formState.errors.discountType && (
+              <p className="text-xs text-red-600">
+                {form.formState.errors.discountType.message}
+              </p>
+            )}
           </div>
 
           {/* Discount Value */}
@@ -80,8 +198,7 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
                     : subtotal
                 }
                 placeholder={discountType === "percentage" ? "0.0" : "0.00"}
-                value={discountValue}
-                onChange={(e) => setDiscountValue(Number(e.target.value))}
+                {...form.register("discountValue", { valueAsNumber: true })}
                 className="h-9 pl-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
               />
               <div className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -92,6 +209,11 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
                 )}
               </div>
             </div>
+            {form.formState.errors.discountValue && (
+              <p className="text-xs text-red-600">
+                {form.formState.errors.discountValue.message}
+              </p>
+            )}
           </div>
 
           {/* Preview */}
@@ -99,16 +221,18 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
             <div className="p-3 bg-muted rounded-lg space-y-1 text-sm">
               <div className="flex justify-between">
                 <span>Original:</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex justify-between text-destructive">
                 <span>Discount:</span>
-                <span>-${discountAmount.toFixed(2)}</span>
+                <span>-{formatCurrency(discountAmount)}</span>
               </div>
               <Separator />
               <div className="flex justify-between font-semibold">
                 <span>Total:</span>
-                <span className="text-primary">${finalAmount.toFixed(2)}</span>
+                <span className="text-primary">
+                  {formatCurrency(finalAmount)}
+                </span>
               </div>
             </div>
           )}
@@ -125,10 +249,11 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
             </Button>
             <Button
               type="button"
-              disabled={discountValue <= 0}
+              disabled={discountValue <= 0 || isApplying}
+              onClick={handleApplyDiscount}
               className="flex-1"
             >
-              Apply
+              {isApplying ? "Applying..." : "Apply"}
             </Button>
           </div>
         </div>
