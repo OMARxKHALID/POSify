@@ -5,13 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getTaxBreakdown } from "@/lib/utils/business-utils";
 import { formatCurrency } from "@/lib/utils/format-utils";
-
-const Row = ({ label, value, className = "" }) => (
-  <div className={`flex justify-between ${className}`}>
-    <span>{label}</span>
-    <span>{value}</span>
-  </div>
-);
+import { Row } from "@/components/ui/row";
 
 export function CartFooter({
   totals,

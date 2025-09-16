@@ -25,12 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/lib/utils/format-utils";
-
-const PAYMENT_METHODS = [
-  { value: "cash", label: "Cash", icon: Banknote },
-  { value: "card", label: "Card", icon: CreditCard },
-  { value: "wallet", label: "Digital Wallet", icon: Smartphone },
-];
+import { PAYMENT_METHODS } from "@/constants/payment-methods";
 
 const TIP_PERCENTAGES = [0, 10, 15, 20, 25];
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { MenuItemCard } from "./menu-item-card";
+import { getCategoryId } from "@/lib/utils/menu-utils";
 
 export function MenuGrid({
   selectedCategory,
@@ -10,15 +11,6 @@ export function MenuGrid({
   menuItems = [],
   isLoading = false,
 }) {
-  // Helper function to get category ID from various formats
-  const getCategoryId = (category) => {
-    if (!category) return "";
-    if (typeof category === "string") return category;
-    if (typeof category === "object" && category.id) return category.id;
-    if (typeof category === "object" && category._id) return category._id;
-    return "";
-  };
-
   // Filter items based on category and search
   const filteredItems = menuItems.filter((item) => {
     if (!item) return false;
