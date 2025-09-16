@@ -228,7 +228,7 @@ export function POSmain() {
 
             <ResizableHandle withHandle />
 
-            <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+            <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
               <OrderCart cartOpen={isCartOpen} toggleCart={toggleCart} />
             </ResizablePanel>
           </ResizablePanelGroup>

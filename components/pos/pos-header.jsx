@@ -35,18 +35,21 @@ export function POSHeader() {
     <header className="flex items-center justify-between bg-card border-b border-border/50 px-4 py-3">
       {/* Left side - Title and User */}
       <div className="flex items-center gap-4">
-        <h1 className="text-lg font-semibold text-card-foreground">
+        <h1 className="text-lg font-semibold text-card-foreground hidden sm:block">
           POS System
+        </h1>
+        <h1 className="text-sm font-semibold text-card-foreground sm:hidden">
+          POS
         </h1>
 
         {/* User Info */}
         {session?.user && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <User className="w-4 h-4" />
-            <span className="font-medium text-foreground">
+            <span className="font-medium text-foreground hidden lg:inline">
               {session.user.name || session.user.email}
             </span>
-            <span className="text-xs bg-muted px-2 py-1 rounded-full">
+            <span className="text-xs bg-muted px-2 py-1 rounded-full hidden md:inline">
               {session.user.role}
             </span>
           </div>
@@ -62,33 +65,19 @@ export function POSHeader() {
           ) : (
             <WifiOff className="w-4 h-4 text-red-600" />
           )}
-          <span className="text-xs font-medium">
+          <span className="text-xs font-medium hidden sm:inline">
             {isOnline ? "Online" : "Offline"}
           </span>
         </div>
 
-        {/* Queue Manager - Show when offline or has queued orders */}
-        {shouldShowQueueManager && (
-          <OrderQueueManager
-            trigger={
-              <Button variant="outline" size="sm" className="relative">
-                <CloudOff className="w-4 h-4 mr-2" />
-                Queue
-                {hasQueuedOrders && (
-                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {queueStats.queued + queueStats.failed}
-                  </span>
-                )}
-              </Button>
-            }
-          />
-        )}
-
         {/* Dashboard Button */}
         <Link href={ADMIN_ROUTES.DASHBOARD}>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="hidden md:flex">
             <LayoutDashboard className="w-4 h-4 mr-2" />
             Dashboard
+          </Button>
+          <Button variant="outline" size="sm" className="md:hidden">
+            <LayoutDashboard className="w-4 h-4" />
           </Button>
         </Link>
 
@@ -102,14 +91,33 @@ export function POSHeader() {
           className="relative"
           onClick={toggleCart}
         >
-          <ShoppingCart className="w-4 h-4 mr-2" />
-          Cart
+          <ShoppingCart className="w-4 h-4 mr-2 hidden sm:inline" />
+          <ShoppingCart className="w-4 h-4 sm:hidden" />
+          <span className="hidden sm:inline">Cart</span>
           {mounted && totalItems > 0 && (
             <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
               {totalItems}
             </span>
           )}
         </Button>
+
+        {/* Queue Manager - Show when offline or has queued orders */}
+        {shouldShowQueueManager && (
+          <OrderQueueManager
+            trigger={
+              <Button variant="outline" size="sm" className="relative">
+                <CloudOff className="w-4 h-4 mr-2 hidden sm:inline" />
+                <CloudOff className="w-4 h-4 sm:hidden" />
+                <span className="hidden sm:inline">Queue</span>
+                {hasQueuedOrders && (
+                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {queueStats.queued + queueStats.failed}
+                  </span>
+                )}
+              </Button>
+            }
+          />
+        )}
       </div>
     </header>
   );

@@ -17,6 +17,8 @@ import { CartFooter } from "./cart-footer";
 import { CartItemsList } from "./cart-items-list";
 import { generateIdempotencyKey } from "@/lib/utils";
 
+/* ------------------------- Helpers ------------------------- */
+
 /**
  * Prepare order data for submission
  */
@@ -35,8 +37,14 @@ const prepareOrderData = (
     tip = 0,
   } = customerData;
 
+  const safeSubtotal = totals?.subtotal ?? 0;
+  const safeTotal = totals?.total ?? 0;
+  const safeItemDiscounts = totals?.itemDiscounts ?? 0;
+  const safeDiscount = totals?.discount ?? 0;
+
   const subtotalAfterDiscounts =
-    totals.subtotal - totals.itemDiscounts - totals.discount;
+    safeSubtotal - safeItemDiscounts - safeDiscount;
+
   const taxBreakdown = getTaxBreakdown(
     subtotalAfterDiscounts,
     orgSettings?.taxes
@@ -51,8 +59,8 @@ const prepareOrderData = (
   if (orgSettings?.business?.serviceCharge?.enabled) {
     const base =
       orgSettings.business.serviceCharge.applyOn === "total"
-        ? totals.total
-        : totals.subtotal;
+        ? safeTotal
+        : safeSubtotal;
     serviceCharge =
       (orgSettings.business.serviceCharge.percentage / 100) * base;
   }
@@ -69,8 +77,8 @@ const prepareOrderData = (
     })),
     customerName: customerName?.trim() || "Guest",
     mobileNumber: mobileNumber?.trim() || "",
-    subtotal: Number(totals.subtotal),
-    total: Number(totals.total + deliveryCharge + serviceCharge + tip),
+    subtotal: Number(safeSubtotal),
+    total: Number(safeTotal + deliveryCharge + serviceCharge + tip),
     paymentMethod,
     status:
       orgSettings?.operational?.orderManagement?.defaultStatus || "pending",
@@ -85,7 +93,7 @@ const prepareOrderData = (
             amount: Number(tax.amount),
           }))
         : [],
-    discount: Number(totals.discount + totals.itemDiscounts),
+    discount: Number(safeDiscount + safeItemDiscounts),
     promoDiscount: 0,
     serviceCharge: Number(serviceCharge),
     tip: Number(tip),
@@ -141,6 +149,8 @@ const validateOrderPrerequisites = (
   return { isValid: true };
 };
 
+/* ------------------------- Component ------------------------- */
+
 export function OrderCart({ toggleCart, isMobile = false }) {
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
@@ -181,7 +191,6 @@ export function OrderCart({ toggleCart, isMobile = false }) {
     deliveryType,
     tip = 0
   ) => {
-    // Early validation
     const validation = validateOrderPrerequisites(
       orderItems,
       status,
@@ -195,7 +204,6 @@ export function OrderCart({ toggleCart, isMobile = false }) {
 
     if (isSubmitting) return;
 
-    // Ensure we have organization settings
     let orgSettings = settings;
     if (!settings?.organizationId) {
       try {
@@ -216,7 +224,6 @@ export function OrderCart({ toggleCart, isMobile = false }) {
     setPendingOrderKey(idempotencyKey);
 
     try {
-      // Prepare order data using extracted utility
       const orderData = prepareOrderData(
         orderItems,
         totals,
@@ -226,24 +233,16 @@ export function OrderCart({ toggleCart, isMobile = false }) {
       );
 
       if (isOnline) {
-        // Submit order online
-        const response = await createOrder.mutateAsync(orderData);
-
-        // Success handling
+        await createOrder.mutateAsync(orderData);
         clearCart();
         setPendingOrderKey(null);
         setPaymentModalOpen(false);
-
         if (isMobile) toggleCart();
       } else {
-        // Queue order for offline processing
         addOrder(orderData);
-
-        // Success handling for queued order
         clearCart();
         setPendingOrderKey(null);
         setPaymentModalOpen(false);
-
         if (isMobile) toggleCart();
 
         toast.success("Order queued for sync", {
@@ -261,8 +260,14 @@ export function OrderCart({ toggleCart, isMobile = false }) {
             error?.message || "Failed to place order. Please try again.",
         });
       } else {
-        // If offline and order creation fails, still queue it
         try {
+          const orderData = prepareOrderData(
+            orderItems,
+            totals,
+            orgSettings,
+            { customerName, paymentMethod, mobileNumber, deliveryType, tip },
+            idempotencyKey
+          );
           addOrder(orderData);
           toast.success("Order queued for sync", {
             id: idempotencyKey,
@@ -272,7 +277,7 @@ export function OrderCart({ toggleCart, isMobile = false }) {
           setPendingOrderKey(null);
           setPaymentModalOpen(false);
           if (isMobile) toggleCart();
-        } catch (queueError) {
+        } catch {
           toast.error("Failed to queue order", {
             id: idempotencyKey,
             description: "Please try again when connection is restored.",
@@ -284,13 +289,8 @@ export function OrderCart({ toggleCart, isMobile = false }) {
     }
   };
 
-  // Show cart items immediately, handle settings loading separately
   const showSettingsError = settingsError && !settings;
   const showSettingsLoading = settingsLoading && !settings;
-
-  // Simple modal handlers - no memoization needed
-  const handleDiscountModalOpen = () => setDiscountModalOpen(true);
-  const handleDiscountModalClose = () => setDiscountModalOpen(false);
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -318,7 +318,7 @@ export function OrderCart({ toggleCart, isMobile = false }) {
             <CartFooter
               totals={totals}
               cartDiscount={cartDiscount}
-              onDiscountModalOpen={handleDiscountModalOpen}
+              onDiscountModalOpen={() => setDiscountModalOpen(true)}
               onPaymentModalOpen={() => setPaymentModalOpen(true)}
               onRemoveCartDiscount={removeCartDiscount}
               currency={currency}
@@ -333,13 +333,13 @@ export function OrderCart({ toggleCart, isMobile = false }) {
 
       <DiscountModal
         open={discountModalOpen}
-        onClose={handleDiscountModalClose}
+        onClose={() => setDiscountModalOpen(false)}
       />
 
       <PaymentModal
         open={paymentModalOpen}
         onOpenChange={setPaymentModalOpen}
-        total={totals.total}
+        total={totals?.total ?? 0}
         onConfirm={handlePlaceOrder}
         isSubmitting={isSubmitting}
       />
