@@ -1,109 +1,56 @@
-import { apiClient } from "@/lib/api-client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
-let networkStatusInstance = null;
-let listeners = new Set();
 export function useNetworkStatus() {
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
-  const [networkType, setNetworkType] = useState("unknown");
-  const prevOnlineStatus = useRef(isOnline);
+
   useEffect(() => {
-    if (networkStatusInstance) {
-      const updateState = (online, type) => {
-        setIsOnline(online);
-        setNetworkType(type);
-      };
-      listeners.add(updateState);
-      return () => {
-        listeners.delete(updateState);
-      };
-    }
-    networkStatusInstance = {
-      isOnline: isOnline,
-      networkType: networkType,
-    };
-    const handleOnline = () => {
-      const newOnline = true;
-      setIsOnline(newOnline);
-      networkStatusInstance.isOnline = newOnline;
-      listeners.forEach((listener) =>
-        listener(newOnline, networkStatusInstance.networkType)
-      );
-      setTimeout(() => {
-        if (navigator.connection) {
-          const newType = navigator.connection.effectiveType || "unknown";
-          setNetworkType(newType);
-          networkStatusInstance.networkType = newType;
-          listeners.forEach((listener) => listener(newOnline, newType));
-        }
-      }, 500);
-    };
-    const handleOffline = () => {
-      const newOnline = false;
-      const newType = "offline";
-      setIsOnline(newOnline);
-      setNetworkType(newType);
-      networkStatusInstance.isOnline = newOnline;
-      networkStatusInstance.networkType = newType;
-      listeners.forEach((listener) => listener(newOnline, newType));
-    };
-    if (navigator.connection) {
-      const initialType = navigator.connection.effectiveType || "unknown";
-      setNetworkType(initialType);
-      networkStatusInstance.networkType = initialType;
-    }
-    const checkNetworkStatus = () => {
-      const currentOnlineStatus = navigator.onLine;
-      if (currentOnlineStatus !== prevOnlineStatus.current) {
-        setIsOnline(currentOnlineStatus);
-        networkStatusInstance.isOnline = currentOnlineStatus;
-        prevOnlineStatus.current = currentOnlineStatus;
-        listeners.forEach((listener) =>
-          listener(currentOnlineStatus, networkStatusInstance.networkType)
-        );
-        if (!currentOnlineStatus) {
-          const newType = "offline";
-          setNetworkType(newType);
-          networkStatusInstance.networkType = newType;
-          listeners.forEach((listener) =>
-            listener(currentOnlineStatus, newType)
-          );
-        }
-      }
-    };
-    const testNetworkConnectivity = async () => {
-      try {
-        await apiClient.get("/health");
-      } catch (error) {
-        const newOnline = false;
-        const newType = "offline";
-        setIsOnline(newOnline);
-        setNetworkType(newType);
-        networkStatusInstance.isOnline = newOnline;
-        networkStatusInstance.networkType = newType;
-        listeners.forEach((listener) => listener(newOnline, newType));
-      }
-    };
-    const intervalId = setInterval(checkNetworkStatus, 2000);
-    const connectivityIntervalId = setInterval(testNetworkConnectivity, 10000);
+    // Browser event handlers - primary detection method
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    // Listen to browser events
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-      clearInterval(intervalId);
-      clearInterval(connectivityIntervalId);
-      if (listeners.size === 0) {
-        networkStatusInstance = null;
+
+    // Only check network when browser events might be unreliable
+    // This happens in dev tools offline mode
+    const checkNetwork = async () => {
+      try {
+        const response = await fetch(`/api/health?t=${Date.now()}`, {
+          method: "HEAD",
+          cache: "no-store",
+        });
+        const online = response.ok;
+        setIsOnline((prev) => (prev !== online ? online : prev));
+      } catch {
+        // Only set offline if we're currently online
+        setIsOnline((prev) => (prev ? false : prev));
       }
     };
-  }, []);
+
+    // Check immediately on mount
+    checkNetwork();
+
+    // Check periodically to catch cases where browser events don't work
+    // This catches dev tools offline mode and reconnection
+    const interval = setInterval(() => {
+      // Only check if navigator.onLine doesn't match our state
+      // This catches dev tools offline mode
+      if (navigator.onLine !== isOnline) {
+        checkNetwork();
+      }
+    }, 10000); // Check every 10 seconds
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [isOnline]);
+
   return {
     isOnline,
-    networkType,
-    isSlowConnection:
-      networkType === "slow-2g" || networkType === "2g" || networkType === "3g",
   };
 }

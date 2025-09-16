@@ -7,6 +7,8 @@ import { useCartStore } from "@/lib/store/use-cart-store";
 import { useSettings } from "@/hooks/use-settings";
 import { useCreateOrder } from "@/hooks/use-orders";
 import { useCartCalculations } from "@/hooks/use-cart-calculations";
+import { useNetworkStatus } from "@/hooks/use-network-status";
+import { useOrderQueueStore } from "@/lib/store/use-queue-order-store";
 import { getTaxBreakdown } from "@/lib/utils/business-utils";
 import { PaymentModal } from "./payment-modal";
 import { DiscountModal } from "./discount-modal";
@@ -164,6 +166,8 @@ export function OrderCart({ toggleCart, isMobile = false }) {
   } = useSettings();
 
   const createOrder = useCreateOrder();
+  const { isOnline } = useNetworkStatus();
+  const { addOrder } = useOrderQueueStore();
 
   const currency = settings?.currency || "USD";
   const hasItems = orderItems.length > 0;
@@ -221,22 +225,60 @@ export function OrderCart({ toggleCart, isMobile = false }) {
         idempotencyKey
       );
 
-      // Submit order
-      const response = await createOrder.mutateAsync(orderData);
+      if (isOnline) {
+        // Submit order online
+        const response = await createOrder.mutateAsync(orderData);
 
-      // Success handling
-      clearCart();
-      setPendingOrderKey(null);
-      setPaymentModalOpen(false);
+        // Success handling
+        clearCart();
+        setPendingOrderKey(null);
+        setPaymentModalOpen(false);
 
-      if (isMobile) toggleCart();
+        if (isMobile) toggleCart();
+      } else {
+        // Queue order for offline processing
+        addOrder(orderData);
+
+        // Success handling for queued order
+        clearCart();
+        setPendingOrderKey(null);
+        setPaymentModalOpen(false);
+
+        if (isMobile) toggleCart();
+
+        toast.success("Order queued for sync", {
+          id: idempotencyKey,
+          description: "Order will be processed when connection is restored.",
+        });
+      }
     } catch (error) {
       console.error("Order placement failed:", error);
-      toast.error("Order Failed", {
-        id: idempotencyKey,
-        description:
-          error?.message || "Failed to place order. Please try again.",
-      });
+
+      if (isOnline) {
+        toast.error("Order Failed", {
+          id: idempotencyKey,
+          description:
+            error?.message || "Failed to place order. Please try again.",
+        });
+      } else {
+        // If offline and order creation fails, still queue it
+        try {
+          addOrder(orderData);
+          toast.success("Order queued for sync", {
+            id: idempotencyKey,
+            description: "Order will be processed when connection is restored.",
+          });
+          clearCart();
+          setPendingOrderKey(null);
+          setPaymentModalOpen(false);
+          if (isMobile) toggleCart();
+        } catch (queueError) {
+          toast.error("Failed to queue order", {
+            id: idempotencyKey,
+            description: "Please try again when connection is restored.",
+          });
+        }
+      }
     } finally {
       setIsSubmitting(false);
     }

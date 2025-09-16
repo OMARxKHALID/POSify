@@ -6,12 +6,15 @@ import {
   Wifi,
   WifiOff,
   User,
+  CloudOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store/use-cart-store";
 import { useMounted } from "@/hooks/use-mounted";
 import { useNetworkStatus } from "@/hooks/use-network-status";
+import { useOrderQueueStore } from "@/lib/store/use-queue-order-store";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { OrderQueueManager } from "./order-queue-manager";
 import { ADMIN_ROUTES } from "@/constants/routes";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -20,8 +23,13 @@ export function POSHeader() {
   const { getTotalQuantity, toggleCart } = useCartStore();
   const totalItems = getTotalQuantity();
   const mounted = useMounted();
-  const { isOnline, networkType } = useNetworkStatus();
+  const { isOnline } = useNetworkStatus();
   const { data: session } = useSession();
+  const { getQueueStats } = useOrderQueueStore();
+
+  const queueStats = getQueueStats();
+  const hasQueuedOrders = queueStats.queued > 0 || queueStats.failed > 0;
+  const shouldShowQueueManager = !isOnline || hasQueuedOrders;
 
   return (
     <header className="flex items-center justify-between bg-card border-b border-border/50 px-4 py-3">
@@ -47,17 +55,34 @@ export function POSHeader() {
 
       {/* Right side - Actions */}
       <div className="flex items-center gap-2">
-        {/* Network Status Indicator */}
-        <div className="flex items-center gap-1">
+        {/* Network Status */}
+        <div className="flex items-center gap-1.5">
           {isOnline ? (
             <Wifi className="w-4 h-4 text-green-600" />
           ) : (
             <WifiOff className="w-4 h-4 text-red-600" />
           )}
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs font-medium">
             {isOnline ? "Online" : "Offline"}
           </span>
         </div>
+
+        {/* Queue Manager - Show when offline or has queued orders */}
+        {shouldShowQueueManager && (
+          <OrderQueueManager
+            trigger={
+              <Button variant="outline" size="sm" className="relative">
+                <CloudOff className="w-4 h-4 mr-2" />
+                Queue
+                {hasQueuedOrders && (
+                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {queueStats.queued + queueStats.failed}
+                  </span>
+                )}
+              </Button>
+            }
+          />
+        )}
 
         {/* Dashboard Button */}
         <Link href={ADMIN_ROUTES.DASHBOARD}>
