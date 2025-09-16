@@ -28,7 +28,6 @@ export function ItemDetailModal({
 
   const { addToCart } = useCartStore();
 
-  // Use selectedItem or fallback to mock data
   const item = selectedItem || {
     id: 1,
     icon: "🍔",
@@ -39,7 +38,6 @@ export function ItemDetailModal({
     available: true,
   };
 
-  // Ensure item is available (default to true if not specified)
   const isAvailable = item.available !== false;
 
   const handleAddToCart = async (e) => {
@@ -48,7 +46,6 @@ export function ItemDetailModal({
 
     setIsAdding(true);
 
-    // Create item with _id for cart store compatibility
     const cartItem = {
       ...item,
       _id: item.id || item._id,
@@ -69,46 +66,46 @@ export function ItemDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto">
-        <DialogHeader>
-          <DialogTitle>Item Details</DialogTitle>
+      <DialogContent className="max-w-sm mx-auto p-4">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg">Item Details</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Item Info */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-start gap-4">
+            <CardContent className="p-3">
+              <div className="flex items-start gap-3">
                 <div className="flex-shrink-0">
-                  <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center text-2xl">
+                  <div className="w-14 h-14 rounded-md bg-muted flex items-center justify-center text-xl">
                     {item.icon}
                   </div>
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg mb-1">{item.name}</h3>
+                  <h3 className="font-semibold text-sm mb-1">{item.name}</h3>
 
-                  <p className="text-sm text-muted-foreground mb-2">
+                  <p className="text-xs text-muted-foreground mb-1 line-clamp-2">
                     {item.description}
                   </p>
 
-                  <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-3 text-xs">
                     <div className="flex items-center gap-1">
-                      <DollarSign className="h-4 w-4" />
+                      <DollarSign className="h-3 w-3" />
                       <span className="font-semibold text-primary">
                         ${item.price.toFixed(2)}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
+                      <Clock className="h-3 w-3" />
                       <span>{item.prepTime || 10} min</span>
                     </div>
                   </div>
 
                   {!isAvailable && (
-                    <Badge variant="secondary" className="mt-2">
-                      Currently Unavailable
+                    <Badge variant="secondary" className="mt-1 text-xs">
+                      Unavailable
                     </Badge>
                   )}
                 </div>
@@ -117,9 +114,9 @@ export function ItemDetailModal({
           </Card>
 
           {/* Customization Form */}
-          <form onSubmit={handleAddToCart} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Quantity</label>
+          <form onSubmit={handleAddToCart} className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium">Quantity</label>
               <QuantityControl
                 value={quantity}
                 onChange={setQuantity}
@@ -129,23 +126,23 @@ export function ItemDetailModal({
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Edit3 className="h-4 w-4" />
-                Special Instructions
+            <div className="space-y-1">
+              <label className="text-xs font-medium flex items-center gap-1">
+                <Edit3 className="h-3 w-3" />
+                Instructions
               </label>
               <Textarea
                 value={specialInstructions}
                 onChange={(e) => setSpecialInstructions(e.target.value)}
-                placeholder="Any special requests or modifications..."
-                className="min-h-[80px]"
+                placeholder="Special requests..."
+                className="min-h-[60px] text-sm"
               />
             </div>
 
             <Separator />
 
             {/* Total */}
-            <div className="flex items-center justify-between text-lg font-semibold">
+            <div className="flex items-center justify-between text-sm font-semibold">
               <span>Total:</span>
               <span className="text-primary">
                 ${(item.price * quantity).toFixed(2)}
@@ -153,11 +150,12 @@ export function ItemDetailModal({
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
+                size="sm"
                 className="flex-1"
               >
                 Cancel
@@ -165,17 +163,18 @@ export function ItemDetailModal({
               <Button
                 type="submit"
                 disabled={!isAvailable || isAdding}
+                size="sm"
                 className="flex-1"
               >
                 {isAdding ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
                     Adding...
                   </>
                 ) : (
                   <>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add to Cart
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add
                   </>
                 )}
               </Button>

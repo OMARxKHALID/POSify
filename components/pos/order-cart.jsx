@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/lib/store/use-cart-store";
+import { PaymentModal } from "./payment-modal";
+import { DiscountModal } from "./discount-modal";
 
 const EmptyCart = () => (
   <div className="flex flex-col items-center justify-center h-full py-8 text-muted-foreground">
@@ -23,7 +25,7 @@ const Row = ({ label, value, className = "" }) => (
 );
 
 const CartFooter = ({ totals, setDiscountModalOpen, setPaymentModalOpen }) => (
-  <div className="border-t bg-muted/30 p-3 space-y-3 flex-shrink-0">
+  <div className="border-t bg-card p-3 space-y-3 flex-shrink-0">
     <div className="space-y-1 text-sm">
       <Row label="Subtotal:" value={`$${totals.subtotal.toFixed(2)}`} />
       <Row
@@ -77,7 +79,7 @@ const OrderItem = ({ item }) => (
   </div>
 );
 
-export function OrderCart({ cartOpen, toggleCart, isMobile }) {
+export function OrderCart({ cartOpen, toggleCart }) {
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
@@ -150,17 +152,15 @@ export function OrderCart({ cartOpen, toggleCart, isMobile }) {
         )}
       </div>
 
-      {discountModalOpen && (
-        <div className="p-4 border-t text-center text-sm">
-          Discount Modal (mock)
-        </div>
-      )}
+      <DiscountModal
+        open={discountModalOpen}
+        onClose={() => setDiscountModalOpen(false)}
+      />
 
-      {paymentModalOpen && (
-        <div className="p-4 border-t text-center text-sm">
-          Payment Modal (mock)
-        </div>
-      )}
+      <PaymentModal
+        isOpen={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+      />
     </div>
   );
 }

@@ -35,51 +35,56 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto">
-        <DialogHeader>
-          <DialogTitle>Apply Discount</DialogTitle>
+      <DialogContent className="max-w-sm mx-auto p-4">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg">Apply Discount</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Item Info */}
           <Card>
-            <CardContent className="p-3">
-              <p className="text-sm text-muted-foreground">Item:</p>
-              <p className="font-medium">{itemName}</p>
+            <CardContent className="p-2">
+              <p className="text-xs text-muted-foreground">Item:</p>
+              <p className="text-sm font-medium">{itemName}</p>
             </CardContent>
           </Card>
 
           {/* Discount Type */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Discount Type</Label>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium">Discount Type</Label>
             <RadioGroup
               value={discountType}
               onValueChange={(value) => {
                 setDiscountType(value);
                 setDiscountValue(0);
               }}
-              className="flex gap-6"
+              className="flex gap-4"
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
                 <RadioGroupItem value="percentage" id="percentage" />
-                <Label htmlFor="percentage" className="flex items-center gap-2">
-                  <Percent className="h-4 w-4" />
-                  Percentage
+                <Label
+                  htmlFor="percentage"
+                  className="flex items-center gap-1 text-xs"
+                >
+                  <Percent className="h-3 w-3" />%
                 </Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
                 <RadioGroupItem value="fixed" id="fixed" />
-                <Label htmlFor="fixed" className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Fixed Amount
+                <Label
+                  htmlFor="fixed"
+                  className="flex items-center gap-1 text-xs"
+                >
+                  <DollarSign className="h-3 w-3" />
+                  Fixed
                 </Label>
               </div>
             </RadioGroup>
           </div>
 
           {/* Discount Value */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">
+          <div className="space-y-1">
+            <Label className="text-xs font-medium">
               {discountType === "percentage"
                 ? "Discount Percentage"
                 : "Discount Amount"}
@@ -97,32 +102,35 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
                 placeholder={discountType === "percentage" ? "0.0" : "0.00"}
                 value={discountValue}
                 onChange={(e) => setDiscountValue(Number(e.target.value))}
-                className="pl-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+                className="h-8 pl-7 text-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
               />
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+              <div className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">
                 {discountType === "percentage" ? (
-                  <Percent className="h-4 w-4" />
+                  <Percent className="h-3 w-3" />
                 ) : (
-                  <DollarSign className="h-4 w-4" />
+                  <DollarSign className="h-3 w-3" />
                 )}
               </div>
             </div>
           </div>
 
           {/* Reason (Optional) */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Reason (Optional)</Label>
-            <Input placeholder="e.g., Customer complaint, Staff discount..." />
+          <div className="space-y-1">
+            <Label className="text-xs font-medium">Reason (Optional)</Label>
+            <Input
+              placeholder="e.g., Customer complaint, Staff discount..."
+              className="h-8 text-sm"
+            />
           </div>
 
           <Separator />
 
           {/* Calculation Preview */}
           <Card>
-            <CardContent className="p-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Original Amount:</span>
+            <CardContent className="p-2">
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span>Original:</span>
                   <span>
                     {currency} {subtotal.toFixed(2)}
                   </span>
@@ -130,15 +138,15 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
 
                 {discountValue > 0 && (
                   <>
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between">
                       <span>Discount:</span>
                       <span className="text-destructive">
                         -{currency} {discountAmount.toFixed(2)}
                       </span>
                     </div>
                     <Separator />
-                    <div className="flex justify-between font-semibold">
-                      <span>Final Amount:</span>
+                    <div className="flex justify-between font-semibold text-sm">
+                      <span>Final:</span>
                       <span className="text-primary">
                         {currency} {finalAmount.toFixed(2)}
                       </span>
@@ -150,11 +158,12 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
           </Card>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
+              size="sm"
               className="flex-1"
             >
               Cancel
@@ -162,10 +171,11 @@ export function DiscountModal({ open = true, onClose = () => {} }) {
             <Button
               type="button"
               disabled={discountValue <= 0}
+              size="sm"
               className="flex-1"
             >
-              <Calculator className="h-4 w-4 mr-2" />
-              Apply Discount
+              <Calculator className="h-3 w-3 mr-1" />
+              Apply
             </Button>
           </div>
         </div>

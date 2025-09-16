@@ -16,13 +16,17 @@ export function QuantityControl({
   className,
   size = "sm",
 }) {
-  const handleIncrement = () => {
+  const handleIncrement = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (value < max) {
       onChange(value + 1);
     }
   };
 
-  const handleDecrement = () => {
+  const handleDecrement = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (value > min) {
       onChange(value - 1);
     }
@@ -38,6 +42,7 @@ export function QuantityControl({
   return (
     <div className={cn("flex items-center gap-1", className)}>
       <Button
+        type="button"
         variant="outline"
         size="icon"
         onClick={handleDecrement}
@@ -57,6 +62,7 @@ export function QuantityControl({
       />
 
       <Button
+        type="button"
         variant="outline"
         size="icon"
         onClick={handleIncrement}

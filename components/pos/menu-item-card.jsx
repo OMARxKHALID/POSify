@@ -22,7 +22,7 @@ export function MenuItemCard({ item, onItemSelect }) {
 
   return (
     <Card
-      className="overflow-hidden hover:shadow-lg transition-shadow duration-300 w-full cursor-pointer p-0 aspect-square"
+      className="overflow-hidden hover:shadow-lg transition-shadow duration-300 w-full cursor-pointer p-0 aspect-square min-w-0"
       onClick={() => onItemSelect?.(item)}
     >
       <CardContent className="p-0 h-full flex flex-col">

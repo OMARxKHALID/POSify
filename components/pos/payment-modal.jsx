@@ -58,116 +58,118 @@ export function PaymentModal({ isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl mx-auto max-h-[95vh] flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle>Complete Order</DialogTitle>
+      <DialogContent className="max-w-4xl mx-auto max-h-[90vh] flex flex-col p-4">
+        <DialogHeader className="flex-shrink-0 pb-2">
+          <DialogTitle className="text-lg">Complete Order</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
+          <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
             {/* Left Column */}
-            <div className="space-y-4 overflow-y-auto">
+            <div className="space-y-4 overflow-y-auto pr-1">
               {/* Customer Info */}
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm font-medium">
                     <User className="h-4 w-4" />
-                    Customer Information
+                    Customer Info
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-2">
-                    <Label>Customer Name *</Label>
-                    <Input placeholder="Enter customer name" />
+                <CardContent className="space-y-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Customer Name *</Label>
+                    <Input
+                      placeholder="Enter customer name"
+                      className="h-8 text-sm"
+                    />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Mobile Number</Label>
-                    <Input placeholder="Enter mobile number" />
+                  <div className="space-y-1">
+                    <Label className="text-xs">Mobile Number</Label>
+                    <Input
+                      placeholder="Enter mobile number"
+                      className="h-8 text-sm"
+                    />
                   </div>
                 </CardContent>
               </Card>
 
               {/* Payment Method */}
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm font-medium">
                     <CreditCard className="h-4 w-4" />
                     Payment Method
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <Label>Payment Method</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select payment method" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PAYMENT_METHODS.map((method) => (
-                          <SelectItem key={method.value} value={method.value}>
-                            <div className="flex items-center gap-2">
-                              <method.icon className="h-4 w-4" />
-                              {method.label}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <CardContent className="space-y-1">
+                  <Label className="text-xs">Method</Label>
+                  <Select>
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAYMENT_METHODS.map((method) => (
+                        <SelectItem key={method.value} value={method.value}>
+                          <div className="flex items-center gap-2">
+                            <method.icon className="h-4 w-4" />
+                            {method.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </CardContent>
               </Card>
 
               {/* Service Type */}
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm font-medium">
                     <MapPin className="h-4 w-4" />
                     Service Type
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-2">
-                    <Label>Service Type</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select service type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DELIVERY_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            <div className="flex items-center gap-2">
-                              <type.icon className="h-4 w-4" />
-                              {type.label}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <CardContent className="space-y-1">
+                  <Label className="text-xs">Type</Label>
+                  <Select>
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DELIVERY_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          <div className="flex items-center gap-2">
+                            <type.icon className="h-4 w-4" />
+                            {type.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </CardContent>
               </Card>
             </div>
 
             {/* Right Column */}
-            <div className="space-y-4 overflow-y-auto">
+            <div className="space-y-4 overflow-y-auto pr-1">
               {/* Order Summary */}
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm font-medium">
                     <Receipt className="h-4 w-4" />
-                    Order Summary
+                    Summary
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                <CardContent className="space-y-1 text-sm">
+                  <div className="flex justify-between">
                     <span>Subtotal:</span>
                     <span>$120.00</span>
                   </div>
-                  <div className="flex justify-between text-sm text-destructive">
+                  <div className="flex justify-between text-destructive">
                     <span>Discount:</span>
                     <span>-$10.00</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between">
                     <span>Tax:</span>
                     <span>$5.00</span>
                   </div>
@@ -181,26 +183,27 @@ export function PaymentModal({ isOpen, onClose }) {
 
               {/* Tip */}
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm font-medium">
                     <Banknote className="h-4 w-4" />
                     Tip
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-3 gap-2">
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-5 gap-1">
                     {TIP_PERCENTAGES.map((percentage) => (
                       <Button
                         key={percentage}
                         type="button"
                         variant="outline"
                         size="sm"
+                        className="h-7 text-xs"
                       >
                         {percentage}%
                       </Button>
                     ))}
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xs">
                     <span>Tip Amount:</span>
                     <span className="text-primary">$10.00</span>
                   </div>
@@ -209,26 +212,22 @@ export function PaymentModal({ isOpen, onClose }) {
 
               {/* Receipt Option */}
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm font-medium">
                     <Download className="h-4 w-4" />
                     Receipt
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm">
-                      Download receipt after payment
-                    </Label>
-                    <Switch />
-                  </div>
+                <CardContent className="flex items-center justify-between text-xs">
+                  <Label>Download receipt</Label>
+                  <Switch className="scale-90" />
                 </CardContent>
               </Card>
 
               {/* Final Total */}
               <Card className="border-primary">
-                <CardContent className="p-3">
-                  <div className="flex justify-between items-center text-base font-bold">
+                <CardContent className="p-2">
+                  <div className="flex justify-between items-center text-sm font-bold">
                     <span>Final Total:</span>
                     <span className="text-primary">${mockFinalTotal}.00</span>
                   </div>
@@ -238,13 +237,18 @@ export function PaymentModal({ isOpen, onClose }) {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-3 border-t flex-shrink-0">
-            <Button type="button" variant="outline" className="flex-1">
+          <div className="flex gap-2 pt-2 flex-shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="flex-1"
+            >
               Cancel
             </Button>
-            <Button type="button" className="flex-1">
-              <CreditCard className="h-4 w-4 mr-2" />
-              Complete Order
+            <Button type="button" size="sm" className="flex-1">
+              <CreditCard className="h-4 w-4 mr-1" />
+              Complete
             </Button>
           </div>
         </div>

@@ -2,7 +2,12 @@
 
 import { MenuItemCard } from "./menu-item-card";
 
-export function MenuGrid({ selectedCategory, searchQuery, onItemSelect }) {
+export function MenuGrid({
+  selectedCategory,
+  searchQuery,
+  onItemSelect,
+  isCartOpen = false,
+}) {
   const mockItems = [
     // Burgers
     {
@@ -352,11 +357,20 @@ export function MenuGrid({ selectedCategory, searchQuery, onItemSelect }) {
     return matchesCategory && matchesSearch;
   });
 
+  const getGridCols = () => {
+    if (isCartOpen) {
+      return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
+    }
+    return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7";
+  };
+
   return (
     <div className="h-full overflow-y-auto">
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2 sm:gap-3 p-3 sm:p-4 max-w-full">
+      <div className={`grid ${getGridCols()} gap-3 p-4 w-full max-w-full`}>
         {filteredItems.map((item) => (
-          <MenuItemCard key={item.id} item={item} onItemSelect={onItemSelect} />
+          <div key={item.id} className="w-full min-w-0">
+            <MenuItemCard item={item} onItemSelect={onItemSelect} />
+          </div>
         ))}
       </div>
     </div>

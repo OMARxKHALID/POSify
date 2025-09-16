@@ -139,7 +139,7 @@ export function OrderQueueManager({ trigger }) {
     mockQueuedOrders.map((o) => (
       <Card key={o.id} className="hover:shadow-sm transition-shadow">
         <CardContent className="p-3">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+          <div className="flex flex-row items-start gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="text-sm font-medium text-card-foreground">
@@ -161,7 +161,7 @@ export function OrderQueueManager({ trigger }) {
               <OrderItemDisplay items={o.items} />
             </div>
 
-            <div className="flex items-center sm:flex-col sm:items-end gap-2">
+            <div className="flex items-center flex-col items-end gap-2">
               <div className="text-sm font-semibold text-card-foreground">
                 ${o.total?.toFixed(2) ?? "-"}
               </div>
@@ -183,7 +183,7 @@ export function OrderQueueManager({ trigger }) {
 
   const footer =
     mockQueuedOrders.length > 0 || mockFailedOrders.length > 0 ? (
-      <div className="px-4 py-3 bg-muted/30 border-t flex flex-col sm:flex-row justify-between items-center gap-2">
+      <div className="px-4 py-3 bg-muted/30 border-t flex flex-row justify-between items-center gap-2">
         <div className="text-xs text-muted-foreground font-medium">
           {mockQueuedOrders.length + mockFailedOrders.length} orders in queue
         </div>
@@ -240,7 +240,7 @@ export function OrderQueueManager({ trigger }) {
         <PopoverTrigger asChild>{trigger}</PopoverTrigger>
         <PopoverContent
           align="end"
-          className="p-0 w-[90vw] sm:w-[400px] lg:w-[500px] max-w-full"
+          className="p-0 w-[500px] max-w-full"
           sideOffset={8}
         >
           {body}
