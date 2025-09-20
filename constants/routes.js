@@ -22,6 +22,7 @@ export const ADMIN_ROUTES = {
   MENU: "/admin/dashboard/menu",
   CATEGORIES: "/admin/dashboard/categories",
   ORDERS: "/admin/dashboard/orders",
+  TRANSACTIONS: "/admin/dashboard/transactions",
   REPORTS: "/admin/dashboard/reports",
   NOTIFICATIONS: "/admin/dashboard/notifications",
 };

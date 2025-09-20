@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Settings } from "./settings";
 import { Counter } from "./counter";
+import { Organization } from "./organization";
 import {
   PAYMENT_METHODS,
   ORDER_STATUSES,
@@ -217,10 +218,6 @@ const OrderSchema = new Schema(
       enum: REFUND_STATUSES,
       default: "none",
     },
-    notes: {
-      type: String,
-      trim: true,
-    },
 
     // Delivery information
     deliveryInfo: {
@@ -250,6 +247,11 @@ const OrderSchema = new Schema(
       type: String,
       trim: true,
     },
+    refundNumber: {
+      type: String,
+      trim: true,
+      default: null,
+    },
   },
   baseSchemaOptions
 );
@@ -269,7 +271,7 @@ OrderSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
 OrderSchema.index({ organizationId: 1, createdAt: -1 }); // recent orders
 OrderSchema.index({ organizationId: 1, isPaid: 1, status: 1 }); // payment queries
 OrderSchema.index({ organizationId: 1, "items.menuItem": 1 }); // menu item analytics
-OrderSchema.index({ organizationId: 1, totalAmount: 1 }); // revenue queries
+OrderSchema.index({ organizationId: 1, total: 1 }); // revenue queries
 
 // ============================================================================
 // VIRTUAL PROPERTIES
@@ -340,10 +342,16 @@ OrderSchema.statics.createWithOrderNumber = async function (
 ) {
   const settings = await Settings.findOne({ organizationId }).lean();
   const sequence = await Counter.getNextSequence(organizationId, "orderNumber");
+  const org = await Organization.findById(organizationId).lean();
+  const orgCode = (org?.name || "ORG")
+    .replace(/[^a-zA-Z]/g, "")
+    .slice(0, 3)
+    .toUpperCase();
 
-  const format =
-    settings?.operational?.orderManagement?.orderNumberFormat || "ORD-{seq}";
-  const orderNumber = format.replace("{seq}", sequence);
+  const format = settings?.operational?.orderManagement?.orderNumberFormat;
+  const orderNumber = format
+    ? format.replace("{org}", orgCode).replace("{seq}", sequence)
+    : `ORD-${orgCode}-${sequence}`;
 
   return this.create({
     ...orderData,

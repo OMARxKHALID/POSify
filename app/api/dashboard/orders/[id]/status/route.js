@@ -1,5 +1,6 @@
 import { Order } from "@/models/order";
-import { logUpdate } from "@/lib/helpers/audit-helpers";
+import { Transaction } from "@/models/transaction";
+import { logUpdate, logCreate } from "@/lib/helpers/audit-helpers";
 import {
   getAuthenticatedUser,
   hasRole,
@@ -19,12 +20,7 @@ import { z } from "zod";
 import { ORDER_STATUSES } from "@/constants";
 
 const statusUpdateSchema = z.object({
-  status: z.enum(
-    ORDER_STATUSES.map((s) => s.value),
-    {
-      required_error: "Status is required",
-    }
-  ),
+  status: z.enum(ORDER_STATUSES, { required_error: "Status is required" }),
   notes: z.string().optional(),
 });
 
@@ -60,31 +56,51 @@ const handleStatusUpdate = async (validatedData, request) => {
     const currentStatus = originalOrder.status;
     const newStatus = validatedData.status;
 
-    // Define valid status transitions
+    // Define valid status transitions aligned with ORDER_STATUSES
     const validTransitions = {
-      pending: ["confirmed", "cancelled"],
-      confirmed: ["preparing", "cancelled"],
+      pending: ["preparing", "cancelled"],
       preparing: ["ready", "cancelled"],
-      ready: ["completed", "cancelled"],
-      completed: [], // No transitions from completed
-      cancelled: [], // No transitions from cancelled
-      refunded: [], // No transitions from refunded
+      ready: ["served", "cancelled"],
+      served: ["paid", "cancelled"],
+      paid: [],
+      cancelled: [],
+      refund: [],
+      "partial refund": [],
     };
 
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
       return badRequest("INVALID_STATUS_TRANSITION");
     }
 
-    // Update the order status
+    // Update the order status (mark paid when status becomes paid)
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
       {
         status: newStatus,
-        notes: validatedData.notes || originalOrder.notes,
         updatedAt: new Date(),
+        ...(newStatus === "paid" ? { isPaid: true } : {}),
       },
       { new: true, runValidators: true }
     );
+
+    // Create transaction when order is marked as paid
+    if (newStatus === "paid" && currentStatus !== "paid") {
+      const transaction = await Transaction.createWithTransactionNumber(
+        organization._id,
+        {
+          orderId: orderId,
+          type: "payment",
+          amount: originalOrder.total,
+          paymentMethod: originalOrder.paymentMethod,
+          status: "completed",
+          processedBy: currentUser._id,
+          processedAt: new Date(),
+          reference: `Payment for order ${originalOrder.orderNumber}`,
+        }
+      );
+
+      await logCreate("Transaction", transaction, currentUser, request);
+    }
 
     // Log the update
     await logUpdate("Order", originalOrder, updatedOrder, currentUser, request);

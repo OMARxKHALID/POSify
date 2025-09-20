@@ -46,10 +46,8 @@ AuditLogSchema.index({ organizationId: 1, action: 1 });
 AuditLogSchema.index({ organizationId: 1, userRole: 1 });
 AuditLogSchema.index({ userId: 1, createdAt: -1 });
 AuditLogSchema.index({ resource: 1, resourceId: 1 });
-AuditLogSchema.index(
-  { organizationId: 1, userEmail: 1, description: 1 },
-  { name: "text" }
-);
+// Enable text search on description and userEmail
+AuditLogSchema.index({ description: "text", userEmail: "text" });
 
 export const AuditLog =
   mongoose.models.AuditLog || mongoose.model("AuditLog", AuditLogSchema);

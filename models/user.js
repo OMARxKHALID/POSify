@@ -55,6 +55,9 @@ const UserSchema = new Schema(
   baseSchemaOptions
 );
 
+// Ensure unique email per user
+UserSchema.index({ email: 1 }, { unique: true });
+
 // Pre-save: hash password + update perms timestamp
 UserSchema.pre("save", async function (next) {
   if (

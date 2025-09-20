@@ -13,6 +13,7 @@ import {
   populateOrder,
   formatOrderForResponse,
   handleOrderValidationError,
+  createTransactionWithValidation,
 } from "@/lib/api";
 import { orderSchema } from "@/schemas/order-schema";
 
@@ -37,6 +38,24 @@ const handleOrderCreation = async (validatedData, request) => {
     );
 
     await logCreate("Order", order, currentUser, request);
+
+    // If the order is created as paid, create a corresponding transaction
+    if (validatedData?.isPaid === true || validatedData?.status === "paid") {
+      const transaction = await createTransactionWithValidation(
+        organization._id,
+        {
+          orderId: order._id,
+          type: "payment",
+          amount: validatedData.total,
+          paymentMethod: validatedData.paymentMethod,
+          status: "completed",
+          reference: `Order ${order.orderNumber} payment`,
+        },
+        currentUser._id
+      );
+
+      await logCreate("Transaction", transaction, currentUser, request);
+    }
 
     const populatedOrder = await populateOrder(order._id, organization._id);
     const formattedOrder = formatOrderForResponse(populatedOrder);

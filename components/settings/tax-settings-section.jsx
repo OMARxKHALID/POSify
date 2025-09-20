@@ -3,7 +3,6 @@
  * Reusable component for tax configuration
  */
 
-import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,7 +13,7 @@ import {
 } from "./settings-form-section";
 import { TAX_TYPES } from "@/constants";
 
-export function TaxSettingsSection({ form, onUpdate }) {
+export function TaxSettingsSection({ form }) {
   // Add new tax
   const addTax = () => {
     const currentTaxes = form.getValues("taxes") || [];
@@ -41,7 +40,6 @@ export function TaxSettingsSection({ form, onUpdate }) {
     <SettingsFormSection
       title="Tax Configuration"
       description="Configure tax rates and types for your business"
-      icon={Plus}
     >
       <div className="flex items-center justify-between mb-4">
         <div />

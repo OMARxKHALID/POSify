@@ -1,4 +1,6 @@
 import { Order } from "@/models/order";
+import { Counter } from "@/models/counter";
+import { Organization } from "@/models/organization";
 import { logUpdate } from "@/lib/helpers/audit-helpers";
 import {
   getAuthenticatedUser,
@@ -109,12 +111,25 @@ const handleRefundProcessing = async (validatedData, request) => {
     }
 
     // Update order with refund information
+    // Generate refundNumber with org code pattern ORG-AAA-####
+    const org = await Organization.findById(organization._id).lean();
+    const orgCode = (org?.name || "ORG")
+      .replace(/[^a-zA-Z]/g, "")
+      .slice(0, 3)
+      .toUpperCase();
+    const refundSeq = await Counter.getNextSequence(
+      organization._id,
+      "refundNumber"
+    );
+    const refundNumber = `RFD-${orgCode}-${refundSeq}`;
+
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
       {
         refundStatus: "refunded",
         status:
           validatedData.type === "full" ? "refunded" : originalOrder.status,
+        refundNumber,
         returns: [
           ...(originalOrder.returns || []),
           {

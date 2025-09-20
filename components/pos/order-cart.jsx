@@ -80,8 +80,8 @@ const prepareOrderData = (
     subtotal: Number(safeSubtotal),
     total: Number(safeTotal + deliveryCharge + serviceCharge + tip),
     paymentMethod,
-    status:
-      orgSettings?.operational?.orderManagement?.defaultStatus || "pending",
+    // Completing payment from POS marks the order as paid
+    status: "paid",
     deliveryType: deliveryType || "dine-in",
     tax:
       taxBreakdown?.length > 0
@@ -97,7 +97,7 @@ const prepareOrderData = (
     promoDiscount: 0,
     serviceCharge: Number(serviceCharge),
     tip: Number(tip),
-    isPaid: false,
+    isPaid: true,
     refundStatus: "none",
     returns: [],
     deliveryInfo: {

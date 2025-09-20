@@ -39,7 +39,3 @@ export const LANGUAGES = [
   "ko",
   "ar",
 ];
-
-export const DATE_FORMATS = ["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD"];
-
-export const TIME_FORMATS = ["12h", "24h"];

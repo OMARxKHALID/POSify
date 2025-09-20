@@ -23,10 +23,10 @@ export const useSettings = (options = {}) => {
   const { data: session } = useSession();
 
   const queryOptions = getDefaultQueryOptions({
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    staleTime: 60 * 1000, // 1 minute
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     retry: 1,
     ...options,
   });
@@ -84,62 +84,6 @@ export const useUpdateSettings = () => {
   });
 };
 
-export const useUpdateTaxSettings = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (taxData) =>
-      apiClient.post("/dashboard/settings/taxes", taxData),
-    onSuccess: () => {
-      invalidateQueries.settings(queryClient);
-      handleHookSuccess("TAX_SETTINGS_UPDATED_SUCCESSFULLY");
-    },
-    ...getDefaultMutationOptions({ operation: "Tax settings update" }),
-  });
-};
-
-export const useUpdatePaymentSettings = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (paymentData) =>
-      apiClient.post("/dashboard/settings/payment", paymentData),
-    onSuccess: () => {
-      invalidateQueries.settings(queryClient);
-      handleHookSuccess("PAYMENT_SETTINGS_UPDATED_SUCCESSFULLY");
-    },
-    ...getDefaultMutationOptions({ operation: "Payment settings update" }),
-  });
-};
-
-export const useUpdateBusinessSettings = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (businessData) =>
-      apiClient.post("/dashboard/settings/business", businessData),
-    onSuccess: () => {
-      invalidateQueries.settings(queryClient);
-      handleHookSuccess("BUSINESS_SETTINGS_UPDATED_SUCCESSFULLY");
-    },
-    ...getDefaultMutationOptions({ operation: "Business settings update" }),
-  });
-};
-
-export const useUpdateLocalizationSettings = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (localizationData) =>
-      apiClient.post("/dashboard/settings/localization", localizationData),
-    onSuccess: () => {
-      invalidateQueries.settings(queryClient);
-      handleHookSuccess("LOCALIZATION_SETTINGS_UPDATED_SUCCESSFULLY");
-    },
-    ...getDefaultMutationOptions({ operation: "Localization settings update" }),
-  });
-};
-
 /* ----------------------- UNIFIED MANAGEMENT HOOK ------------------------- */
 
 /**
@@ -151,9 +95,5 @@ export const useSettingsManagement = () => {
   return {
     ...settingsQuery,
     updateSettings: useUpdateSettings(),
-    updateTaxSettings: useUpdateTaxSettings(),
-    updatePaymentSettings: useUpdatePaymentSettings(),
-    updateBusinessSettings: useUpdateBusinessSettings(),
-    updateLocalizationSettings: useUpdateLocalizationSettings(),
   };
 };

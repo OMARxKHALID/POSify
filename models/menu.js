@@ -65,10 +65,8 @@ const MenuSchema = new Schema(
 // INDEXES (optimizes queries)
 
 MenuSchema.index({ organizationId: 1, categoryId: 1, available: 1 }); // filter by org, category, and availability
-MenuSchema.index(
-  { organizationId: 1, name: 1, description: 1 },
-  { name: "text" } // enables text search on name/description
-);
+// Enable text search on name and description
+MenuSchema.index({ name: "text", description: "text" });
 MenuSchema.index({ organizationId: 1, isSpecial: 1 }); // quick lookup for specials
 
 // Additional indexes for common query patterns

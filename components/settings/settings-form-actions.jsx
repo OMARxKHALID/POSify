@@ -9,7 +9,6 @@ import { Save, RefreshCw } from "lucide-react";
 
 export function SettingsFormActions({
   onCancel,
-  onSubmit,
   isLoading = false,
   hasChanges = false,
 }) {
@@ -18,7 +17,6 @@ export function SettingsFormActions({
       <CardContent className="pt-6">
         <FormActions
           onCancel={onCancel}
-          onSubmit={onSubmit}
           submitText="Save Settings"
           cancelText="Reset"
           isLoading={isLoading}

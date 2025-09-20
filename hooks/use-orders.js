@@ -68,6 +68,9 @@ export const useCreateOrder = () => {
       apiClient.post("/dashboard/orders/create", orderData),
     onSuccess: () => {
       invalidateQueries.orders(queryClient);
+      // If creation produced a transaction (paid orders), refresh transactions
+      invalidateQueries.transactions(queryClient);
+      invalidateQueries.transactionStats(queryClient);
       handleHookSuccess("ORDER_CREATED_SUCCESSFULLY");
     },
     ...getDefaultMutationOptions({ operation: "Order creation" }),
@@ -104,6 +107,9 @@ export const useUpdateOrderStatus = () => {
     onSuccess: (_, variables) => {
       invalidateQueries.orders(queryClient);
       invalidateQueries.order(queryClient, variables.orderId);
+      // Completing orders can create transactions; refresh them
+      invalidateQueries.transactions(queryClient);
+      invalidateQueries.transactionStats(queryClient);
       handleHookSuccess("ORDER_STATUS_UPDATED_SUCCESSFULLY");
     },
     ...getDefaultMutationOptions({ operation: "Order status update" }),

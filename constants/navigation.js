@@ -18,6 +18,7 @@ import {
   Shield,
   Utensils,
   FolderOpen,
+  DollarSign,
 } from "lucide-react";
 import { ADMIN_ROUTES } from "./routes";
 
@@ -44,6 +45,13 @@ export const NAVIGATION_PERMISSIONS = {
       url: ADMIN_ROUTES.ORDERS,
       icon: ShoppingCart,
       permissions: ["orders:manage"],
+      roles: ["super_admin", "admin", "staff"],
+    },
+    {
+      title: "Transactions",
+      url: ADMIN_ROUTES.TRANSACTIONS,
+      icon: DollarSign,
+      permissions: ["transactions:manage"],
       roles: ["super_admin", "admin", "staff"],
     },
     {
