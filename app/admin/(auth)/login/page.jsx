@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn, useSession } from "next-auth/react";
@@ -24,7 +24,7 @@ import { getRedirectPath } from "@/lib/helpers/redirect-helpers";
 import { loginSchema } from "@/schemas/auth-schema";
 import { FORM_DEFAULTS, DEFAULT_REDIRECTS, AUTH_ROUTES } from "@/constants";
 
-export default function AdminLoginPage() {
+function AdminLoginPageContent() {
   const [loading, setLoading] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
@@ -92,6 +92,7 @@ export default function AdminLoginPage() {
   };
 
   return (
+    <Suspense fallback={null}>
     <div className="relative min-h-screen bg-background">
       <GeometricBackground />
 
@@ -195,5 +196,14 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </div>
+    </Suspense>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminLoginPageContent />
+    </Suspense>
   );
 }

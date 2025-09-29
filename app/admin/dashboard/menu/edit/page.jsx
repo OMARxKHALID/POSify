@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -143,6 +143,7 @@ export default function EditMenuItemPage() {
     editMenuItemMutation?.isLoading || editMenuItemMutation?.isPending;
 
   return (
+    <Suspense fallback={null}>
     <PageLayout errorMessage="Failed to load menu item edit form. Please try refreshing the page.">
       <PageHeader
         title="Edit Menu Item"
@@ -436,5 +437,6 @@ export default function EditMenuItemPage() {
         </div>
       </div>
     </PageLayout>
+    </Suspense>
   );
 }

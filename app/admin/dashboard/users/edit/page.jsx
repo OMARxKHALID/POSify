@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -346,6 +346,7 @@ export default function EditUserPage() {
   const roleOptions = computeRoleOptions();
 
   return (
+    <Suspense fallback={null}>
     <PageLayout errorMessage="Failed to load user edit form. Please try refreshing the page.">
       <PageHeader
         title="Edit User"
@@ -658,5 +659,6 @@ export default function EditUserPage() {
         </div>
       )}
     </PageLayout>
+    </Suspense>
   );
 }

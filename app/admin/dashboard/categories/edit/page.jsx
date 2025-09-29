@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -122,6 +122,7 @@ export default function EditCategoryPage() {
   }
 
   return (
+    <Suspense fallback={null}>
     <PageLayout isLoading={false} error={null} errorMessage="">
       <PageHeader
         title="Edit Category"
@@ -252,5 +253,6 @@ export default function EditCategoryPage() {
         </Card>
       </div>
     </PageLayout>
+    </Suspense>
   );
 }
