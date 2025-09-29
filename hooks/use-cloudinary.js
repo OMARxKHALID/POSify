@@ -3,8 +3,6 @@ import { useCallback } from "react";
 const DEFAULT_CONFIG = {
   uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
   cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-  secretKey: process.env.NEXT_PUBLIC_CLOUDINARY_SECRET_KEY,
 };
 
 // Check Cloudinary configuration (non-blocking)
@@ -29,8 +27,6 @@ export const useCloudinary = (config = {}) => {
   const {
     uploadPreset = DEFAULT_CONFIG.uploadPreset,
     cloudName = DEFAULT_CONFIG.cloudName,
-    apiKey = DEFAULT_CONFIG.apiKey,
-    secretKey = DEFAULT_CONFIG.secretKey,
   } = config;
 
   // Check configuration (non-blocking)
@@ -87,7 +83,7 @@ export const useCloudinary = (config = {}) => {
 
   return {
     uploadToCloudinary,
-    config: { uploadPreset, cloudName, apiKey, secretKey },
+    config: { uploadPreset, cloudName },
     isConfigured: configCheck.isValid,
     configError: configCheck.error,
   };
