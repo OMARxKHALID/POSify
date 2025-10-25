@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   Wifi,
   WifiOff,
-  User,
   CloudOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { OrderQueueManager } from "./order-queue-manager";
 import { ADMIN_ROUTES } from "@/constants/routes";
 import { useSession } from "next-auth/react";
+import { SimpleUserDisplay } from "@/components/ui/user-info";
 import Link from "next/link";
 
 export function POSHeader() {
@@ -43,17 +43,7 @@ export function POSHeader() {
         </h1>
 
         {/* User Info */}
-        {session?.user && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <User className="w-4 h-4" />
-            <span className="font-medium text-foreground hidden lg:inline">
-              {session.user.name || session.user.email}
-            </span>
-            <span className="text-xs bg-muted px-2 py-1 rounded-full hidden md:inline">
-              {session.user.role}
-            </span>
-          </div>
-        )}
+        <SimpleUserDisplay session={session} />
       </div>
 
       {/* Right side - Actions */}

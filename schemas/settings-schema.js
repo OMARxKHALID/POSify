@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { organizationBaseSchema } from "./base-schema";
+import { organizationBaseSchema, updateSchema } from "./base-schema";
 import {
   TAX_TYPES,
   RECEIPT_TEMPLATES,
@@ -15,7 +15,10 @@ import {
 export const taxSettingsSchema = z.object({
   id: z.string().min(1, "Tax ID is required").trim(),
   name: z.string().min(1, "Tax name is required").trim(),
-  rate: z.number().min(0, "Tax rate must be non-negative"),
+  rate: z.coerce
+    .number()
+    .min(0, "Tax rate must be non-negative")
+    .max(100, "Tax rate cannot exceed 100"),
   enabled: z.boolean().default(true),
   type: z.enum(TAX_TYPES).default("percentage"),
 });
@@ -54,7 +57,11 @@ export const operationalSettingsSchema = z.object({
  */
 export const serviceChargeSchema = z.object({
   enabled: z.boolean().default(false),
-  percentage: z.number().min(0).default(0),
+  percentage: z.coerce
+    .number()
+    .min(0, "Percentage must be non-negative")
+    .max(100, "Percentage cannot exceed 100")
+    .default(0),
   applyOn: z.enum(SERVICE_CHARGE_APPLY_ON).default("subtotal"),
 });
 
@@ -97,3 +104,8 @@ export const settingsSchema = organizationBaseSchema.extend({
   // Currency
   currency: z.string().default("USD"),
 });
+
+/**
+ * Update schema: allows partial updates and excludes organizationId (derived server-side)
+ */
+export const updateSettingsSchema = updateSchema(settingsSchema);

@@ -7,15 +7,13 @@ import {
   createPutHandler,
   apiSuccess,
   forbidden,
-  notFound,
   validateOrganizationExists,
   getOrCreateSettings,
   updateSettings,
-  formatSettingsData,
   handleSettingsValidationError,
   createSettingsResponse,
 } from "@/lib/api";
-import { settingsSchema } from "@/schemas/settings-schema";
+import { updateSettingsSchema } from "@/schemas/settings-schema";
 
 /**
  * Handle settings data request with role-based access control
@@ -109,6 +107,6 @@ export const GET = createGetHandler(handleSettingsData);
  * PUT /api/dashboard/settings
  * Update organization settings
  */
-export const PUT = createPutHandler(settingsSchema, handleSettingsUpdate);
+export const PUT = createPutHandler(updateSettingsSchema, handleSettingsUpdate);
 
 export const { POST, DELETE } = createMethodHandler(["GET", "PUT"]);

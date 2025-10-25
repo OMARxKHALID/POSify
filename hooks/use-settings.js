@@ -10,6 +10,7 @@ import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
   handleHookSuccess,
+  handleHookError, // Import error handler
   queryKeys,
   invalidateQueries,
 } from "@/lib/hooks/hook-utils";
@@ -70,17 +71,24 @@ export const useSettings = (options = {}) => {
 
 /* ----------------------------- UPDATE HOOKS ------------------------------ */
 
-export const useUpdateSettings = () => {
+export const useUpdateSettings = (options = {}) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (settingsData) =>
-      apiClient.put("/dashboard/settings", settingsData),
+  const defaultOptions = {
     onSuccess: () => {
       invalidateQueries.settings(queryClient);
       handleHookSuccess("SETTINGS_UPDATED_SUCCESSFULLY");
     },
-    ...getDefaultMutationOptions({ operation: "Settings update" }),
+    onError: (error) => {
+      handleHookError(error, "Settings update");
+    },
+  };
+
+  return useMutation({
+    mutationFn: (settingsData) =>
+      apiClient.put("/dashboard/settings", settingsData),
+    ...defaultOptions,
+    ...options, // Allow overriding defaults
   });
 };
 

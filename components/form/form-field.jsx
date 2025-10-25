@@ -44,10 +44,15 @@ export function FormField({
 
     // Handle select component
     if (component === "select" || options) {
+      // Ensure the current value is a valid option; otherwise show placeholder
+      const optionValues = Array.isArray(options)
+        ? options.map((o) => o?.value)
+        : [];
+      const safeValue = optionValues.includes(field.value) ? field.value : undefined;
       return (
         <Select
           onValueChange={field.onChange}
-          value={field.value}
+          value={safeValue}
           disabled={disabled}
         >
           <FormControl>

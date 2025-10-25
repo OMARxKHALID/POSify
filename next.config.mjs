@@ -44,8 +44,6 @@ const nextConfig = {
       "@radix-ui/react-toggle-group",
       "@radix-ui/react-tooltip",
     ],
-    // Optimize CSS
-    optimizeCss: true,
   },
 
   // Build configuration

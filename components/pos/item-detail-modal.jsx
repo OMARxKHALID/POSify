@@ -35,16 +35,12 @@ export function ItemDetailModal({
 
   const { addToCart } = useCartStore();
 
-  const item = selectedItem || {
-    id: 1,
-    icon: "🍔",
-    name: "Classic Burger",
-    description: "Juicy grilled beef patty with lettuce, tomato, and cheese.",
-    price: 8.99,
-    prepTime: 10,
-    available: true,
-  };
+  // Early return if no item is selected
+  if (!selectedItem) {
+    return null;
+  }
 
+  const item = selectedItem;
   const isAvailable = item.available !== false;
 
   const handleAddToCart = form.handleSubmit(async (data) => {

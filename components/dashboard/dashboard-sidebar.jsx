@@ -36,6 +36,13 @@ import { Building2, Crown, ChevronDown, Check } from "lucide-react";
 // Import navigation permissions and helper functions
 import { NAVIGATION_PERMISSIONS } from "@/constants";
 import { filterNavigationByPermissions } from "@/lib/utils/permission-utils";
+import SectionErrorBoundary from "@/components/ui/section-error-boundary";
+
+// Static fallback data outside component to prevent recreation
+const FALLBACK_ORGS = [
+  { id: "2", name: "Demo Store", isActive: false },
+  { id: "3", name: "Test Location", isActive: false },
+];
 
 // Helper Components
 function OrganizationSwitcher({ user, organizations = [] }) {
@@ -44,17 +51,23 @@ function OrganizationSwitcher({ user, organizations = [] }) {
   );
 
   const availableOrgs = useMemo(() => {
-    return organizations.length > 0
-      ? organizations
-      : [
-          {
-            id: "1",
-            name: user?.organizationName || "My Restaurant",
-            isActive: true,
-          },
-          { id: "2", name: "Demo Store", isActive: false },
-          { id: "3", name: "Test Location", isActive: false },
-        ];
+    if (organizations.length > 0) {
+      return organizations;
+    }
+    
+    // Only create array when user organization exists
+    if (user?.organizationName) {
+      return [
+        {
+          id: "1",
+          name: user.organizationName,
+          isActive: true,
+        },
+        ...FALLBACK_ORGS,
+      ];
+    }
+    
+    return FALLBACK_ORGS;
   }, [organizations, user?.organizationName]);
 
   return (
@@ -202,15 +215,20 @@ export function DashboardSidebar({ ...props }) {
         {user && <UserProfile user={user} isSuperAdmin={isSuperAdmin} />}
       </SidebarHeader>
       <SidebarContent className="gap-1 py-2">
-        {Object.entries(filteredNavigation).map(([key, items]) => (
-          <NavigationGroup
-            key={key}
-            title={key.charAt(0).toUpperCase() + key.slice(1)}
-            items={items}
-            pathname={pathname}
-            onItemClick={handleSidebarClick}
-          />
-        ))}
+        <SectionErrorBoundary
+          title="Navigation error"
+          description="Unable to load navigation menu"
+        >
+          {Object.entries(filteredNavigation).map(([key, items]) => (
+            <NavigationGroup
+              key={key}
+              title={key.charAt(0).toUpperCase() + key.slice(1)}
+              items={items}
+              pathname={pathname}
+              onItemClick={handleSidebarClick}
+            />
+          ))}
+        </SectionErrorBoundary>
       </SidebarContent>
 
       <SidebarRail />

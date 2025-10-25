@@ -1,10 +1,11 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard, User } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { SimpleUserDisplay } from "@/components/ui/user-info";
 import Link from "next/link";
 
 export function DashboardHeader() {
@@ -30,29 +31,47 @@ export function DashboardHeader() {
         <div className="flex items-center space-x-4">
           <ThemeToggle />
           {session && (
-            <div className="flex items-center space-x-3">
-              <Link href="/admin/dashboard">
+            <div className="flex items-center space-x-4">
+              <SimpleUserDisplay session={session} />
+
+              {/* Navigation Links */}
+              <div className="flex items-center gap-2">
+                <Link href="/admin/dashboard">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center space-x-1"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Button>
+                </Link>
+
+                {/* POS Access for Admin/Staff */}
+                {(session.user.role === "admin" ||
+                  session.user.role === "staff") && (
+                  <Link href="/pos">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center space-x-1"
+                    >
+                      <User className="h-4 w-4" />
+                      <span>POS</span>
+                    </Button>
+                  </Link>
+                )}
+
                 <Button
                   variant="outline"
                   size="sm"
+                  onClick={() => signOut({ callbackUrl: "/admin/login" })}
                   className="flex items-center space-x-1"
                 >
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span>Dashboard</span>
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
                 </Button>
-              </Link>
-              <div className="text-sm text-muted-foreground">
-                Welcome, {session.user?.name || session.user?.email}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => signOut({ callbackUrl: "/admin/login" })}
-                className="flex items-center space-x-1"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </Button>
             </div>
           )}
         </div>

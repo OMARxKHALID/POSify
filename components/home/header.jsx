@@ -2,16 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useScroll } from "@/hooks/use-scroll";
 import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  UserInfoDisplay,
+  UserDropdownMenu,
+  MobileUserInfo,
+  MobileUserMenu,
+} from "@/components/ui/user-info";
 
 const NAV_ITEMS = ["features", "pricing", "testimonials", "faq"];
 
 export function Header() {
   const { isScrolled } = useScroll();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
 
   const scrollToSection = (id) => {
     setIsMobileMenuOpen(false);
@@ -62,12 +70,24 @@ export function Header() {
         {/* Actions */}
         <div className="relative z-10 flex items-center gap-2">
           <ThemeToggle />
-          <Button variant="ghost" asChild>
-            <Link href="/admin/login">Log In</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/register">Register</Link>
-          </Button>
+
+          {status === "loading" ? (
+            <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+          ) : session ? (
+            <div className="flex items-center gap-3">
+              <UserInfoDisplay session={session} className="hidden sm:flex" />
+              <UserDropdownMenu session={session} />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" asChild>
+                <Link href="/admin/login">Log In</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/register">Register</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -77,8 +97,10 @@ export function Header() {
           <Logo className="h-7 w-7" />
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <ThemeToggle />
+          <MobileUserInfo session={session} className="flex" />
+
           <button
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
             aria-label="Toggle menu"
@@ -120,16 +142,22 @@ export function Header() {
                 </button>
               ))}
               <div className="mt-4 flex flex-col space-y-3 border-t border-border/50 pt-4">
-                <Button
-                  variant="ghost"
-                  asChild
-                  className="justify-start h-12 text-lg"
-                >
-                  <Link href="/admin/login">Log In</Link>
-                </Button>
-                <Button asChild className="h-12 text-lg font-semibold">
-                  <Link href="/register">Register</Link>
-                </Button>
+                {session ? (
+                  <MobileUserMenu session={session} />
+                ) : (
+                  <>
+                    <Button
+                      variant="ghost"
+                      asChild
+                      className="justify-start h-12 text-lg"
+                    >
+                      <Link href="/admin/login">Log In</Link>
+                    </Button>
+                    <Button asChild className="h-12 text-lg font-semibold">
+                      <Link href="/register">Register</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>

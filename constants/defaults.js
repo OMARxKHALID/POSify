@@ -18,3 +18,9 @@ export const DEFAULT_ESTIMATED_DELIVERY_TIME = 45;
 export const DEFAULT_STORE_NAME = "My Store";
 
 export const RECEIPT_TEMPLATES = ["default", "minimal", "detailed"];
+
+export const RECEIPT_TEMPLATE_OPTIONS = [
+  { value: "default", label: "Default" },
+  { value: "minimal", label: "Minimal" },
+  { value: "detailed", label: "Detailed" },
+];

@@ -9,6 +9,7 @@ export * from "./auth";
 export * from "./business";
 export * from "./users";
 export * from "./localization";
+export * from "./currencies";
 export * from "./orders";
 export * from "./defaults";
 export * from "./navigation";

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/resizable";
 import { PageLoading } from "@/components/ui/loading";
 import { useMounted } from "@/hooks/use-mounted";
+import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 
 /**
  * Login prompt component for unauthenticated users
@@ -165,13 +166,18 @@ export function POSmain() {
             />
           </div>
           <div className="flex-1 overflow-hidden">
-            <MenuGrid
-              selectedCategory={selectedCategory}
-              searchQuery={searchQuery}
-              onItemSelect={setSelectedItem}
-              menuItems={menuItems}
-              isLoading={menuLoading}
-            />
+            <SectionErrorBoundary
+              title="Menu loading error"
+              description="Unable to display menu items"
+            >
+              <MenuGrid
+                selectedCategory={selectedCategory}
+                searchQuery={searchQuery}
+                onItemSelect={setSelectedItem}
+                menuItems={menuItems}
+                isLoading={menuLoading}
+              />
+            </SectionErrorBoundary>
           </div>
         </div>
 
@@ -184,11 +190,16 @@ export function POSmain() {
               className="absolute inset-x-0 top-0 bottom-0"
               onClick={(e) => e.stopPropagation()}
             >
-              <OrderCart
-                cartOpen={isCartOpen}
-                toggleCart={toggleCart}
-                isMobile
-              />
+              <SectionErrorBoundary
+                title="Cart error"
+                description="Unable to display shopping cart"
+              >
+                <OrderCart
+                  cartOpen={isCartOpen}
+                  toggleCart={toggleCart}
+                  isMobile
+                />
+              </SectionErrorBoundary>
             </div>
           </div>
         )}
