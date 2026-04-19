@@ -79,7 +79,10 @@ export default function EditMenuItemPage() {
         available: targetMenuItem.available ?? true,
         prepTime: targetMenuItem.prepTime ?? 0,
         isSpecial: targetMenuItem.isSpecial ?? false,
+        stockQuantity: targetMenuItem.stockQuantity ?? 100,
+        lowStockThreshold: targetMenuItem.lowStockThreshold ?? 10,
         categoryId: targetMenuItem.categoryId ?? "uncategorized",
+
       });
     }
   }, [targetMenuItem, form]);
@@ -322,6 +325,30 @@ export default function EditMenuItemPage() {
                     switchDescription="Mark as a special featured item"
                     disabled={isMutating}
                   />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="stockQuantity"
+                      label="Current Stock"
+                      icon={Clock}
+                      type="number"
+                      min="0"
+                      placeholder="100"
+                      disabled={isMutating}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="lowStockThreshold"
+                      label="Low Stock Alert Threshold"
+                      icon={AlertTriangle}
+                      type="number"
+                      min="0"
+                      placeholder="10"
+                      disabled={isMutating}
+                    />
+                  </div>
 
                   <FormActions
                     isLoading={isMutating}

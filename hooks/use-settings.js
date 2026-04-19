@@ -1,25 +1,16 @@
-/**
- * useSettings Hooks
- * Manage application/organization settings via TanStack React Query.
- */
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
-  getDefaultMutationOptions,
   handleHookSuccess,
   handleHookError, // Import error handler
   queryKeys,
   invalidateQueries,
+  isDemoModeEnabled,
 } from "@/lib/hooks/hook-utils";
+import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
 
-/* ----------------------------- FETCH SETTINGS ---------------------------- */
-
-/**
- * Fetch settings for the authenticated user’s organization.
- */
 export const useSettings = (options = {}) => {
   const { data: session } = useSession();
 
@@ -37,39 +28,62 @@ export const useSettings = (options = {}) => {
   return useQuery({
     queryKey,
     queryFn: async () => {
-      const data = await apiClient.get("/dashboard/settings");
+      try {
+        const data = await apiClient.get("/dashboard/settings");
 
-      const { settings, organization, currentUser } = data;
-      const organizationId = settings?.organizationId || organization?.id;
-      const userRole = currentUser?.role;
+        const processData = (sourceData) => {
+          const { settings, organization, currentUser } = sourceData;
+          const organizationId = settings?.organizationId || organization?.id;
+          const userRole = currentUser?.role;
 
-      const result = {
-        ...settings,
-        organizationId,
-        organizationName: organization?.name,
-        organization,
-        currentUser,
-        userRole,
-        userId: currentUser?.id,
-        isAdmin: userRole === "admin",
-        isStaff: userRole === "staff",
-        isOwner:
-          userRole === "admin" && organization?.owner === currentUser?.id,
-        _raw: data,
-      };
+          return {
+            ...settings,
+            organizationId,
+            organizationName: organization?.name,
+            organization,
+            currentUser,
+            userRole,
+            userId: currentUser?.id,
+            isAdmin: userRole === "admin",
+            isStaff: userRole === "staff",
+            isOwner:
+              userRole === "admin" && organization?.owner === currentUser?.id,
+            _raw: sourceData,
+          };
+        };
 
-      if (!result.organizationId) {
-        throw new Error("Organization ID not found in settings response");
+        if (isDemoModeEnabled() && isDataEmpty(data)) {
+          return {
+            ...processData(mockFallback.settings().data),
+            isDemo: true,
+          };
+        }
+
+        const result = processData(data);
+
+        if (!result.organizationId) {
+          throw new Error("Organization ID not found in settings response");
+        }
+
+        return result;
+      } catch (error) {
+        if (isDemoModeEnabled()) {
+          console.warn("Settings API failed, using demo data:", error.message);
+          return {
+            ...mockFallback.settings().data.settings,
+            organizationId: "demo_org",
+            organizationName: "Demo Restaurant",
+            organization: { id: "demo_org", name: "Demo Restaurant" },
+            isDemo: true,
+          };
+        }
+        throw error;
       }
-
-      return result;
     },
     enabled: !!session?.user?.id,
     ...queryOptions,
   });
 };
-
-/* ----------------------------- UPDATE HOOKS ------------------------------ */
 
 export const useUpdateSettings = (options = {}) => {
   const queryClient = useQueryClient();
@@ -92,11 +106,6 @@ export const useUpdateSettings = (options = {}) => {
   });
 };
 
-/* ----------------------- UNIFIED MANAGEMENT HOOK ------------------------- */
-
-/**
- * Provides a single interface for querying and updating all settings.
- */
 export const useSettingsManagement = () => {
   const settingsQuery = useSettings();
 

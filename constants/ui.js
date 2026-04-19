@@ -1,9 +1,3 @@
-/**
- * UI Constants
- * User interface related constants and form defaults
- */
-
-// Form Defaults
 export const FORM_DEFAULTS = {
   LOGIN: {
     email: "",
@@ -17,5 +11,4 @@ export const FORM_DEFAULTS = {
   },
 };
 
-// UI Breakpoints
 export const MOBILE_BREAKPOINT = 768;

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Transaction } from "@/models/transaction";
 import {
   getAuthenticatedUser,
@@ -25,16 +26,30 @@ const handleGetTransactionById = async (_params, request) => {
     const organization = await validateOrganizationExists(currentUser);
     if (!organization || organization.error) return organization;
 
-    const { pathname } = new URL(request.url);
-    const id = pathname.split("/").pop();
+    const { id } = _params;
+    const { ObjectId } = mongoose.Types;
 
-    if (!id) {
+    // DEMO MODE BYPASS: Check for mock ID format (e.g., txn_001)
+    if (id && id.startsWith("txn_")) {
+      const { mockTransactions } = require("@/lib/mockup-data/transactions-mockup");
+      const mockTxn = mockTransactions.find((txn) => txn._id === id);
+      
+      if (mockTxn) {
+        return apiSuccess("TRANSACTIONS_RETRIEVED_SUCCESSFULLY", {
+          transaction: formatTransactionForResponse(mockTxn),
+          organization: { id: organization._id, name: organization.name },
+          demo: true
+        });
+      }
+    }
+
+    if (!id || !ObjectId.isValid(id)) {
       return badRequest("INVALID_TRANSACTION_ID");
     }
 
     const transaction = await Transaction.findOne({
-      _id: id,
-      organizationId: organization._id,
+      _id: new ObjectId(id),
+      organizationId: new ObjectId(organization._id.toString()),
     })
       .populate("processedBy", "name email")
       .populate("orderId", "orderNumber customerName")
@@ -66,5 +81,9 @@ const handleGetTransactionById = async (_params, request) => {
   }
 };
 
+/**
+ * GET /api/dashboard/transactions/[id]
+ * Get a single transaction by ID
+ */
 export const GET = createGetHandler(handleGetTransactionById);
 export const { POST, PUT, DELETE } = createMethodHandler(["GET"]);

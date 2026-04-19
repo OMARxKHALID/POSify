@@ -12,7 +12,9 @@ import {
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
+  isDemoModeEnabled,
 } from "@/lib/hooks/hook-utils";
+import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
 
 /**
  * Hook to fetch users based on authenticated user's role and permissions
@@ -30,8 +32,19 @@ export const useUsers = (options = {}) => {
   return useQuery({
     queryKey: [...queryKeys.users, session?.user?.id], // Include session user ID in query key to force refresh on session change
     queryFn: async () => {
-      const data = await apiClient.get("/dashboard/users");
-      return data;
+      try {
+        const data = await apiClient.get("/dashboard/users");
+        if (isDemoModeEnabled() && isDataEmpty(data)) {
+          return mockFallback.users().data;
+        }
+        return data;
+      } catch (error) {
+        if (isDemoModeEnabled()) {
+          console.warn("Users API failed, using demo data:", error.message);
+          return mockFallback.users().data;
+        }
+        throw error;
+      }
     },
     ...queryOptions,
   });

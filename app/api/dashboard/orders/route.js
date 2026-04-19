@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Order } from "@/models/order";
 import {
   getAuthenticatedUser,
@@ -11,11 +12,47 @@ import {
   formatOrderForResponse,
 } from "@/lib/api";
 
+import { z } from "zod";
+
+/**
+ * Zod schema for orders query validation
+ */
+const ordersQuerySchema = z.object({
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(20),
+  status: z.string().optional(),
+  paymentMethod: z.string().optional(),
+  deliveryType: z.string().optional(),
+  startDate: z.string().datetime().optional().or(z.string().length(10).optional()),
+  endDate: z.string().datetime().optional().or(z.string().length(10).optional()),
+  search: z.string().optional(),
+  sortBy: z.string().default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+});
+
 /**
  * Handle orders data request with role-based access control
  */
 const handleOrdersData = async (queryParams, request) => {
   try {
+    const validatedParams = ordersQuerySchema.safeParse(queryParams);
+    if (!validatedParams.success) {
+      return badRequest("INVALID_QUERY_PARAMS");
+    }
+
+    const {
+      page,
+      limit,
+      status,
+      paymentMethod,
+      deliveryType,
+      startDate,
+      endDate,
+      search,
+      sortBy,
+      sortOrder,
+    } = validatedParams.data;
+
     const currentUser = await getAuthenticatedUser();
 
     // Only admin and staff can access orders
@@ -27,21 +64,8 @@ const handleOrdersData = async (queryParams, request) => {
     const organization = await validateOrganizationExists(currentUser);
     if (!organization || organization.error) return organization;
 
-    const {
-      page = 1,
-      limit = 20,
-      status,
-      paymentMethod,
-      deliveryType,
-      startDate,
-      endDate,
-      search,
-      sortBy = "createdAt",
-      sortOrder = "desc",
-    } = queryParams;
-
-    // Build filter object
-    const filter = { organizationId: organization._id };
+    // Build filter object with strict ObjectId casting
+    const filter = { organizationId: new mongoose.Types.ObjectId(organization._id.toString()) };
 
     if (status) filter.status = status;
     if (paymentMethod) filter.paymentMethod = paymentMethod;
@@ -63,35 +87,100 @@ const handleOrdersData = async (queryParams, request) => {
       ];
     }
 
-    // Calculate pagination
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const skip = (page - 1) * limit;
+    const sort = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
 
-    // Build sort object
-    const sort = {};
-    sort[sortBy] = sortOrder === "desc" ? -1 : 1;
-
-    const [orders, totalCount] = await Promise.all([
-      Order.find(filter)
-        .populate("servedBy", "name email")
-        .populate("items.menuItem", "name price image")
-        .sort(sort)
-        .skip(skip)
-        .limit(parseInt(limit))
-        .lean(),
-      Order.countDocuments(filter),
+    // Optimized Single-Trip Aggregation
+    const [result] = await Order.aggregate([
+      { $match: filter },
+      { $sort: sort },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [
+            { $skip: skip },
+            { $limit: limit },
+            {
+              $lookup: {
+                from: "users",
+                localField: "servedBy",
+                foreignField: "_id",
+                as: "servedByInfo",
+              },
+            },
+            // Logic to populate items.menuItem details in aggregation
+            {
+              $unwind: {
+                path: "$items",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: "menus", // Assuming collection name is 'menus'
+                localField: "items.menuItem",
+                foreignField: "_id",
+                as: "items.menuItemDetail"
+              }
+            },
+            {
+              $addFields: {
+                "items.menuItem": { $arrayElemAt: ["$items.menuItemDetail", 0] }
+              }
+            },
+            {
+              $group: {
+                _id: "$_id",
+                items: { $push: "$items" },
+                // Preserve other fields
+                orderNumber: { $first: "$orderNumber" },
+                organizationId: { $first: "$organizationId" },
+                customerName: { $first: "$customerName" },
+                mobileNumber: { $first: "$mobileNumber" },
+                status: { $first: "$status" },
+                total: { $first: "$total" },
+                subtotal: { $first: "$subtotal" },
+                tax: { $first: "$tax" },
+                discount: { $first: "$discount" },
+                promoDiscount: { $first: "$promoDiscount" },
+                serviceCharge: { $first: "$serviceCharge" },
+                tip: { $first: "$tip" },
+                paymentMethod: { $first: "$paymentMethod" },
+                isPaid: { $first: "$isPaid" },
+                deliveryType: { $first: "$deliveryType" },
+                servedByInfo: { $first: "$servedByInfo" },
+                refundStatus: { $first: "$refundStatus" },
+                returns: { $first: "$returns" },
+                deliveryInfo: { $first: "$deliveryInfo" },
+                idempotencyKey: { $first: "$idempotencyKey" },
+                createdAt: { $first: "$createdAt" },
+                updatedAt: { $first: "$updatedAt" }
+              }
+            },
+            { $sort: sort } // Re-sort after group
+          ],
+        },
+      },
     ]);
 
-    const totalPages = Math.ceil(totalCount / parseInt(limit));
+    const totalCount = result.metadata[0]?.total || 0;
+    const orders = result.data.map(o => ({
+      ...o,
+      servedBy: o.servedByInfo ? o.servedByInfo[0] : null
+    }));
+
+    const totalPages = Math.ceil(totalCount / limit);
     const formattedOrders = orders.map(formatOrderForResponse);
 
     return apiSuccess("ORDERS_RETRIEVED_SUCCESSFULLY", {
       orders: formattedOrders,
       pagination: {
-        currentPage: parseInt(page),
+        currentPage: page,
         totalPages,
         totalCount,
-        hasNextPage: parseInt(page) < totalPages,
-        hasPrevPage: parseInt(page) > 1,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        limit,
       },
       organization: { id: organization._id, name: organization.name },
       currentUser: {
@@ -101,6 +190,7 @@ const handleOrdersData = async (queryParams, request) => {
       },
     });
   } catch (error) {
+    console.error("Orders Fetch Error:", error);
     return serverError("ORDERS_RETRIEVAL_FAILED");
   }
 };

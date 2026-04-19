@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -19,6 +21,7 @@ import {
   MapPin,
   Crown,
   Users,
+  TrendingUp,
 } from "lucide-react";
 
 export default function OverviewPage() {
@@ -136,214 +139,38 @@ export default function OverviewPage() {
           </CardContent>
         </Card>
 
-        {/* Organization Information Card */}
+        {/* Quick Stats Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Building2 className="w-5 h-5" />
-              User's Organization
-              {isOwner && (
-                <Badge variant="default" className="ml-auto">
-                  <Crown className="w-3 h-3 mr-1" />
-                  Owner
-                </Badge>
-              )}
+              <TrendingUp className="w-5 h-5" />
+              Quick Stats (Last 30 Days)
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {organization ? (
-              <>
-                <div className="space-y-3">
-                  <div>
-                    <h3 className="text-xl font-semibold">
-                      {organization.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      ID: {organization.id}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">
-                      {organization.businessType
-                        ?.replace("_", " ")
-                        .toUpperCase()}
-                    </Badge>
-                    <Badge
-                      variant={
-                        organization.status === "active" ? "default" : "outline"
-                      }
-                    >
-                      {organization.status}
-                    </Badge>
-                    {organization.onboardingCompleted && (
-                      <Badge variant="secondary">Onboarded</Badge>
-                    )}
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-4">
-                  {/* Business Information */}
-                  {organization.information && (
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-sm text-muted-foreground">
-                        Business Information
-                      </h4>
-                      <div className="grid grid-cols-1 gap-3">
-                        {organization.information.legalName && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Building2 className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
-                              Legal Name:
-                            </span>
-                            <span className="font-medium">
-                              {organization.information.legalName}
-                            </span>
-                          </div>
-                        )}
-
-                        {organization.information.displayName && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Building2 className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
-                              Display Name:
-                            </span>
-                            <span className="font-medium">
-                              {organization.information.displayName}
-                            </span>
-                          </div>
-                        )}
-
-                        {organization.information.orgPhone && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
-                              Phone:
-                            </span>
-                            <span className="font-medium">
-                              {organization.information.orgPhone}
-                            </span>
-                          </div>
-                        )}
-
-                        {organization.information.orgEmail && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
-                              Email:
-                            </span>
-                            <span className="font-medium">
-                              {organization.information.orgEmail}
-                            </span>
-                          </div>
-                        )}
-
-                        {organization.information.website && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Globe className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
-                              Website:
-                            </span>
-                            <a
-                              href={organization.information.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-medium text-primary hover:underline"
-                            >
-                              {organization.information.website}
-                            </a>
-                          </div>
-                        )}
-
-                        {organization.information.address && (
-                          <div className="flex items-start gap-2 text-sm">
-                            <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
-                            <div>
-                              <span className="text-muted-foreground">
-                                Address:
-                              </span>
-                              <div className="font-medium">
-                                {[
-                                  organization.information.address.street,
-                                  organization.information.address.city,
-                                  organization.information.address.state,
-                                  organization.information.address.postalCode,
-                                  organization.information.address.country,
-                                ]
-                                  .filter(Boolean)
-                                  .join(", ")}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Organization Details */}
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-sm text-muted-foreground">
-                      Organization Details
-                    </h4>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Created:</span>
-                        <span className="font-medium">
-                          {organization.createdAt
-                            ? format(
-                                new Date(organization.createdAt),
-                                "MMM dd, yyyy"
-                              )
-                            : "Unknown"}
-                        </span>
-                      </div>
-
-                      {organization.subscription && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Shield className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Plan:</span>
-                          <Badge variant="outline">
-                            {organization.subscription.plan?.toUpperCase()}
-                          </Badge>
-                          <Badge
-                            variant={
-                              organization.subscription.status === "active"
-                                ? "default"
-                                : "outline"
-                            }
-                          >
-                            {organization.subscription.status}
-                          </Badge>
-                        </div>
-                      )}
-
-                      {organization.owner && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Users className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Owner:</span>
-                          <span className="font-medium">
-                            {organization.owner.name}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No Organization</h3>
-                <p className="text-muted-foreground text-sm">
-                  {user?.role === "super_admin"
-                    ? "Super admins don't belong to any organization"
-                    : "You haven't been assigned to an organization yet"}
-                </p>
-              </div>
-            )}
+          <CardContent>
+             <div className="grid grid-cols-2 gap-4">
+               <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+                 <p className="text-sm font-medium text-muted-foreground mb-1">Total Orders</p>
+                 <p className="text-2xl font-bold">128</p>
+               </div>
+               <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+                 <p className="text-sm font-medium text-muted-foreground mb-1">Revenue</p>
+                 <p className="text-2xl font-bold">$4,250.75</p>
+               </div>
+               <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+                 <p className="text-sm font-medium text-muted-foreground mb-1">Avg. Order</p>
+                 <p className="text-2xl font-bold">$33.20</p>
+               </div>
+               <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+                 <p className="text-sm font-medium text-muted-foreground mb-1">Best Seller</p>
+                 <p className="text-lg font-bold truncate">Grilled Chicken</p>
+               </div>
+             </div>
+             <div className="mt-6">
+                <Button variant="outline" className="w-full" asChild>
+                  <Link href="/admin/dashboard/analytics">View Full Analytics</Link>
+                </Button>
+             </div>
           </CardContent>
         </Card>
       </div>

@@ -12,7 +12,9 @@ import {
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
+  isDemoModeEnabled,
 } from "@/lib/hooks/hook-utils";
+import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
 
 /* -------------------------------------------------------------------------- */
 /*                              Fetching Hooks                                */
@@ -26,7 +28,21 @@ export const useTransactions = (options = {}) => {
 
   return useQuery({
     queryKey: [...queryKeys.transactions(), session?.user?.id],
-    queryFn: () => apiClient.get("/dashboard/transactions"),
+    queryFn: async () => {
+      try {
+        const data = await apiClient.get("/dashboard/transactions");
+        if (isDemoModeEnabled() && isDataEmpty(data)) {
+          return mockFallback.transactions().data;
+        }
+        return data;
+      } catch (error) {
+        if (isDemoModeEnabled()) {
+          console.warn("Transactions API failed, using demo data:", error.message);
+          return mockFallback.transactions().data;
+        }
+        throw error;
+      }
+    },
     ...getDefaultQueryOptions({
       staleTime: 60 * 1000, // 1 min
       refetchOnMount: true,
@@ -61,7 +77,21 @@ export const useTransactionStats = (options = {}) => {
 
   return useQuery({
     queryKey: [...queryKeys.transactionStats(), session?.user?.id],
-    queryFn: () => apiClient.get("/dashboard/transactions/stats"),
+    queryFn: async () => {
+      try {
+        const data = await apiClient.get("/dashboard/transactions/stats");
+        if (isDemoModeEnabled() && isDataEmpty(data)) {
+          return mockFallback.transactionsStats ? mockFallback.transactionsStats().data : mockFallback.transactions().data;
+        }
+        return data;
+      } catch (error) {
+        if (isDemoModeEnabled()) {
+          console.warn("Transaction Stats API failed, using demo data:", error.message);
+          return mockFallback.transactionsStats ? mockFallback.transactionsStats().data : mockFallback.transactions().data;
+        }
+        throw error;
+      }
+    },
     ...getDefaultQueryOptions({
       staleTime: 2 * 60 * 1000, // 2 min
       refetchOnMount: true,
@@ -84,8 +114,21 @@ export const useTransactionsWithFilters = (filters = {}, options = {}) => {
       filters,
       session?.user?.id,
     ],
-    queryFn: () =>
-      apiClient.get("/dashboard/transactions", { params: filters }),
+    queryFn: async () => {
+      try {
+        const data = await apiClient.get("/dashboard/transactions", { params: filters });
+        if (isDemoModeEnabled() && isDataEmpty(data)) {
+          return mockFallback.transactions().data;
+        }
+        return data;
+      } catch (error) {
+        if (isDemoModeEnabled()) {
+          console.warn("Transactions API failed, using demo data:", error.message);
+          return mockFallback.transactions().data;
+        }
+        throw error;
+      }
+    },
     ...getDefaultQueryOptions({
       staleTime: 60 * 1000, // 1 min
       refetchOnMount: true,

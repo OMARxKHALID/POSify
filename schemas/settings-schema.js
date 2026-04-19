@@ -50,6 +50,7 @@ export const orderManagementSchema = z.object({
  */
 export const operationalSettingsSchema = z.object({
   orderManagement: orderManagementSchema.default({}),
+  demoMode: z.boolean().default(true),
 });
 
 /**

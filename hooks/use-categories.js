@@ -1,8 +1,3 @@
-/**
- * useCategories Hook
- * Custom hook for category management operations using TanStack React Query
- */
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import {
@@ -11,11 +6,10 @@ import {
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
+  isDemoModeEnabled,
 } from "@/lib/hooks/hook-utils";
+import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
 
-/**
- * Hook to fetch categories
- */
 export const useCategories = (options = {}) => {
   const queryOptions = getDefaultQueryOptions({
     staleTime: 3 * 60 * 1000,
@@ -27,17 +21,27 @@ export const useCategories = (options = {}) => {
   return useQuery({
     queryKey: queryKeys.categories,
     queryFn: async () => {
-      const data = await apiClient.get("/dashboard/categories");
-      return data;
+      try {
+        const data = await apiClient.get("/dashboard/categories");
+        if (isDemoModeEnabled() && isDataEmpty(data)) {
+          return mockFallback.categories().data;
+        }
+        return data;
+      } catch (error) {
+        if (isDemoModeEnabled()) {
+          console.warn(
+            "Categories API failed, using demo data:",
+            error.message,
+          );
+          return mockFallback.categories().data;
+        }
+        throw error;
+      }
     },
     ...queryOptions,
   });
 };
 
-/**
- * Category Creation Hook
- * Creates a new category
- */
 export const useCreateCategory = () => {
   const queryClient = useQueryClient();
 
@@ -45,7 +49,7 @@ export const useCreateCategory = () => {
     mutationFn: async (categoryData) => {
       const response = await apiClient.post(
         "/dashboard/categories/create",
-        categoryData
+        categoryData,
       );
       return response;
     },
@@ -57,10 +61,6 @@ export const useCreateCategory = () => {
   });
 };
 
-/**
- * Category Edit Hook
- * Edits/updates an existing category
- */
 export const useEditCategory = () => {
   const queryClient = useQueryClient();
 
@@ -68,7 +68,7 @@ export const useEditCategory = () => {
     mutationFn: async ({ categoryId, categoryData }) => {
       const response = await apiClient.put(
         `/dashboard/categories/edit?categoryId=${categoryId}`,
-        categoryData
+        categoryData,
       );
       return response;
     },
@@ -90,7 +90,7 @@ export const useDeleteCategory = () => {
   return useMutation({
     mutationFn: async (categoryId) => {
       const response = await apiClient.delete(
-        `/dashboard/categories/delete?categoryId=${categoryId}`
+        `/dashboard/categories/delete?categoryId=${categoryId}`,
       );
       return response;
     },

@@ -11,7 +11,9 @@ import {
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
+  isDemoModeEnabled,
 } from "@/lib/hooks/hook-utils";
+import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
 
 /**
  * Hook to fetch menu items
@@ -27,8 +29,19 @@ export const useMenu = (options = {}) => {
   return useQuery({
     queryKey: queryKeys.menu,
     queryFn: async () => {
-      const data = await apiClient.get("/dashboard/menu");
-      return data;
+      try {
+        const data = await apiClient.get("/dashboard/menu");
+        if (isDemoModeEnabled() && isDataEmpty(data)) {
+          return mockFallback.menu().data;
+        }
+        return data;
+      } catch (error) {
+        if (isDemoModeEnabled()) {
+          console.warn("Menu API failed, using demo data:", error.message);
+          return mockFallback.menu().data;
+        }
+        throw error;
+      }
     },
     ...queryOptions,
   });

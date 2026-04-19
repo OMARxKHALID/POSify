@@ -86,7 +86,7 @@ export const NAVIGATION_PERMISSIONS = {
     },
     {
       title: "Reports",
-      url: ADMIN_ROUTES.REPORTS,
+      url: ADMIN_ROUTES.ANALYTICS,
       icon: TrendingUp,
       permissions: ["reports:view"],
       roles: ["super_admin", "admin"],

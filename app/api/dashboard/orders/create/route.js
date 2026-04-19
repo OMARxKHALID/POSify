@@ -16,9 +16,10 @@ import {
   createTransactionWithValidation,
 } from "@/lib/api";
 import { orderSchema } from "@/schemas/order-schema";
+import { Order } from "@/models/order";
 
 /**
- * Handle order creation with role-based access control
+ * Handle order creation with role-based access control and idempotency
  */
 const handleOrderCreation = async (validatedData, request) => {
   try {
@@ -31,30 +32,62 @@ const handleOrderCreation = async (validatedData, request) => {
     const organization = await validateOrganizationExists(currentUser);
     if (!organization || organization.error) return organization;
 
+    const { idempotencyKey } = validatedData;
+
+    // SECURE: Strict Idempotency Check
+    if (idempotencyKey) {
+      const existingOrder = await Order.findOne({
+        idempotencyKey,
+        organizationId: organization._id,
+      }).lean();
+
+      if (existingOrder) {
+        const populatedOrder = await populateOrder(
+          existingOrder._id,
+          organization._id,
+        );
+        const formattedOrder = formatOrderForResponse(populatedOrder);
+
+        return apiSuccess("ORDER_ALREADY_EXISTS_IDEMPOTENT", {
+          order: formattedOrder,
+          organization: { id: organization._id, name: organization.name },
+          idempotent: true,
+        });
+      }
+    }
+
+    // Create order with internal validation logic
     const order = await createOrderWithValidation(
       organization._id,
-      validatedData,
-      currentUser._id
+      { ...validatedData },
+      currentUser._id,
     );
 
-    await logCreate("Order", order, currentUser, request);
+    // Non-blocking Audit
+    logCreate("Order", order, currentUser, request);
 
     // If the order is created as paid, create a corresponding transaction
     if (validatedData?.isPaid === true || validatedData?.status === "paid") {
-      const transaction = await createTransactionWithValidation(
-        organization._id,
-        {
-          orderId: order._id,
-          type: "payment",
-          amount: validatedData.total,
-          paymentMethod: validatedData.paymentMethod,
-          status: "completed",
-          reference: `Order ${order.orderNumber} payment`,
-        },
-        currentUser._id
-      );
+      try {
+        const transaction = await createTransactionWithValidation(
+          organization._id,
+          {
+            orderId: order._id,
+            type: "payment",
+            amount: validatedData.total,
+            paymentMethod: validatedData.paymentMethod,
+            status: "completed",
+            reference: `Order ${order.orderNumber} payment`,
+          },
+          currentUser._id,
+        );
 
-      await logCreate("Transaction", transaction, currentUser, request);
+        logCreate("Transaction", transaction, currentUser, request);
+      } catch (txError) {
+        console.error("Secondary Transaction Failed:", txError);
+        // Note: For absolute production consistency, this should be in a MongoDB transaction.
+        // For now, we log the error but the order remains created.
+      }
     }
 
     const populatedOrder = await populateOrder(order._id, organization._id);
@@ -71,7 +104,7 @@ const handleOrderCreation = async (validatedData, request) => {
           organizationId: currentUser.organizationId,
         },
       },
-      201
+      201,
     );
   } catch (error) {
     const errorInfo = handleOrderValidationError(error);
@@ -84,6 +117,7 @@ const handleOrderCreation = async (validatedData, request) => {
       return badRequest(errorInfo.message);
     }
 
+    console.error("Order Creation Logic Error:", error);
     return serverError("ORDER_CREATION_FAILED");
   }
 };

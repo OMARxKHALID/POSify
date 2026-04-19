@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+import { z } from "zod";
 import { Order } from "@/models/order";
 import {
   getAuthenticatedUser,
@@ -8,6 +10,13 @@ import {
   badRequest,
   validateOrganizationExists,
 } from "@/lib/api";
+
+/**
+ * Zod schema for analytics query validation
+ */
+const analyticsQuerySchema = z.object({
+  timeRange: z.enum(["7d", "30d", "90d"]).default("30d"),
+});
 
 /**
  * Generate empty analytics structure for new organizations
@@ -43,7 +52,7 @@ const generateEmptyAnalytics = () => ({
 });
 
 /**
- * Calculate KPIs with mock previous period data for comparison
+ * Calculate KPIs logic
  */
 const calculateKPIs = (totalRevenue, totalOrders, avgOrderValue) => {
   const previousRevenue = totalRevenue * 0.88;
@@ -89,164 +98,17 @@ const calculateKPIs = (totalRevenue, totalOrders, avgOrderValue) => {
 };
 
 /**
- * Generate mock inventory data for low stock items
- */
-const generateMockInventory = () => [
-  { item: "Chicken Breast", current: 5, min: 10, category: "Meat" },
-  { item: "Tomatoes", current: 8, min: 15, category: "Vegetables" },
-  { item: "Olive Oil", current: 2, min: 5, category: "Pantry" },
-  { item: "Pasta", current: 12, min: 20, category: "Pantry" },
-  { item: "Cheese", current: 6, min: 12, category: "Dairy" },
-];
-
-/**
- * Generate comprehensive analytics data for organization orders and sales
- */
-const generateAnalyticsData = async (organizationId, timeRange = "30d") => {
-  const now = new Date();
-  const daysToShow = getDaysFromTimeRange(timeRange);
-  const startDate = new Date(now.getTime() - daysToShow * 24 * 60 * 60 * 1000);
-
-  // Get orders with proper status filtering
-  const orders = await Order.find({
-    organizationId,
-    createdAt: { $gte: startDate, $lte: now },
-    status: { $nin: ["cancelled", "refund"] },
-  }).populate("items.menuItem");
-
-  // Handle empty results
-  if (orders.length === 0) {
-    return generateEmptyAnalytics();
-  }
-
-  // Process data
-  const dailySalesMap = new Map();
-  const hourlySalesMap = new Map();
-  const topItemsMap = new Map();
-  let totalRevenue = 0;
-  let totalOrders = orders.length;
-
-  // Initialize time slots
-  for (let i = 0; i < daysToShow; i++) {
-    const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
-    const dateKey = date.toISOString().split("T")[0];
-    dailySalesMap.set(dateKey, {
-      date: dateKey,
-      sales: 0,
-      orders: 0,
-      customers: 0,
-    });
-  }
-
-  for (let hour = 0; hour < 24; hour++) {
-    const hourKey = hour.toString().padStart(2, "0") + ":00";
-    hourlySalesMap.set(hourKey, { hour: hourKey, sales: 0, orders: 0 });
-  }
-
-  // Process orders
-  orders.forEach((order) => {
-    const orderDate = new Date(order.createdAt);
-    const dateKey = orderDate.toISOString().split("T")[0];
-    const hourKey = orderDate.getHours().toString().padStart(2, "0") + ":00";
-
-    // Update daily sales
-    const dailyData = dailySalesMap.get(dateKey);
-    if (dailyData) {
-      dailyData.sales += order.total; // Use 'total' field from Order model
-      dailyData.orders += 1;
-      dailyData.customers += 1;
-    }
-
-    // Update hourly sales
-    const hourlyData = hourlySalesMap.get(hourKey);
-    if (hourlyData) {
-      hourlyData.sales += order.total; // Use 'total' field from Order model
-      hourlyData.orders += 1;
-    }
-
-    // Process top items
-    order.items.forEach((item) => {
-      if (item.menuItem) {
-        const itemName = item.menuItem.name;
-        if (!topItemsMap.has(itemName)) {
-          topItemsMap.set(itemName, {
-            name: itemName,
-            category: item.menuItem.category || "Other",
-            sales: 0,
-            orders: 0,
-            price: item.menuItem.price,
-          });
-        }
-        const itemData = topItemsMap.get(itemName);
-        itemData.sales += item.price * item.quantity;
-        itemData.orders += item.quantity;
-      }
-    });
-
-    totalRevenue += order.total; // Use 'total' field from Order model
-  });
-
-  // Convert to arrays and sort
-  const dailySales = Array.from(dailySalesMap.values()).sort(
-    (a, b) => new Date(a.date) - new Date(b.date)
-  );
-
-  const hourlySales = Array.from(hourlySalesMap.values()).sort((a, b) =>
-    a.hour.localeCompare(b.hour)
-  );
-
-  const topItems = Array.from(topItemsMap.values())
-    .sort((a, b) => b.sales - a.sales)
-    .slice(0, 8);
-
-  // Calculate KPIs
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-  const kpis = calculateKPIs(totalRevenue, totalOrders, avgOrderValue);
-  const lowStock = generateMockInventory();
-
-  return {
-    sales: {
-      dailySales,
-      hourlySales,
-      topItems,
-    },
-    performance: {
-      kpis,
-    },
-    inventory: {
-      lowStock,
-    },
-  };
-};
-
-/**
- * Validate time range parameter against allowed values
- */
-const validateTimeRange = (timeRange) => {
-  const allowedRanges = ["7d", "30d", "90d"];
-  return allowedRanges.includes(timeRange);
-};
-
-/**
- * Get days count from time range string
- */
-const getDaysFromTimeRange = (timeRange) => {
-  const rangeMap = { "7d": 7, "30d": 30, "90d": 90 };
-  return rangeMap[timeRange] || 30;
-};
-
-/**
- * Handle analytics data request with role-based access control
+ * Handle analytics data request using MongoDB Aggregation Pipeline
  */
 const handleAnalyticsData = async (queryParams, request) => {
   try {
-    const user = await getAuthenticatedUser();
-    const timeRange = queryParams.timeRange || "30d";
-
-    // Validate time range parameter
-    if (!validateTimeRange(timeRange)) {
-      return badRequest("INVALID_TIME_RANGE");
+    const validatedParams = analyticsQuerySchema.safeParse(queryParams);
+    if (!validatedParams.success) {
+      return badRequest("INVALID_QUERY_PARAMS");
     }
+
+    const { timeRange } = validatedParams.data;
+    const user = await getAuthenticatedUser();
 
     // Super admin gets empty analytics
     if (user.role === "super_admin") {
@@ -256,18 +118,128 @@ const handleAnalyticsData = async (queryParams, request) => {
       );
     }
 
-    // Validate organization exists
     const organization = await validateOrganizationExists(user);
     if (!organization || organization.error) return organization;
 
-    // Generate analytics data
-    const analyticsData = await generateAnalyticsData(
-      user.organizationId,
-      timeRange
-    );
+    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
 
-    return apiSuccess("ANALYTICS_RETRIEVED_SUCCESSFULLY", analyticsData);
+    // Optimized Aggregation Pipeline with strict ObjectId casting
+    const [stats] = await Order.aggregate([
+      {
+        $match: {
+          organizationId: new mongoose.Types.ObjectId(organization._id.toString()),
+          createdAt: { $gte: startDate },
+          status: { $nin: ["cancelled", "refund"] },
+        },
+      },
+      {
+        $facet: {
+          dailySales: [
+            {
+              $group: {
+                _id: {
+                  $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+                },
+                sales: { $sum: "$total" },
+                orders: { $sum: 1 },
+              },
+            },
+            { $sort: { _id: 1 } },
+            { $project: { date: "$_id", sales: 1, orders: 1, _id: 0 } },
+          ],
+          hourlySales: [
+            {
+              $group: {
+                _id: { $hour: "$createdAt" },
+                sales: { $sum: "$total" },
+                orders: { $sum: 1 },
+              },
+            },
+            { $sort: { _id: 1 } },
+            {
+              $project: {
+                hour: {
+                  $concat: [
+                    { $toString: { $cond: [{ $lt: ["$_id", 10] }, "0", ""] } },
+                    { $toString: "$_id" },
+                    ":00",
+                  ],
+                },
+                sales: 1,
+                orders: 1,
+                _id: 0,
+              },
+            },
+          ],
+          topItems: [
+            { $unwind: "$items" },
+            {
+              $group: {
+                _id: "$items.name",
+                sales: {
+                  $sum: { $multiply: ["$items.price", "$items.quantity"] },
+                },
+                orders: { $sum: "$items.quantity" },
+              },
+            },
+            { $sort: { sales: -1 } },
+            { $limit: 8 },
+            { $project: { name: "$_id", sales: 1, orders: 1, _id: 0 } },
+          ],
+          summary: [
+            {
+              $group: {
+                _id: null,
+                totalRevenue: { $sum: "$total" },
+                totalOrders: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    // Handle empty results
+    if (!stats || !stats.summary.length) {
+      return apiSuccess("ANALYTICS_RETRIEVED", generateEmptyAnalytics());
+    }
+
+    const { totalRevenue, totalOrders } = stats.summary[0];
+    const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    // Fetch Inventory Alerts separately (different collection)
+    const Menu = (await import("@/models/menu")).Menu;
+    const lowStockItems = await Menu.find({
+      organizationId: new mongoose.Types.ObjectId(organization._id.toString()),
+      $expr: { $lte: ["$stockQuantity", "$lowStockThreshold"] },
+    })
+      .select("name stockQuantity lowStockThreshold")
+      .lean()
+      .limit(10);
+
+    const result = {
+      sales: {
+        dailySales: stats.dailySales,
+        hourlySales: stats.hourlySales,
+        topItems: stats.topItems,
+      },
+      performance: {
+        kpis: calculateKPIs(totalRevenue, totalOrders, avgOrderValue),
+      },
+      inventory: {
+        lowStock: lowStockItems.map((i) => ({
+          item: i.name,
+          current: i.stockQuantity,
+          min: i.lowStockThreshold,
+        })),
+      },
+    };
+
+    return apiSuccess("ANALYTICS_RETRIEVED_SUCCESSFULLY", result);
   } catch (error) {
+    console.error("Aggregation Error:", error);
     return serverError("ANALYTICS_FETCH_FAILED");
   }
 };

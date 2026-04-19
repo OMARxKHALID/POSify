@@ -447,8 +447,9 @@ export default function AnalyticsPage() {
                 showAddButton={true}
                 addButtonText="Add Item"
                 onAddClick={() => {
-                  // TODO: Implement add inventory item functionality
+                  router.push("/admin/dashboard/menu");
                 }}
+
               />
             </CardContent>
           </Card>

@@ -11,112 +11,84 @@ import { baseSchemaOptions } from "@/schemas/base-schema";
 
 const { Schema } = mongoose;
 
-// SUB-SCHEMAS
-
-/**
- * Tax Settings Schema
- * Defines tax rates and types
- */
 const TaxSettingsSchema = new Schema(
   {
-    id: { type: String, required: true, trim: true }, // tax ID
-    name: { type: String, required: true, trim: true }, // tax name
-    rate: { type: Number, required: true, min: 0 }, // tax %
-    enabled: { type: Boolean, default: true }, // enable/disable tax
-    type: { type: String, enum: TAX_TYPES, default: "percentage" }, // percentage or fixed
+    id: { type: String, required: true, trim: true },
+    name: { type: String, required: true, trim: true },
+    rate: { type: Number, required: true, min: 0 },
+    enabled: { type: Boolean, default: true },
+    type: { type: String, enum: TAX_TYPES, default: "percentage" },
   },
-  { _id: false }
+  { _id: false },
 );
 
-/**
- * Receipt Settings Schema
- * Receipt printing and formatting
- */
 const ReceiptSettingsSchema = new Schema(
   {
-    template: { type: String, enum: RECEIPT_TEMPLATES, default: "default" }, // receipt template
-    footer: { type: String, trim: true, default: DEFAULT_RECEIPT_FOOTER }, // footer note
-    header: { type: String, trim: true, default: "" }, // header note
-    printLogo: { type: Boolean, default: true }, // show logo
-    showTaxBreakdown: { type: Boolean, default: true }, // show tax details
-    showItemDiscounts: { type: Boolean, default: true }, // show discounts
-    showOrderNumber: { type: Boolean, default: true }, // show order ID
-    showServerName: { type: Boolean, default: true }, // show staff
-    autoPrint: { type: Boolean, default: false }, // auto print receipts
+    template: { type: String, enum: RECEIPT_TEMPLATES, default: "default" },
+    footer: { type: String, trim: true, default: DEFAULT_RECEIPT_FOOTER },
+    header: { type: String, trim: true, default: "" },
+    printLogo: { type: Boolean, default: true },
+    showTaxBreakdown: { type: Boolean, default: true },
+    showItemDiscounts: { type: Boolean, default: true },
+    showOrderNumber: { type: Boolean, default: true },
+    showServerName: { type: Boolean, default: true },
+    autoPrint: { type: Boolean, default: false },
   },
-  { _id: false }
+  { _id: false },
 );
 
-/**
- * Operational Settings Schema
- * Order management rules
- */
 const OperationalSettingsSchema = new Schema(
   {
     orderManagement: {
-      defaultStatus: { type: String, enum: ORDER_STATUSES, default: "pending" }, // new order status
+      defaultStatus: { type: String, enum: ORDER_STATUSES, default: "pending" },
     },
+    demoMode: { type: Boolean, default: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
-/**
- * Business Config Schema
- * Discounts, service charge, tipping
- */
 const BusinessConfigSchema = new Schema(
   {
     serviceCharge: {
-      enabled: { type: Boolean, default: false }, // enable service charge
-      percentage: { type: Number, default: 0 }, // % applied
+      enabled: { type: Boolean, default: false },
+      percentage: { type: Number, default: 0 },
       applyOn: {
         type: String,
         enum: SERVICE_CHARGE_APPLY_ON,
         default: "subtotal",
-      }, // apply rule
+      },
     },
     tipping: {
-      enabled: { type: Boolean, default: true }, // enable tips
+      enabled: { type: Boolean, default: true },
       suggestedPercentages: {
         type: [Number],
         default: DEFAULT_SUGGESTED_TIP_PERCENTAGES,
-      }, // tip options
-      allowCustomTip: { type: Boolean, default: true }, // allow custom tip
+      },
+      allowCustomTip: { type: Boolean, default: true },
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
-// MAIN SCHEMA
-
-/**
- * Settings Schema
- * Holds all configuration for an organization
- */
 const SettingsSchema = new Schema(
   {
     organizationId: {
       type: Schema.Types.ObjectId,
       ref: "Organization",
       required: true,
-    }, // linked org
+    },
 
-    taxes: { type: [TaxSettingsSchema], default: [] }, // tax config
-    receipt: { type: ReceiptSettingsSchema, default: () => ({}) }, // receipt config
-    operational: { type: OperationalSettingsSchema, default: () => ({}) }, // ops rules
-    business: { type: BusinessConfigSchema, default: () => ({}) }, // business rules
+    taxes: { type: [TaxSettingsSchema], default: [] },
+    receipt: { type: ReceiptSettingsSchema, default: () => ({}) },
+    operational: { type: OperationalSettingsSchema, default: () => ({}) },
+    business: { type: BusinessConfigSchema, default: () => ({}) },
 
-    // Currency
-    currency: { type: String, uppercase: true, default: "USD" }, // store currency
+    currency: { type: String, uppercase: true, default: "USD" },
   },
-  baseSchemaOptions
+  baseSchemaOptions,
 );
 
-// INDEXES
-
 SettingsSchema.index({ organizationId: 1, updatedAt: -1 });
-
-// EXPORT
 
 export const Settings =
   mongoose.models.Settings || mongoose.model("Settings", SettingsSchema);

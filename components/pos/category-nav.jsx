@@ -35,6 +35,7 @@ export function CategoryNav({
   // Add count to each category
   const categoriesWithCount = categories.map((cat) => ({
     ...cat,
+    id: cat.id || cat._id, // Normalize ID to fix selection bug
     count: getCategoryItemCount(cat.id || cat._id),
   }));
 
@@ -47,7 +48,7 @@ export function CategoryNav({
         {[...Array(5)].map((_, idx) => (
           <div
             key={idx}
-            className="flex flex-col items-start p-2 rounded-2xl w-[105px] h-[105px] border-2 flex-shrink-0 bg-muted animate-pulse"
+            className="flex flex-col justify-between items-start p-2 rounded-2xl w-[105px] h-[115px] border-2 flex-shrink-0 bg-muted animate-pulse"
           >
             <div className="mb-3">
               <div className="flex items-center justify-center rounded-full w-9 h-9 bg-muted-foreground/20" />
@@ -72,13 +73,13 @@ export function CategoryNav({
             type="button"
             onClick={() => onCategoryChange?.(cat.id)}
             className={cn(
-              "flex flex-col items-start p-2 rounded-2xl transition-all duration-200 w-[105px] h-[105px] border-2 flex-shrink-0 hover:shadow",
+              "flex flex-col justify-between items-start p-2 rounded-2xl transition-all duration-200 w-[105px] h-[115px] border-2 flex-shrink-0 hover:shadow",
               selected
                 ? "bg-primary/10 border-primary"
                 : "bg-card border-border"
             )}
           >
-            <div className="mb-3">
+            <div className="mb-1">
               <div
                 className={cn(
                   "flex items-center justify-center rounded-full w-9 h-9",

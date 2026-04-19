@@ -1,16 +1,9 @@
-/**
- * Route Constants
- * Centralized route definitions for the application
- */
-
-// Authentication Routes
 export const AUTH_ROUTES = {
   LOGIN: "/admin/login",
   REGISTER: "/register",
   HOME: "/",
 };
 
-// Admin Routes
 export const ADMIN_ROUTES = {
   DASHBOARD: "/admin/dashboard",
   OVERVIEW: "/admin/dashboard/overview",
@@ -27,19 +20,16 @@ export const ADMIN_ROUTES = {
   NOTIFICATIONS: "/admin/dashboard/notifications",
 };
 
-// Organization Routes
 export const ORG_ROUTES = {
   REGISTER: "/organization/register",
 };
 
-// API Routes
 export const API_ROUTES = {
   AUTH: "/api/auth",
   ORGANIZATIONS: "/api/organizations",
   REGISTER: "/api/register",
 };
 
-// Public Routes (don't require authentication)
 export const PUBLIC_ROUTES = [
   AUTH_ROUTES.LOGIN,
   AUTH_ROUTES.REGISTER,
@@ -48,7 +38,6 @@ export const PUBLIC_ROUTES = [
   API_ROUTES.AUTH,
 ];
 
-// Default Redirects
 export const DEFAULT_REDIRECTS = {
   AFTER_LOGIN: ADMIN_ROUTES.ANALYTICS,
   AFTER_LOGOUT: AUTH_ROUTES.LOGIN,

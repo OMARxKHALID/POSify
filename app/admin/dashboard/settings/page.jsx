@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { settingsSchema } from "@/schemas/settings-schema";
@@ -11,7 +12,6 @@ import {
   Building2,
   CreditCard,
   Save,
-  RefreshCw,
   AlertTriangle,
   Plus,
   Trash2,
@@ -31,6 +31,7 @@ import { PageLayout } from "@/components/dashboard/page-layout";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { FormField } from "@/components/form/form-field";
 import { useSettingsManagement, useUpdateSettings } from "@/hooks/use-settings";
+import { useDemoModeStore } from "@/lib/store/use-demo-mode-store";
 import { BusinessSettingsSection } from "@/components/settings/business-settings-section";
 import { TaxSettingsSection } from "@/components/settings/tax-settings-section";
 import {
@@ -41,7 +42,6 @@ import {
   SERVICE_CHARGE_APPLY_ON_OPTIONS,
 } from "@/constants";
 
-// Default form values aligned with model/schema
 const defaultFormValues = {
   taxes: [],
   receipt: {
@@ -59,6 +59,7 @@ const defaultFormValues = {
     orderManagement: {
       defaultStatus: "pending",
     },
+    demoMode: true,
   },
   business: {
     serviceCharge: {
@@ -76,6 +77,9 @@ const defaultFormValues = {
 };
 
 export default function SettingsPage() {
+  const queryClient = useQueryClient();
+  const { isDemoMode, enableDemoMode, disableDemoMode } = useDemoModeStore();
+
   const {
     data: settingsData,
     isLoading,
@@ -83,7 +87,6 @@ export default function SettingsPage() {
     updateSettings,
   } = useSettingsManagement();
 
-  // Independent mutations per section to avoid global loading side-effects
   const generalMutation = useUpdateSettings();
   const taxesMutation = useUpdateSettings();
   const receiptMutation = useUpdateSettings();
@@ -95,48 +98,53 @@ export default function SettingsPage() {
     mode: "onChange",
   });
 
-  // Hydrate form when data arrives
   useEffect(() => {
     if (settingsData) {
       form.reset(settingsData);
     }
   }, [settingsData, form]);
 
-  // Helper: clean payload before sending (filter incomplete taxes)
   const cleanSettingsPayload = (values) => {
     const cleaned = { ...values };
     if (Array.isArray(cleaned.taxes)) {
-      cleaned.taxes = cleaned.taxes.filter((t) =>
-        t && typeof t.name === "string" && t.name.trim().length > 0
+      cleaned.taxes = cleaned.taxes.filter(
+        (t) => t && typeof t.name === "string" && t.name.trim().length > 0,
       );
     }
     return cleaned;
   };
 
-  // Save All
   const onSubmit = async (data) => {
     try {
       const payload = cleanSettingsPayload(data);
       await updateSettings.mutateAsync(payload);
-    } catch (_) {
-      // handled by hook notifications
-    }
+    } catch (_) {}
   };
 
-  // Reset All
   const handleResetAll = () => {
     if (settingsData) form.reset(settingsData);
   };
 
-  // Section helpers
   const saveGeneralSection = async () => {
     const values = form.getValues();
     const payload = {
-      operational: { orderManagement: { ...values.operational?.orderManagement } },
+      operational: {
+        orderManagement: { ...values.operational?.orderManagement },
+        demoMode: values.operational?.demoMode,
+      },
       currency: values.currency,
     };
     try {
       await generalMutation.mutateAsync(payload);
+
+      if (values.operational?.demoMode) {
+        enableDemoMode();
+      } else {
+        disableDemoMode();
+      }
+      
+      // Invalidate all queries to force refetch without mock data
+      queryClient.invalidateQueries();
     } catch (_) {}
   };
 
@@ -164,7 +172,6 @@ export default function SettingsPage() {
     } catch (_) {}
   };
 
-  // Taxes array helpers
   const addTax = () => {
     const currentTaxes = form.getValues("taxes") || [];
     const newTax = {
@@ -201,7 +208,8 @@ export default function SettingsPage() {
           <div>
             <AlertTitle>Unsaved changes</AlertTitle>
             <AlertDescription>
-              You have unsaved changes. Use the "Save Section" button on each card to persist updates.
+              You have unsaved changes. Use the "Save Section" button on each
+              card to persist updates.
             </AlertDescription>
           </div>
         </Alert>
@@ -261,6 +269,14 @@ export default function SettingsPage() {
                       label="Currency"
                       component="select"
                       options={CURRENCY_OPTIONS}
+                      disabled={generalMutation.isPending}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="operational.demoMode"
+                      label="Demo Mode"
+                      description="Show sample data when no custom data exists"
+                      component="switch"
                       disabled={generalMutation.isPending}
                     />
                   </div>
@@ -490,8 +506,14 @@ export default function SettingsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm text-muted-foreground">
-                  <p>Use "Save Section" on each card to persist changes specific to that section.</p>
-                  <p>Your changes are not saved until you click the section's Save button.</p>
+                  <p>
+                    Use "Save Section" on each card to persist changes specific
+                    to that section.
+                  </p>
+                  <p>
+                    Your changes are not saved until you click the section's
+                    Save button.
+                  </p>
                 </CardContent>
               </Card>
 
@@ -503,4 +525,3 @@ export default function SettingsPage() {
     </PageLayout>
   );
 }
-

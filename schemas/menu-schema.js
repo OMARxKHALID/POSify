@@ -27,6 +27,9 @@ export const menuFormSchema = z.object({
     .min(0, "Preparation time must be non-negative")
     .default(DEFAULT_PREP_TIME),
   isSpecial: z.boolean().default(false),
+  stockQuantity: z.coerce.number().min(0).default(100),
+  lowStockThreshold: z.coerce.number().min(0).default(10),
+
   organizationId: z.string().optional(), // Set automatically on backend
 });
 
@@ -60,4 +63,7 @@ export const menuSchema = organizationBaseSchema.extend({
     .min(0, "Preparation time must be non-negative")
     .default(DEFAULT_PREP_TIME),
   isSpecial: z.boolean().default(false),
+  stockQuantity: z.coerce.number().min(0).default(100),
+  lowStockThreshold: z.coerce.number().min(0).default(10),
+
 });

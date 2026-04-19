@@ -224,6 +224,30 @@ export default function CreateMenuItemPage() {
                     />
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="stockQuantity"
+                      label="Initial Stock Quantity"
+                      icon={Clock}
+                      type="number"
+                      min="0"
+                      placeholder="100"
+                      disabled={createMenuItemMutation.isPending}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="lowStockThreshold"
+                      label="Low Stock Threshold"
+                      icon={AlertTriangle}
+                      type="number"
+                      min="0"
+                      placeholder="10"
+                      disabled={createMenuItemMutation.isPending}
+                    />
+                  </div>
+
                   <FormActions
                     isLoading={createMenuItemMutation.isPending}
                     submitText="Create Menu Item"

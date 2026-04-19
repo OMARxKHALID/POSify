@@ -1,6 +1,6 @@
 import { Order } from "@/models/order";
 import { Counter } from "@/models/counter";
-import { Organization } from "@/models/organization";
+import { Menu } from "@/models/menu";
 import { logUpdate } from "@/lib/helpers/audit-helpers";
 import {
   getAuthenticatedUser,
@@ -9,16 +9,15 @@ import {
   createPostHandler,
   apiSuccess,
   forbidden,
+  serverError,
   badRequest,
   notFound,
-  serverError,
   validateOrganizationExists,
   populateOrder,
   formatOrderForResponse,
   handleOrderValidationError,
 } from "@/lib/api";
 import { z } from "zod";
-import { REFUND_STATUSES } from "@/constants";
 
 const refundSchema = z.object({
   type: z.enum(["full", "partial"], {
@@ -30,7 +29,7 @@ const refundSchema = z.object({
         itemId: z.string().min(1, "Item ID is required"),
         quantity: z.number().min(1, "Quantity must be at least 1"),
         reason: z.string().optional(),
-      })
+      }),
     )
     .optional(),
   reason: z.string().min(1, "Refund reason is required"),
@@ -40,7 +39,7 @@ const refundSchema = z.object({
 /**
  * Handle refund processing with role-based access control
  */
-const handleRefundProcessing = async (validatedData, request) => {
+const handleRefundProcessing = async (validatedData, request, params) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
@@ -53,7 +52,7 @@ const handleRefundProcessing = async (validatedData, request) => {
     const organization = await validateOrganizationExists(currentUser);
     if (!organization || organization.error) return organization;
 
-    const orderId = request.url.split("/").pop().replace("/refund", "");
+    const { id: orderId } = params;
 
     // Find the order
     const originalOrder = await Order.findOne({
@@ -94,7 +93,7 @@ const handleRefundProcessing = async (validatedData, request) => {
       // Validate refund items
       for (const refundItem of validatedData.items) {
         const orderItem = originalOrder.items.find(
-          (item) => item.menuItem.toString() === refundItem.itemId
+          (item) => item.menuItem.toString() === refundItem.itemId,
         );
 
         if (!orderItem) {
@@ -111,24 +110,23 @@ const handleRefundProcessing = async (validatedData, request) => {
     }
 
     // Update order with refund information
-    // Generate refundNumber with org code pattern ORG-AAA-####
-    const org = await Organization.findById(organization._id).lean();
-    const orgCode = (org?.name || "ORG")
+    const orgCode = (organization.name || "ORG")
       .replace(/[^a-zA-Z]/g, "")
       .slice(0, 3)
       .toUpperCase();
+
     const refundSeq = await Counter.getNextSequence(
       organization._id,
-      "refundNumber"
+      "refundNumber",
     );
     const refundNumber = `RFD-${orgCode}-${refundSeq}`;
 
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
       {
-        refundStatus: "refunded",
+        refundStatus: validatedData.type === "full" ? "full" : "partial",
         status:
-          validatedData.type === "full" ? "refunded" : originalOrder.status,
+          validatedData.type === "full" ? "refund" : "partial refund",
         refundNumber,
         returns: [
           ...(originalOrder.returns || []),
@@ -143,11 +141,27 @@ const handleRefundProcessing = async (validatedData, request) => {
         ],
         updatedAt: new Date(),
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
-    // Log the update
-    await logUpdate("Order", originalOrder, updatedOrder, currentUser, request);
+    // SECURE: Automate Inventory Restoration on Refund
+    try {
+      const itemsToRestore = refundItems
+        .filter((item) => item.itemId.toString().match(/^[0-9a-fA-F]{24}$/))
+        .map((item) => ({
+          menuItem: item.itemId,
+          quantity: item.quantity,
+        }));
+
+      if (itemsToRestore.length > 0) {
+        await Menu.incrementStock(organization._id, itemsToRestore);
+      }
+    } catch (inventoryError) {
+      console.error("Inventory Restoration on Refund Failed:", inventoryError);
+    }
+
+    // Log the update (non-blocking)
+    logUpdate("Order", originalOrder, updatedOrder, currentUser, request);
 
     // Populate and format the updated order
     const populatedOrder = await populateOrder(orderId, organization._id);

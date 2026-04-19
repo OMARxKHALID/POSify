@@ -1,5 +1,6 @@
 import { Order } from "@/models/order";
 import { Transaction } from "@/models/transaction";
+import { Menu } from "@/models/menu";
 import { logUpdate, logCreate } from "@/lib/helpers/audit-helpers";
 import {
   getAuthenticatedUser,
@@ -27,7 +28,7 @@ const statusUpdateSchema = z.object({
 /**
  * Handle order status update with role-based access control
  */
-const handleStatusUpdate = async (validatedData, request) => {
+const handleStatusUpdate = async (validatedData, request, params) => {
   try {
     const currentUser = await getAuthenticatedUser();
 
@@ -40,9 +41,9 @@ const handleStatusUpdate = async (validatedData, request) => {
     const organization = await validateOrganizationExists(currentUser);
     if (!organization || organization.error) return organization;
 
-    const orderId = request.url.split("/").pop().replace("/status", "");
+    const { id: orderId } = params;
 
-    // Find the order
+    // Find the order restricted by organization
     const originalOrder = await Order.findOne({
       _id: orderId,
       organizationId: organization._id,
@@ -83,6 +84,21 @@ const handleStatusUpdate = async (validatedData, request) => {
       { new: true, runValidators: true }
     );
 
+    // SECURE: Automate Inventory Restoration on Cancellation
+    if (newStatus === "cancelled" && currentStatus !== "cancelled") {
+      try {
+        const itemsToRestore = originalOrder.items.filter(item => 
+          item.menuItem.toString().match(/^[0-9a-fA-F]{24}$/)
+        );
+        
+        if (itemsToRestore.length > 0) {
+          await Menu.incrementStock(organization._id, itemsToRestore);
+        }
+      } catch (inventoryError) {
+        console.error("Inventory Restoration Failed:", inventoryError);
+      }
+    }
+
     // Create transaction when order is marked as paid
     if (newStatus === "paid" && currentStatus !== "paid") {
       const transaction = await Transaction.createWithTransactionNumber(
@@ -99,11 +115,11 @@ const handleStatusUpdate = async (validatedData, request) => {
         }
       );
 
-      await logCreate("Transaction", transaction, currentUser, request);
+      logCreate("Transaction", transaction, currentUser, request);
     }
 
     // Log the update
-    await logUpdate("Order", originalOrder, updatedOrder, currentUser, request);
+    logUpdate("Order", originalOrder, updatedOrder, currentUser, request);
 
     // Populate and format the updated order
     const populatedOrder = await populateOrder(orderId, organization._id);

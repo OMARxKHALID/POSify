@@ -12,21 +12,30 @@ import {
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
+  isDemoModeEnabled,
 } from "@/lib/hooks/hook-utils";
+import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
 
-/* -------------------------------------------------------------------------- */
-/*                              Fetching Hooks                                */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Fetch all orders
- */
 export const useOrders = (options = {}) => {
   const { data: session } = useSession();
 
   return useQuery({
     queryKey: [...queryKeys.orders(), session?.user?.id],
-    queryFn: () => apiClient.get("/dashboard/orders"),
+    queryFn: async () => {
+      try {
+        const data = await apiClient.get("/dashboard/orders");
+        if (isDemoModeEnabled() && isDataEmpty(data)) {
+          return mockFallback.orders().data;
+        }
+        return data;
+      } catch (error) {
+        if (isDemoModeEnabled()) {
+          console.warn("Orders API failed, using demo data:", error.message);
+          return mockFallback.orders().data;
+        }
+        throw error;
+      }
+    },
     ...getDefaultQueryOptions({
       staleTime: 60 * 1000, // 1 min
       refetchOnMount: true,
@@ -36,9 +45,6 @@ export const useOrders = (options = {}) => {
   });
 };
 
-/**
- * Fetch a single order by ID
- */
 export const useOrder = (orderId, options = {}) => {
   const { data: session } = useSession();
 
@@ -53,13 +59,6 @@ export const useOrder = (orderId, options = {}) => {
   });
 };
 
-/* -------------------------------------------------------------------------- */
-/*                             Mutation Hooks                                 */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Create a new order
- */
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
 
@@ -77,9 +76,6 @@ export const useCreateOrder = () => {
   });
 };
 
-/**
- * Edit an existing order
- */
 export const useEditOrder = () => {
   const queryClient = useQueryClient();
 
@@ -95,9 +91,6 @@ export const useEditOrder = () => {
   });
 };
 
-/**
- * Update order status
- */
 export const useUpdateOrderStatus = () => {
   const queryClient = useQueryClient();
 
@@ -116,9 +109,6 @@ export const useUpdateOrderStatus = () => {
   });
 };
 
-/**
- * Delete (cancel) an order
- */
 export const useDeleteOrder = () => {
   const queryClient = useQueryClient();
 
@@ -133,9 +123,6 @@ export const useDeleteOrder = () => {
   });
 };
 
-/**
- * Process a refund
- */
 export const useProcessRefund = () => {
   const queryClient = useQueryClient();
 
@@ -150,10 +137,6 @@ export const useProcessRefund = () => {
     ...getDefaultMutationOptions({ operation: "Refund processing" }),
   });
 };
-
-/* -------------------------------------------------------------------------- */
-/*                      Unified Orders Management Hook                        */
-/* -------------------------------------------------------------------------- */
 
 export const useOrdersManagement = () => {
   const ordersQuery = useOrders();

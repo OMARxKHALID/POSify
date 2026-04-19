@@ -4,6 +4,7 @@ import { User } from "@/models/user";
 import { Organization } from "@/models/organization";
 import {
   cleanUserResponse,
+  getAuthenticatedUser,
   createMethodHandler,
   createPostHandler,
   apiSuccess,
@@ -18,15 +19,20 @@ import { DEFAULT_PERMISSIONS } from "@/constants";
  * Handle organization registration with user role elevation to admin
  */
 const handleOrganizationRegistration = async (validatedData) => {
-  const { userId, organizationName, businessType, information } = validatedData;
+  const { organizationName, businessType, information } = validatedData;
+  
+  // SECURE: Get user from session, not from body
+  const currentUser = await getAuthenticatedUser();
+  const userId = currentUser._id;
 
   // Start MongoDB transaction session
   const session = await mongoose.startSession();
 
   try {
     await session.withTransaction(async () => {
-      // Verify user exists and is active
+      // Refresh user info within transaction
       const user = await User.findById(userId).session(session);
+      
       if (!user) {
         throw new Error("USER_NOT_FOUND");
       }
@@ -48,35 +54,11 @@ const handleOrganizationRegistration = async (validatedData) => {
         throw new Error("ORGANIZATION_EXISTS");
       }
 
-      // Generate URL-friendly slug from organization name
-      const slug = organizationName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-
       // Create new organization with default settings
       const organization = new Organization({
         name: organizationName,
-        slug,
         businessType,
-        information: information || {
-          address: {
-            street: "123 Main Street",
-            city: "New York",
-            state: "NY",
-            postalCode: "10001",
-            country: "USA",
-          },
-          legalName: organizationName,
-          displayName: "POS",
-          orgPhone: "+1-555-0123",
-          website: "https://myrestaurant.com",
-          logoUrl: "https://example.com/logo.png",
-          taxId: "TAX123456789",
-          currency: "USD",
-          timezone: "America/New_York",
-          language: "en",
-        },
+        information,
         owner: userId,
         subscription: {
           plan: "free",

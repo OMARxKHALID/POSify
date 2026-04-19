@@ -58,6 +58,14 @@ const MenuSchema = new Schema(
       type: Boolean,
       default: false, // highlights item as "chef's special" or featured
     },
+    stockQuantity: {
+      type: Number,
+      default: 100, // current quantity in stock
+    },
+    lowStockThreshold: {
+      type: Number,
+      default: 10, // threshold below which a "low stock" alert is triggered
+    },
   },
   baseSchemaOptions
 );
@@ -72,6 +80,40 @@ MenuSchema.index({ organizationId: 1, isSpecial: 1 }); // quick lookup for speci
 // Additional indexes for common query patterns
 MenuSchema.index({ organizationId: 1, price: 1 }); // price range queries
 MenuSchema.index({ organizationId: 1, createdAt: -1 }); // recent items
+
+// STATIC METHODS
+
+/**
+ * Decrement stock for multiple items atomically
+ */
+MenuSchema.statics.decrementStock = async function (organizationId, items) {
+  const operations = items.map((item) => ({
+    updateOne: {
+      filter: { _id: item.menuItem, organizationId },
+      update: { $inc: { stockQuantity: -item.quantity } },
+    },
+  }));
+
+  if (operations.length > 0) {
+    return this.bulkWrite(operations);
+  }
+};
+
+/**
+ * Increment stock for multiple items atomically
+ */
+MenuSchema.statics.incrementStock = async function (organizationId, items) {
+  const operations = items.map((item) => ({
+    updateOne: {
+      filter: { _id: item.menuItem, organizationId },
+      update: { $inc: { stockQuantity: item.quantity } },
+    },
+  }));
+
+  if (operations.length > 0) {
+    return this.bulkWrite(operations);
+  }
+};
 
 // EXPORT
 

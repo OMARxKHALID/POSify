@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+import { z } from "zod";
 import { Transaction } from "@/models/transaction";
 import {
   getAuthenticatedUser,
@@ -12,11 +14,52 @@ import {
   formatTransactionsForResponse,
   handleTransactionValidationError,
 } from "@/lib/api";
+
+/**
+ * Zod schema for transactions query validation
+ */
+const transactionsQuerySchema = z.object({
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(200).default(20),
+  type: z.string().optional(),
+  status: z.string().optional(),
+  paymentMethod: z.string().optional(),
+  processedBy: z.string().optional(),
+  orderId: z.string().optional(),
+  transactionNumber: z.string().optional(),
+  startDate: z.string().datetime().optional().or(z.string().length(10).optional()),
+  endDate: z.string().datetime().optional().or(z.string().length(10).optional()),
+  search: z.string().optional(),
+  sortBy: z.string().default("processedAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+});
+
 /**
  * Handle transactions data request with role-based access control
  */
 const handleTransactionsData = async (queryParams, request) => {
   try {
+    const validatedParams = transactionsQuerySchema.safeParse(queryParams);
+    if (!validatedParams.success) {
+      return badRequest("INVALID_QUERY_PARAMS");
+    }
+
+    const {
+      page,
+      limit,
+      type,
+      status,
+      paymentMethod,
+      processedBy,
+      orderId,
+      transactionNumber,
+      startDate,
+      endDate,
+      search,
+      sortBy,
+      sortOrder,
+    } = validatedParams.data;
+
     const currentUser = await getAuthenticatedUser();
 
     // Only admin and staff can access transactions
@@ -28,40 +71,32 @@ const handleTransactionsData = async (queryParams, request) => {
     const organization = await validateOrganizationExists(currentUser);
     if (!organization || organization.error) return organization;
 
-    const {
-      page = 1,
-      limit = 20,
-      type,
-      status,
-      paymentMethod,
-      processedBy,
-      orderId,
-      transactionNumber,
-      startDate,
-      endDate,
-      search,
-      sortBy = "processedAt",
-      sortOrder = "desc",
-    } = queryParams;
-
-    // Build filter object
-    const filter = { organizationId: organization._id };
+    // SECURE: Strict ObjectId casting for aggregation matching
+    const { ObjectId } = mongoose.Types;
+    const filter = { organizationId: new ObjectId(organization._id.toString()) };
 
     if (type) filter.type = type;
     if (status) filter.status = status;
     if (paymentMethod) filter.paymentMethod = paymentMethod;
-    if (processedBy) filter.processedBy = processedBy;
-    if (orderId) filter.orderId = orderId;
+    
+    // Cast processedBy if present
+    if (processedBy && ObjectId.isValid(processedBy)) {
+        filter.processedBy = new ObjectId(processedBy);
+    }
+    
+    // Cast orderId if present
+    if (orderId && ObjectId.isValid(orderId)) {
+        filter.orderId = new ObjectId(orderId);
+    }
+    
     if (transactionNumber) filter.transactionNumber = transactionNumber;
 
-    // Date range filter
     if (startDate || endDate) {
       filter.processedAt = {};
       if (startDate) filter.processedAt.$gte = new Date(startDate);
       if (endDate) filter.processedAt.$lte = new Date(endDate);
     }
 
-    // Search filter
     if (search) {
       filter.$or = [
         { transactionNumber: { $regex: search, $options: "i" } },
@@ -69,37 +104,60 @@ const handleTransactionsData = async (queryParams, request) => {
       ];
     }
 
-    // Calculate pagination
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const skip = (page - 1) * limit;
+    const sort = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
 
-    // Build sort object
-    const sort = {};
-    sort[sortBy] = sortOrder === "desc" ? -1 : 1;
-
-    const [transactions, totalCount] = await Promise.all([
-      Transaction.find(filter)
-        .populate("processedBy", "name email")
-        .populate("orderId", "orderNumber customerName")
-        .sort(sort)
-        .skip(skip)
-        .limit(parseInt(limit))
-        .lean(),
-      Transaction.countDocuments(filter),
+    // Atomic Aggregation
+    const [result] = await Transaction.aggregate([
+      { $match: filter },
+      { $sort: sort },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [
+            { $skip: skip },
+            { $limit: limit },
+            {
+              $lookup: {
+                from: "users",
+                localField: "processedBy",
+                foreignField: "_id",
+                as: "processedByInfo",
+              },
+            },
+            {
+              $lookup: {
+                from: "orders",
+                localField: "orderId",
+                foreignField: "_id",
+                as: "orderInfo",
+              },
+            },
+          ],
+        },
+      },
     ]);
 
-    const totalPages = Math.ceil(totalCount / parseInt(limit));
+    const totalCount = result.metadata[0]?.total || 0;
+    const totalPages = Math.ceil(totalCount / limit);
 
-    // Format transactions for response
+    // Format results (Map looks up results for response compatibility)
+    const transactions = result.data.map(t => ({
+      ...t,
+      processedBy: t.processedByInfo[0],
+      orderId: t.orderInfo[0]
+    }));
+
     const formattedTransactions = formatTransactionsForResponse(transactions);
 
     return apiSuccess("TRANSACTIONS_RETRIEVED_SUCCESSFULLY", {
       transactions: formattedTransactions,
       pagination: {
-        currentPage: parseInt(page),
+        currentPage: page,
         totalPages,
         totalCount,
-        hasNextPage: parseInt(page) < totalPages,
-        hasPrevPage: parseInt(page) > 1,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
       },
       organization: { id: organization._id, name: organization.name },
       currentUser: {
