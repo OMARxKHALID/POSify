@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +30,14 @@ import { FormField } from "@/components/form/form-field";
 import { useEditCategory, useCategories } from "@/features/menu/hooks/use-categories";
 
 export default function EditCategoryPage() {
+  return (
+    <Suspense fallback={<PageLayout isLoading={true} error={null} errorMessage="" />}>
+      <EditCategoryContent />
+    </Suspense>
+  );
+}
+
+function EditCategoryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const categoryId = searchParams?.get("id") || null;

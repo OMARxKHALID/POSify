@@ -1,7 +1,5 @@
 import { DEFAULT_PERMISSIONS } from "@/features/users/constants/users.constants";
 
-// --- Role & Permission Checks ---
-
 export function getUserPermissions(user) {
   if (!user) return [];
   const rolePermissions = DEFAULT_PERMISSIONS[user.role] || [];
@@ -28,7 +26,10 @@ export function filterNavigationByPermissions(navigation, user) {
       if (user?.role === "super_admin" && !user.permissions?.length) {
         return true;
       }
-      return hasAnyPermission(user, item.permissions) && hasAllowedRole(user, item.roles);
+      return (
+        hasAnyPermission(user, item.permissions) &&
+        hasAllowedRole(user, item.roles)
+      );
     });
 
     if (filteredItems.length > 0) {
@@ -38,8 +39,6 @@ export function filterNavigationByPermissions(navigation, user) {
 
   return filtered;
 }
-
-// --- User Action Guards ---
 
 export const canEditUser = (currentUser, targetUser) => {
   const isCurrentUser = currentUser?.id === targetUser?.id;

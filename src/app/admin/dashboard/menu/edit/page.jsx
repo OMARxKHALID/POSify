@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,6 +39,14 @@ import { useEditMenuItem, useMenu } from "@/features/menu/hooks/use-menu";
 import { formatCategoryOptions } from "@/features/menu/utils/category.utils";
 
 export default function EditMenuItemPage() {
+  return (
+    <Suspense fallback={<PageLayout isLoading={true} errorMessage="Loading menu item edit form..." />}>
+      <EditMenuItemContent />
+    </Suspense>
+  );
+}
+
+function EditMenuItemContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const menuItemId = searchParams?.get("id") || null;

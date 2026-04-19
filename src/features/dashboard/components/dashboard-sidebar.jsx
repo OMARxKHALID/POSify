@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "@/lib/mock-auth";
 
-
 import {
   Sidebar,
   SidebarContent,
@@ -30,31 +29,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-
 import { Building2, Crown, ChevronDown, Check } from "lucide-react";
-
 
 import { NAVIGATION_PERMISSIONS } from "@/constants";
 import { filterNavigationByPermissions } from "@/lib/utils/access-control";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
-
 
 const FALLBACK_ORGS = [
   { id: "2", name: "Demo Store", isActive: false },
   { id: "3", name: "Test Location", isActive: false },
 ];
 
-
 function OrganizationSwitcher({ user, organizations = [] }) {
   const [selectedOrg, setSelectedOrg] = useState(
-    user?.organizationName || "No Organization"
+    user?.organizationName || "No Organization",
   );
 
   const availableOrgs = useMemo(() => {
     if (organizations.length > 0) {
       return organizations;
     }
-    
 
     if (user?.organizationName) {
       return [
@@ -66,7 +60,7 @@ function OrganizationSwitcher({ user, organizations = [] }) {
         ...FALLBACK_ORGS,
       ];
     }
-    
+
     return FALLBACK_ORGS;
   }, [organizations, user?.organizationName]);
 
@@ -185,15 +179,13 @@ export function DashboardSidebar({ ...props }) {
   const user = session?.user;
   const isSuperAdmin = user?.role === "super_admin";
 
-
   const filteredNavigation = useMemo(() => {
     const filtered = filterNavigationByPermissions(
       NAVIGATION_PERMISSIONS,
-      user
+      user,
     );
     return filtered;
   }, [user]);
-
 
   const handleSidebarClick = useMemo(() => {
     return (e) => {
@@ -206,9 +198,7 @@ export function DashboardSidebar({ ...props }) {
   return (
     <Sidebar {...props} onClick={handleSidebarClick}>
       <SidebarHeader className="border-b">
-
         {!isSuperAdmin && <OrganizationSwitcher user={user} />}
-
 
         {!isSuperAdmin && <Separator className="my-2" />}
 

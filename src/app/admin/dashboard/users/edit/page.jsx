@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,6 +49,14 @@ import {
 } from "@/lib/utils/access-control";
 
 export default function EditUserPage() {
+  return (
+    <Suspense fallback={<PageLayout isLoading={true} errorMessage="Loading user edit form..." />}>
+      <EditUserContent />
+    </Suspense>
+  );
+}
+
+function EditUserContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams?.get("id") || null;

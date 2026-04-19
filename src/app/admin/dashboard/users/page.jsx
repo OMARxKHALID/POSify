@@ -40,7 +40,10 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { KPICard, KPICardsGrid } from "@/features/dashboard/components/kpi-card";
+import {
+  KPICard,
+  KPICardsGrid,
+} from "@/features/dashboard/components/kpi-card";
 import { PageLayout } from "@/features/dashboard/components/page-layout";
 import { PageHeader } from "@/features/dashboard/components/page-header";
 import { useUsersManagement } from "@/features/users/hooks/use-users";
@@ -56,7 +59,6 @@ import {
   canCreateUsers,
 } from "@/lib/utils/access-control";
 
-
 const columnHelper = createColumnHelper();
 
 export default function UsersPage() {
@@ -66,30 +68,24 @@ export default function UsersPage() {
     isLoading,
     isError,
     error,
-    refetch,
-    createUser,
-    editUser,
     deleteUser,
   } = useUsersManagement();
-
 
   const users = useMemo(() => usersData?.users || [], [usersData?.users]);
   const currentUser = useMemo(
     () => usersData?.currentUser,
-    [usersData?.currentUser]
+    [usersData?.currentUser],
   );
   const organization = useMemo(
     () => usersData?.organization,
-    [usersData?.organization]
+    [usersData?.organization],
   );
-
 
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     userId: null,
     userInfo: null,
   });
-
 
   const columns = [
     columnHelper.accessor("name", {
@@ -289,7 +285,6 @@ export default function UsersPage() {
     }),
   ];
 
-
   const handleDeleteUser = (userId) => {
     const user = users.find((u) => u.id === userId);
     if (user) {
@@ -304,23 +299,18 @@ export default function UsersPage() {
     }
   };
 
-
   const confirmDeleteUser = async () => {
     if (!deleteDialog.userId) return;
 
     try {
       await deleteUser.mutateAsync(deleteDialog.userId);
       setDeleteDialog({ isOpen: false, userId: null, userInfo: null });
-    } catch (error) {
-
-    }
+    } catch (error) {}
   };
-
 
   const closeDeleteDialog = () => {
     setDeleteDialog({ isOpen: false, userId: null, userInfo: null });
   };
-
 
   const handleCreateUser = () => {
     router.push("/admin/dashboard/users/create");
@@ -337,7 +327,6 @@ export default function UsersPage() {
         description="Manage users, roles, and permissions for your organization"
         icon={Users}
       />
-
 
       <KPICardsGrid>
         <KPICard
@@ -365,7 +354,6 @@ export default function UsersPage() {
           period="Awaiting approval"
         />
       </KPICardsGrid>
-
 
       {organization && (
         <Card>
@@ -400,7 +388,6 @@ export default function UsersPage() {
         </Card>
       )}
 
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -423,7 +410,6 @@ export default function UsersPage() {
           />
         </CardContent>
       </Card>
-
 
       <DeleteConfirmationDialog
         isOpen={deleteDialog.isOpen}

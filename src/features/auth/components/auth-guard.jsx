@@ -6,7 +6,10 @@ import { useEffect, useMemo } from "react";
 import { PageLoading } from "@/components/ui/loading";
 import { ADMIN_ROUTES, AUTH_ROUTES } from "@/constants";
 import { NAVIGATION_PERMISSIONS } from "@/constants/navigation";
-import { hasAnyPermission, hasAllowedRole } from "@/lib/utils/access-control";
+import {
+  hasAnyPermission,
+  hasAllowedRole,
+} from "@/lib/utils/access-control";
 
 export function AuthGuard({ children, fallback = null }) {
   const { data: session, status } = useSession();
