@@ -1,0 +1,57 @@
+import { z } from "zod";
+import { USER_ROLES, USER_STATUSES } from "@/features/users/constants/users.constants";
+
+
+const passwordSchema = z
+  .string()
+  .min(6, "Password must be at least 6 characters");
+
+
+export const loginSchema = z.object({
+  email: z.string().email("Invalid email format").toLowerCase().trim(),
+  password: z.string().min(1, "Password is required"),
+});
+
+
+export const userRegistrationSchema = z.object({
+  name: z.string().min(1, "Name is required").trim(),
+  email: z.string().email("Invalid email format").toLowerCase().trim(),
+  password: passwordSchema,
+});
+
+
+export const userCreationSchema = z.object({
+  name: z.string().min(1, "Name is required").trim(),
+  email: z.string().email("Invalid email format").toLowerCase().trim(),
+  password: passwordSchema,
+  role: z.enum(USER_ROLES).default("staff"),
+  permissions: z.array(z.string()).optional(),
+});
+
+
+export const userEditSchema = z.object({
+  name: z.string().min(1, "Name is required").trim().optional(),
+  email: z
+    .string()
+    .email("Invalid email format")
+    .toLowerCase()
+    .trim()
+    .optional(),
+  password: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine(
+      (val) => !val || val.trim() === "" || val.length >= 6,
+      "Password must be at least 6 characters"
+    ),
+  role: z.enum(USER_ROLES).optional(),
+  status: z.enum(USER_STATUSES).optional(),
+  permissions: z.array(z.string()).optional(),
+});
+
+
+export const organizationTransferSchema = z.object({
+  organizationId: z.string().min(1, "Organization ID is required"),
+  newOwnerId: z.string().min(1, "New owner ID is required"),
+});
