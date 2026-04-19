@@ -1,21 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/mock-auth";
 import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
+  getDefaultMutationOptions,
   handleHookSuccess,
-  handleHookError, // Import error handler
   queryKeys,
   invalidateQueries,
-  isDemoModeEnabled,
-} from "@/lib/hooks/hook-utils";
+} from "@/lib/helpers/hook-helpers";
+import { useIsDemoModeEnabled } from "@/hooks/use-demo-mode";
 import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
 
 export const useSettings = (options = {}) => {
   const { data: session } = useSession();
+  const isDemoMode = useIsDemoModeEnabled();
 
   const queryOptions = getDefaultQueryOptions({
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 60 * 1000,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
@@ -52,7 +53,7 @@ export const useSettings = (options = {}) => {
           };
         };
 
-        if (isDemoModeEnabled() && isDataEmpty(data)) {
+        if (isDemoMode && isDataEmpty(data)) {
           return {
             ...processData(mockFallback.settings().data),
             isDemo: true,
@@ -67,7 +68,7 @@ export const useSettings = (options = {}) => {
 
         return result;
       } catch (error) {
-        if (isDemoModeEnabled()) {
+        if (isDemoMode) {
           console.warn("Settings API failed, using demo data:", error.message);
           return {
             ...mockFallback.settings().data.settings,
@@ -102,7 +103,7 @@ export const useUpdateSettings = (options = {}) => {
     mutationFn: (settingsData) =>
       apiClient.put("/dashboard/settings", settingsData),
     ...defaultOptions,
-    ...options, // Allow overriding defaults
+    ...options,
   });
 };
 

@@ -10,12 +10,12 @@ export function PageLayout({
   errorMessage = "Failed to load page content. Please try refreshing the page.",
   showErrorBoundary = true,
 }) {
-  // Show loading state
+
   if (isLoading) {
     return <PageLoading />;
   }
 
-  // Show error state
+
   if (error) {
     return (
       <div className="min-h-screen w-full max-w-full overflow-x-hidden space-y-3 p-3 sm:space-y-4 sm:p-4 lg:p-6">

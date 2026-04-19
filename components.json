@@ -12,7 +12,7 @@
   },
   "aliases": {
     "components": "@/components",
-    "utils": "@/lib/utils",
+    "utils": "@/lib/utils/ui-utils",
     "ui": "@/components/ui",
     "lib": "@/lib",
     "hooks": "@/hooks",
@@ -24,7 +24,7 @@
     "internal": {
       "url": "https://internal.company.com/{name}.json",
       "headers": {
-        "Authorization": "Bearer ${123213213}"
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
       }
     }
   }

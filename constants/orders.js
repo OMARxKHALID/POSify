@@ -1,6 +1,4 @@
-/**
- * Orders & Payments Constants
- */
+
 
 export const ORDER_STATUSES = [
   "pending",

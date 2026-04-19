@@ -1,22 +1,16 @@
-/**
- * useRegistration Hook
- * Comprehensive registration hook using TanStack React Query
- * Handles user registration, super admin registration, and organization registration
- */
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import {
+  getDefaultQueryOptions,
   getDefaultMutationOptions,
   handleHookSuccess,
+  queryKeys,
   invalidateQueries,
-} from "@/lib/hooks/hook-utils";
+} from "@/lib/helpers/hook-helpers";
+import { useIsDemoModeEnabled } from "@/hooks/use-demo-mode";
 import { REGISTRATION_TYPES } from "@/constants";
 
-/**
- * User Registration Hook
- * Registers a new user with pending role
- */
+
 export function useUserRegistration() {
   const queryClient = useQueryClient();
 
@@ -33,10 +27,7 @@ export function useUserRegistration() {
   });
 }
 
-/**
- * Super Admin Registration Hook
- * Registers a super admin user with full system permissions
- */
+
 export function useSuperAdminRegistration() {
   const queryClient = useQueryClient();
 
@@ -53,10 +44,7 @@ export function useSuperAdminRegistration() {
   });
 }
 
-/**
- * Organization Registration Hook
- * Registers a new organization and links it to an existing user
- */
+
 export function useOrganizationRegistration() {
   const queryClient = useQueryClient();
 
@@ -66,22 +54,19 @@ export function useOrganizationRegistration() {
       return response;
     },
     onSuccess: async (data, variables) => {
-      // Invalidate queries
+
       invalidateQueries.organizations(queryClient);
       invalidateQueries.users(queryClient);
       invalidateQueries.user(queryClient, variables.userId);
 
-      // Show success toast
+
       handleHookSuccess("ORGANIZATION_REGISTERED_SUCCESSFULLY");
     },
     ...getDefaultMutationOptions({ operation: "Organization registration" }),
   });
 }
 
-/**
- * Main Registration Hook
- * Unified hook that handles all registration types
- */
+
 export function useRegistration(type = REGISTRATION_TYPES.USER) {
   const userRegistration = useUserRegistration();
   const superAdminRegistration = useSuperAdminRegistration();

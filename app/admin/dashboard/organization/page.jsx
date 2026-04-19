@@ -26,10 +26,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/**
- * Organization Page
- * Dedicated page for viewing and managing organization profile details
- */
+
 export default function OrganizationPage() {
   const { data: overviewData, isLoading, error } = useOrganizationOverview();
   const { organization, isOwner } = overviewData || {};
@@ -49,7 +46,7 @@ export default function OrganizationPage() {
       <div className="space-y-6">
         {organization ? (
           <>
-            {/* Main Info Card */}
+
             <Card>
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
@@ -83,7 +80,7 @@ export default function OrganizationPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Contact Information */}
+
                   <div className="space-y-4">
                     <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
                       Contact Information
@@ -132,7 +129,7 @@ export default function OrganizationPage() {
                     </div>
                   </div>
 
-                  {/* Business Details */}
+
                   <div className="space-y-4">
                     <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
                       Business Details
@@ -178,7 +175,7 @@ export default function OrganizationPage() {
                     </div>
                   </div>
 
-                  {/* Address */}
+
                   <div className="space-y-4">
                     <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
                       Location
@@ -211,7 +208,7 @@ export default function OrganizationPage() {
               </CardContent>
             </Card>
 
-            {/* Subscription Card */}
+
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">

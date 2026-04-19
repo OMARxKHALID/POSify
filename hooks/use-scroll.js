@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-/**
- * Optimized scroll hook with throttling
- */
+
 export function useScroll() {
   const [scrollY, setScrollY] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -27,7 +25,7 @@ export function useScroll() {
     };
 
     window.addEventListener("scroll", throttledScroll, { passive: true });
-    handleScroll(); // Initial call
+    handleScroll(); 
 
     return () => {
       window.removeEventListener("scroll", throttledScroll);
@@ -37,9 +35,7 @@ export function useScroll() {
   return { scrollY, isScrolled };
 }
 
-/**
- * Hook for scroll-based visibility detection
- */
+
 export function useScrollVisibility(threshold = 0.1) {
   const [isVisible, setIsVisible] = useState(false);
   const [ref, setRef] = useState(null);

@@ -2,9 +2,9 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/ui-utils"
 
-// Format: { THEME_NAME: CSS_SELECTOR }
+
 const THEMES = {
   light: "",
   dark: ".dark"
@@ -64,7 +64,7 @@ const ChartStyle = ({
             const safeLines = colorConfig
               .map(([key, itemConfig]) => {
                 const color = itemConfig.theme?.[theme] || itemConfig.color
-                // Only allow simple color values to prevent CSS injection
+
                 const isSafe =
                   typeof color === "string" &&
                   /^#[0-9a-fA-F]{3,8}$|^rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)$|^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*(0|1|0?\.\d+)\s*\)$|^[a-zA-Z]+$/.test(
@@ -266,7 +266,7 @@ const ChartLegendContent = React.forwardRef((
 })
 ChartLegendContent.displayName = "ChartLegend"
 
-// Helper to extract item config from a payload.
+
 function getPayloadConfigFromPayload(
   config,
   payload,

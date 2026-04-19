@@ -6,14 +6,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Activity, Plus, Minus, Edit, AlertCircle } from "lucide-react";
 import { format, isValid, parseISO } from "date-fns";
 
-/**
- * Highlight changes in audit log data
- */
+
 export function AuditChangesDisplay({ changes, resource, action }) {
   const highlightedChanges = useMemo(() => {
     if (!changes) return null;
 
-    // Handle different change formats
+
     if (changes.before && changes.after) {
       return compareObjects(changes.before, changes.after, resource, action);
     } else if (changes.after) {
@@ -45,7 +43,7 @@ export function AuditChangesDisplay({ changes, resource, action }) {
 
   return (
     <div className="space-y-4">
-      {/* Added Fields */}
+
       {highlightedChanges.added &&
         Object.keys(highlightedChanges.added).length > 0 && (
           <Card>
@@ -65,7 +63,7 @@ export function AuditChangesDisplay({ changes, resource, action }) {
           </Card>
         )}
 
-      {/* Removed Fields */}
+
       {highlightedChanges.removed &&
         Object.keys(highlightedChanges.removed).length > 0 && (
           <Card>
@@ -85,7 +83,7 @@ export function AuditChangesDisplay({ changes, resource, action }) {
           </Card>
         )}
 
-      {/* Modified Fields */}
+
       {highlightedChanges.modified &&
         Object.keys(highlightedChanges.modified).length > 0 && (
           <Card>
@@ -162,9 +160,7 @@ export function AuditChangesDisplay({ changes, resource, action }) {
   );
 }
 
-/**
- * Compare two objects and return differences
- */
+
 function compareObjects(before, after, resource, action) {
   const result = {
     added: {},
@@ -172,7 +168,7 @@ function compareObjects(before, after, resource, action) {
     modified: {},
   };
 
-  // Get all unique keys
+
   const allKeys = new Set([
     ...Object.keys(before || {}),
     ...Object.keys(after || {}),
@@ -182,19 +178,19 @@ function compareObjects(before, after, resource, action) {
     const beforeValue = before?.[key];
     const afterValue = after?.[key];
 
-    // Skip sensitive fields
+
     if (isSensitiveField(key)) {
       continue;
     }
 
     if (beforeValue === undefined && afterValue !== undefined) {
-      // Added
+
       result.added[key] = afterValue;
     } else if (beforeValue !== undefined && afterValue === undefined) {
-      // Removed
+
       result.removed[key] = beforeValue;
     } else if (JSON.stringify(beforeValue) !== JSON.stringify(afterValue)) {
-      // Modified
+
       result.modified[key] = {
         before: beforeValue,
         after: afterValue,
@@ -207,9 +203,7 @@ function compareObjects(before, after, resource, action) {
   return result;
 }
 
-/**
- * Check if field is sensitive and should be hidden
- */
+
 function isSensitiveField(field) {
   const sensitiveFields = [
     "password",
@@ -222,12 +216,10 @@ function isSensitiveField(field) {
   return sensitiveFields.includes(field);
 }
 
-/**
- * Get field type for better display
- */
+
 function getFieldType(field, resource) {
   const fieldTypes = {
-    // User fields
+
     name: "text",
     email: "email",
     role: "role",
@@ -235,11 +227,11 @@ function getFieldType(field, resource) {
     permissions: "array",
     organizationId: "reference",
 
-    // Organization fields
+
     organizationName: "text",
     businessType: "select",
 
-    // Common fields
+
     createdAt: "date",
     updatedAt: "date",
     lastLogin: "date",
@@ -248,9 +240,7 @@ function getFieldType(field, resource) {
   return fieldTypes[field] || "text";
 }
 
-/**
- * Check if field is important for highlighting
- */
+
 function isImportantField(field, resource, action) {
   const importantFields = {
     User: ["name", "email", "role", "status", "permissions"],
@@ -262,14 +252,12 @@ function isImportantField(field, resource, action) {
   return fields.includes(field);
 }
 
-/**
- * Format value for display
- */
+
 function formatValue(value) {
   if (value === null) return "null";
   if (value === undefined) return "undefined";
 
-  // Handle date strings (ISO format)
+
   if (typeof value === "string" && isISODateString(value)) {
     try {
       const date = parseISO(value);
@@ -277,16 +265,16 @@ function formatValue(value) {
         return format(date, "MMM d, yyyy 'at' h:mm a");
       }
     } catch {
-      // Fall through to return original string
+
     }
   }
 
-  // Handle arrays (like permissions)
+
   if (Array.isArray(value)) {
     return value.length > 0 ? value.join(", ") : "[]";
   }
 
-  // Handle objects
+
   if (typeof value === "object") {
     return JSON.stringify(value, null, 2);
   }
@@ -294,11 +282,9 @@ function formatValue(value) {
   return String(value);
 }
 
-/**
- * Check if string is an ISO date string
- */
+
 function isISODateString(str) {
-  // Check for ISO 8601 format: YYYY-MM-DDTHH:mm:ss.sssZ
+
   const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/;
   return isoRegex.test(str);
 }

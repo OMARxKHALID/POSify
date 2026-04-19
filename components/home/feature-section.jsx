@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 import { motion, useInView } from "framer-motion";
 import Earth from "@/components/ui/globe";
 import ScrambleHover from "@/components/ui/scramble";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/ui-utils";
 
 const featureCards = [
   {
@@ -167,7 +167,7 @@ const MenuFeatureContent = ({ isHovering }) => (
     <div className="relative w-full h-[400px] rounded-[20px] overflow-hidden">
       <div className="absolute inset-0">
         <Image
-          src="https://framerusercontent.com/images/UjqUIiBHmIcSH9vos9HlG2BF4bo.png"
+          src="https://api.dicebear.com/7.x/avataaars/svg?seed=Menu"
           alt="Menu Management"
           fill
           className="object-cover rounded-xl"

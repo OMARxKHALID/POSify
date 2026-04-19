@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/mock-auth";
 import { useRouter } from "next/navigation";
 import { CategoryNav } from "@/components/pos/category-nav";
 import { SearchBar } from "@/components/pos/search-bar";
 import { MenuGrid } from "@/components/pos/menu-grid";
 import { OrderCart } from "@/components/pos/order-cart";
 import { ItemDetailModal } from "@/components/pos/item-detail-modal";
-import { useCartStore } from "@/lib/store/use-cart-store";
+import { useCartStore } from "@/components/providers/store-provider";
+import { useShallow } from "zustand/react/shallow";
 import { POSHeader } from "@/components/pos/pos-header";
 import { useMenu } from "@/hooks/use-menu";
 import { useCategories } from "@/hooks/use-categories";
@@ -21,9 +22,7 @@ import { PageLoading } from "@/components/ui/loading";
 import { useMounted } from "@/hooks/use-mounted";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 
-/**
- * Login prompt component for unauthenticated users
- */
+
 function LoginPrompt() {
   const router = useRouter();
 
@@ -61,19 +60,19 @@ export default function POSpage() {
     return <PageLoading />;
   }
 
-  // Show loading while checking authentication
+
   if (status === "loading") {
     return <PageLoading />;
   }
 
-  // Show login prompt if not authenticated
+
   if (status === "unauthenticated" || !session) {
     return <LoginPrompt />;
   }
 
-  // Check if user has required role (admin or staff)
+
   const userRole = session?.user?.role;
-  if (!userRole || !["admin", "staff"].includes(userRole)) {
+  if (!userRole || !["super_admin", "admin", "staff"].includes(userRole)) {
     return (
       <div className="h-screen w-full overflow-hidden flex items-center justify-center bg-background">
         <div className="text-center text-muted-foreground max-w-md mx-auto p-6">
@@ -104,9 +103,14 @@ export function POSmain() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { isCartOpen, toggleCart } = useCartStore();
+  const { isCartOpen, toggleCart } = useCartStore(
+    useShallow((state) => ({
+      isCartOpen: state.isCartOpen,
+      toggleCart: state.toggleCart,
+    })),
+  );
 
-  // Fetch menu items and categories from API
+
   const {
     data: menuData,
     isLoading: menuLoading,
@@ -121,7 +125,7 @@ export function POSmain() {
   const menuItems = menuData?.menuItems || [];
   const categories = categoriesData?.categories || [];
 
-  // Show error state if there are critical errors
+
   if (menuError || categoriesError) {
     return (
       <div className="h-screen w-full overflow-hidden flex items-center justify-center bg-background">
@@ -148,7 +152,7 @@ export function POSmain() {
 
   return (
     <div className="h-screen w-full overflow-hidden">
-      {/* ---------------- Mobile Layout ---------------- */}
+
       <div className="flex flex-col h-full lg:hidden">
         <div className="flex flex-col flex-1 overflow-hidden bg-card">
           <div className="flex-shrink-0 p-4 space-y-3">
@@ -205,7 +209,7 @@ export function POSmain() {
         )}
       </div>
 
-      {/* ---------------- Desktop Layout ---------------- */}
+
       <div className="hidden h-full lg:flex">
         {isCartOpen ? (
           <ResizablePanelGroup direction="horizontal" className="h-full">
@@ -272,7 +276,7 @@ export function POSmain() {
         )}
       </div>
 
-      {/* ---------------- Item Modal ---------------- */}
+
       <ItemDetailModal
         open={!!selectedItem}
         selectedItem={selectedItem}

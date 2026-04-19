@@ -1,33 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/mock-auth";
 import { toast } from "sonner";
-import { useCartStore } from "@/lib/store/use-cart-store";
+import { useCartStore } from "@/components/providers/store-provider";
+import { useShallow } from "zustand/react/shallow";
 import { useSettings } from "@/hooks/use-settings";
 import { useCreateOrder } from "@/hooks/use-orders";
 import { useCartCalculations } from "@/hooks/use-cart-calculations";
 import { useNetworkStatus } from "@/hooks/use-network-status";
-import { useOrderQueueStore } from "@/lib/store/use-queue-order-store";
+import { useOrderQueueStore } from "@/components/providers/store-provider";
 import { getTaxBreakdown } from "@/lib/utils/business-utils";
 import { PaymentModal } from "./payment-modal";
 import { DiscountModal } from "./discount-modal";
 import { CartHeader } from "./cart-header";
 import { CartFooter } from "./cart-footer";
 import { CartItemsList } from "./cart-items-list";
-import { generateIdempotencyKey } from "@/lib/utils";
+import { generateIdempotencyKey } from "@/lib/utils/common-utils";
 
-/* ------------------------- Helpers ------------------------- */
-
-/**
- * Prepare order data for submission
- */
 const prepareOrderData = (
   orderItems,
   totals,
   orgSettings,
   customerData,
-  idempotencyKey
+  idempotencyKey,
 ) => {
   const {
     customerName,
@@ -47,7 +43,7 @@ const prepareOrderData = (
 
   const taxBreakdown = getTaxBreakdown(
     subtotalAfterDiscounts,
-    orgSettings?.taxes
+    orgSettings?.taxes,
   );
 
   const deliveryCharge =
@@ -80,7 +76,6 @@ const prepareOrderData = (
     subtotal: Number(safeSubtotal),
     total: Number(safeTotal + deliveryCharge + serviceCharge + tip),
     paymentMethod,
-    // Completing payment from POS marks the order as paid
     status: "paid",
     deliveryType: deliveryType || "dine-in",
     tax:
@@ -112,14 +107,11 @@ const prepareOrderData = (
   };
 };
 
-/**
- * Validate order prerequisites
- */
 const validateOrderPrerequisites = (
   orderItems,
   status,
   settingsLoading,
-  settingsError
+  settingsError,
 ) => {
   if (!orderItems.length) {
     return { isValid: false, error: "No items in cart" };
@@ -149,8 +141,6 @@ const validateOrderPrerequisites = (
   return { isValid: true };
 };
 
-/* ------------------------- Component ------------------------- */
-
 export function OrderCart({ toggleCart, isMobile = false }) {
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
@@ -160,12 +150,22 @@ export function OrderCart({ toggleCart, isMobile = false }) {
   const {
     orderItems,
     cartDiscount,
-    getTotalQuantity,
     updateQuantity,
     removeFromCart,
     clearCart,
     removeCartDiscount,
-  } = useCartStore();
+    getTotalQuantity,
+  } = useCartStore(
+    useShallow((state) => ({
+      orderItems: state.orderItems,
+      cartDiscount: state.cartDiscount,
+      getTotalQuantity: state.getTotalQuantity,
+      updateQuantity: state.updateQuantity,
+      removeFromCart: state.removeFromCart,
+      clearCart: state.clearCart,
+      removeCartDiscount: state.removeCartDiscount,
+    })),
+  );
 
   const { status } = useSession();
   const {
@@ -189,13 +189,13 @@ export function OrderCart({ toggleCart, isMobile = false }) {
     paymentMethod,
     mobileNumber,
     deliveryType,
-    tip = 0
+    tip = 0,
   ) => {
     const validation = validateOrderPrerequisites(
       orderItems,
       status,
       settingsLoading,
-      settingsError
+      settingsError,
     );
     if (!validation.isValid) {
       toast.error(validation.error);
@@ -229,7 +229,7 @@ export function OrderCart({ toggleCart, isMobile = false }) {
         totals,
         orgSettings,
         { customerName, paymentMethod, mobileNumber, deliveryType, tip },
-        idempotencyKey
+        idempotencyKey,
       );
 
       if (isOnline) {
@@ -266,7 +266,7 @@ export function OrderCart({ toggleCart, isMobile = false }) {
             totals,
             orgSettings,
             { customerName, paymentMethod, mobileNumber, deliveryType, tip },
-            idempotencyKey
+            idempotencyKey,
           );
           addOrder(orderData);
           toast.success("Order queued for sync", {

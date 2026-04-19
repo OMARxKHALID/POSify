@@ -1,4 +1,4 @@
-import { formatCurrency } from "@/lib/utils/format-utils";
+import { formatCurrency } from "@/lib/utils/display-formatters";
 import { format } from "date-fns";
 import { getTaxBreakdown } from "@/lib/utils/business-utils";
 
@@ -14,7 +14,7 @@ export class ReceiptDataProcessor {
       orderData.discount || 0
     );
 
-    // Calculate tax breakdown for receipt
+
     const subtotalAfterDiscounts =
       breakdown.subtotal - breakdown.itemDiscounts - breakdown.discount;
     const taxBreakdown = getTaxBreakdown(subtotalAfterDiscounts, enabledTaxes);
@@ -25,7 +25,7 @@ export class ReceiptDataProcessor {
       items: this.processItems(orderData.items || [], currency),
       totals: this.processTotals(breakdown, taxBreakdown, currency),
       footer: this.processFooter(settings),
-      settings: settings, // Pass settings to the template
+      settings: settings, 
     };
   }
 
@@ -40,7 +40,7 @@ export class ReceiptDataProcessor {
       }
     }
 
-    // Format address for display
+
     let formattedAddress = "";
     if (settings?.storeInformation?.address) {
       if (typeof settings.storeInformation.address === "string") {

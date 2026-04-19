@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, useSession } from "@/lib/mock-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock } from "lucide-react";
@@ -45,19 +45,19 @@ function LoginContent() {
       AUTH_ROUTES.LOGIN
     );
 
-  // Handle error messages from query params
+
   useEffect(() => {
     const error = searchParams.get("error");
     if (error) {
       toast.error(getErrorMessage(error));
-      // Remove error param from URL
+
       const url = new URL(window.location.href);
       url.searchParams.delete("error");
       window.history.replaceState({}, "", url);
     }
   }, [searchParams]);
 
-  // Redirect logged-in users
+
   useEffect(() => {
     if (session?.user) {
       const redirectPath = getUserRedirectPath(session.user);
@@ -65,7 +65,7 @@ function LoginContent() {
     }
   }, [session, router]);
 
-  // While session exists → block UI with loader
+
   if (session?.user) {
     return <PageLoading />;
   }
@@ -95,11 +95,11 @@ function LoginContent() {
     <div className="relative min-h-screen bg-background">
       <GeometricBackground />
 
-      {/* Decorative blobs */}
+
       <div className="absolute top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
 
-      {/* Back to Home */}
+
       <Link
         href="/"
         className="absolute top-6 left-6 z-30 flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"

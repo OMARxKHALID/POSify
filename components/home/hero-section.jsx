@@ -12,7 +12,7 @@ export function HeroSection() {
       <section className="relative overflow-hidden min-h-screen flex flex-col">
         <div className="container mx-auto px-4 py-16 relative z-10 flex-1 flex flex-col">
           <div className="mx-auto max-w-4xl text-center flex-1 flex flex-col justify-center">
-            {/* Badge */}
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -28,7 +28,7 @@ export function HeroSection() {
               </Badge>
             </motion.div>
 
-            {/* Main Heading */}
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -45,7 +45,7 @@ export function HeroSection() {
               </h1>
             </motion.div>
 
-            {/* Description */}
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -62,7 +62,7 @@ export function HeroSection() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col items-center gap-6"
             >
-              {/* Decorative Elements */}
+
               <svg
                 width="100"
                 height="50"
@@ -126,7 +126,7 @@ export function HeroSection() {
             </motion.div>
           </div>
 
-          {/* Social Proof Section */}
+
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -139,7 +139,7 @@ export function HeroSection() {
                 Trusted by restaurants and retail businesses
               </p>
               <div className="flex items-center justify-center gap-8">
-                {/* Vercel Logo */}
+
                 <div className="opacity-60 grayscale hover:opacity-100 hover:grayscale-0 hover:drop-shadow-[0_0_8px_hsl(var(--foreground)/0.3)] transition-all duration-300">
                   <svg
                     width="32"
@@ -152,16 +152,16 @@ export function HeroSection() {
                   </svg>
                 </div>
 
-                {/* Tailwind CSS Logo */}
+
                 <div className="opacity-60 grayscale hover:opacity-100 hover:grayscale-0 hover:drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all duration-300">
                   <img
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Tailwind_CSS_Logo.svg-6xxjTKleFAC9zoBBGesuy0rIESAcXA.png"
+                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tailwind"
                     alt="Tailwind CSS"
                     className="h-8 object-contain"
                   />
                 </div>
 
-                {/* Framer Logo */}
+
                 <div className="opacity-60 grayscale hover:opacity-100 hover:grayscale-0 hover:drop-shadow-[0_0_8px_hsl(var(--foreground)/0.3)] transition-all duration-300">
                   <svg
                     width="32"
@@ -174,7 +174,7 @@ export function HeroSection() {
                   </svg>
                 </div>
 
-                {/* Next.js Logo */}
+
                 <div className="opacity-60 grayscale hover:opacity-100 hover:grayscale-0 hover:drop-shadow-[0_0_8px_hsl(var(--foreground)/0.3)] transition-all duration-300">
                   <svg
                     width="32"

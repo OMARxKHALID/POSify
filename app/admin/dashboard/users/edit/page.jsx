@@ -16,7 +16,7 @@ import {
   CheckCircle,
   UserCheck,
 } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "@/lib/mock-auth";
 
 import { Button } from "@/components/ui/button";
 import { OwnershipTransferDialog } from "@/components/ui/ownership-transfer-dialog";
@@ -46,26 +46,26 @@ import {
   canEditUser,
   canChangeRole,
   canChangeStatus,
-} from "@/lib/utils/user-utils";
+} from "@/lib/utils/access-control";
 
 export default function EditUserPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams?.get("id") || null;
-  const { update } = useSession?.() || {}; // guard in case useSession shape differs
+  const { update } = useSession?.() || {}; 
 
   const editUserMutation = useEditUser();
   const { data: usersData, isLoading: usersLoading } = useUsers();
   const ownershipTransferMutation = useOwnershipTransfer();
 
-  // Local UI state
+
   const [showOwnershipDialog, setShowOwnershipDialog] = useState(false);
   const [pendingFormData, setPendingFormData] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [isUpdatingSession, setIsUpdatingSession] = useState(false);
 
-  // Refs for timers so we can clear them reliably
+
   const countdownIntervalRef = useRef(null);
   const timeoutRef = useRef(null);
 
@@ -73,7 +73,7 @@ export default function EditUserPage() {
   const currentUser = usersData?.currentUser;
   const targetUser = users.find((u) => u.id === userId) || null;
 
-  // Form setup
+
   const form = useForm({
     resolver: zodResolver(userEditSchema),
     defaultValues: {
@@ -97,7 +97,7 @@ export default function EditUserPage() {
         permissions: targetUser.permissions ?? [],
       });
     }
-    // only reset when targetUser changes
+
   }, [targetUser, form]);
 
   const isMutating =
@@ -106,31 +106,31 @@ export default function EditUserPage() {
     ownershipTransferMutation?.isLoading ||
     ownershipTransferMutation?.isPending;
 
-  // Permission checks
+
   const isCurrentUser = currentUser?.id === userId;
   const canEdit = canEditUser(currentUser, targetUser);
   const userCanChangeRole = canChangeRole(currentUser, targetUser);
   const userCanChangeStatus = canChangeStatus(currentUser, targetUser);
 
-  // Redirect if not allowed to edit (when not loading)
+
   useEffect(() => {
     if (!usersLoading && !canEdit) {
       router.push(ADMIN_ROUTES.USERS);
     }
   }, [canEdit, router, usersLoading]);
 
-  // Handle form submit
+
   const onSubmit = async (data) => {
     try {
-      // clone payload so we don't mutate RHF internals
+
       const payload = { ...data };
 
-      // Remove empty password
+
       if (!payload.password || String(payload.password).trim() === "") {
         delete payload.password;
       }
 
-      // Determine ownership transfer: current user is admin and promoting staff -> admin
+
       const isOwnershipTransfer =
         currentUser?.role === "admin" &&
         targetUser?.role === "staff" &&
@@ -142,11 +142,11 @@ export default function EditUserPage() {
         return;
       }
 
-      // Normal submission
+
       await submitFormData(payload);
     } catch (err) {
-      // Hook-level toasts / error handling expected in hooks
-      // Make sure to not leave pending state
+
+
       setPendingFormData(null);
     }
   };
@@ -157,14 +157,14 @@ export default function EditUserPage() {
         userId,
         userData: data,
       });
-      // On success, navigate back to users list
+
       router.push(ADMIN_ROUTES.USERS);
     } catch (error) {
-      // Hook-level toasts expected
+
     }
   };
 
-  // Confirm ownership transfer
+
   const handleOwnershipTransferConfirm = async () => {
     if (!pendingFormData || !targetUser || !currentUser) {
       setPendingFormData(null);
@@ -179,33 +179,33 @@ export default function EditUserPage() {
       });
 
       if (result?.ownershipTransferred) {
-        // Attempt to update session (if available)
+
         setIsUpdatingSession(true);
         try {
           if (typeof update === "function") {
             await update();
           }
-          // Give a short moment for session to stabilize
+
           await new Promise((r) => setTimeout(r, 700));
         } catch (sessionErr) {
-          // Ignore and continue with logout flow
+
         } finally {
           setIsUpdatingSession(false);
         }
 
-        // Close dialog and start logout countdown
+
         setShowOwnershipDialog(false);
         setIsLoggingOut(true);
         setCountdown(5);
 
-        // Start interval to decrement countdown every second
+
         if (countdownIntervalRef.current) {
           clearInterval(countdownIntervalRef.current);
         }
         countdownIntervalRef.current = setInterval(() => {
           setCountdown((prev) => {
             if (prev <= 1) {
-              // Clear interval once it reaches 0 in next tick
+
               if (countdownIntervalRef.current) {
                 clearInterval(countdownIntervalRef.current);
                 countdownIntervalRef.current = null;
@@ -216,12 +216,12 @@ export default function EditUserPage() {
           });
         }, 1000);
 
-        // After 5 seconds, sign out and redirect
+
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
         timeoutRef.current = setTimeout(async () => {
-          // Ensure interval cleared
+
           if (countdownIntervalRef.current) {
             clearInterval(countdownIntervalRef.current);
             countdownIntervalRef.current = null;
@@ -235,7 +235,7 @@ export default function EditUserPage() {
         }, 5000);
       }
     } catch (err) {
-      // Hook level handles toasts/errors
+
     } finally {
       setPendingFormData(null);
     }
@@ -246,7 +246,7 @@ export default function EditUserPage() {
     setPendingFormData(null);
   };
 
-  // Clear timers on unmount to avoid leaks
+
   useEffect(() => {
     return () => {
       if (countdownIntervalRef.current) {
@@ -260,14 +260,14 @@ export default function EditUserPage() {
     };
   }, []);
 
-  // If data loading or no edit permission -> show loading page
+
   if (usersLoading || !canEdit) {
     return (
       <PageLayout isLoading={true} errorMessage="Loading user edit form..." />
     );
   }
 
-  // If targetUser doesn't exist (but we have permission) -> show not found
+
   if (!targetUser) {
     return (
       <PageLayout error={{ message: "User not found" }}>
@@ -288,7 +288,7 @@ export default function EditUserPage() {
     );
   }
 
-  // Show a blocking UI when we're explicitly updating session
+
   if (isUpdatingSession) {
     return (
       <PageLayout errorMessage="Failed to load user edit form. Please try refreshing the page.">
@@ -309,27 +309,27 @@ export default function EditUserPage() {
     );
   }
 
-  // Calculate role options in a clearer way
+
   const computeRoleOptions = () => {
-    // If editing your own account, don't allow role change
+
     if (isCurrentUser) return null;
 
     const currentRole = currentUser?.role;
     const targetRole = targetUser?.role;
 
-    // Super admin can set admin or staff (and keep super_admin option if needed)
+
     if (currentRole === "super_admin") {
       return [
         { value: "staff", label: "Staff" },
         { value: "admin", label: "Admin" },
-        // optionally allow super_admin
-        // { value: "super_admin", label: "Super Admin" },
+
+
       ];
     }
 
-    // Admin can promote staff to admin, but cannot edit other admins
+
     if (currentRole === "admin") {
-      // If target is staff, allow promoting to admin; otherwise show only staff (no change)
+
       if (targetRole === "staff") {
         return [
           { value: "staff", label: "Staff" },
@@ -339,7 +339,7 @@ export default function EditUserPage() {
       return [{ value: "staff", label: "Staff" }];
     }
 
-    // Default fallback: only staff
+
     return [{ value: "staff", label: "Staff" }];
   };
 
@@ -355,7 +355,7 @@ export default function EditUserPage() {
         onBackClick={() => router.back()}
       />
 
-      {/* User Info Card */}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -416,7 +416,7 @@ export default function EditUserPage() {
         </CardContent>
       </Card>
 
-      {/* Edit User Form */}
+
       <div className="grid gap-4 lg:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card>
@@ -508,7 +508,7 @@ export default function EditUserPage() {
           </Card>
         </div>
 
-        {/* Sidebar */}
+
         <div className="space-y-4 lg:space-y-6">
           <Card>
             <CardHeader>
@@ -610,7 +610,7 @@ export default function EditUserPage() {
         </div>
       </div>
 
-      {/* Ownership Transfer Dialog */}
+
       <OwnershipTransferDialog
         isOpen={showOwnershipDialog}
         onClose={handleOwnershipTransferCancel}
@@ -622,7 +622,7 @@ export default function EditUserPage() {
         }
       />
 
-      {/* Logout Loading Overlay */}
+
       {isLoggingOut && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-card border rounded-lg p-8 max-w-md mx-4 text-center shadow-lg">

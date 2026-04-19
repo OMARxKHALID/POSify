@@ -1,12 +1,12 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/mock-auth";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { PageLoading } from "@/components/ui/loading";
 import { AUTH_ROUTES, ADMIN_ROUTES } from "@/constants";
 import { NAVIGATION_PERMISSIONS } from "@/constants/navigation";
-import { hasAnyPermission, hasAllowedRole } from "@/lib/utils/permission-utils";
+import { hasAnyPermission, hasAllowedRole } from "@/lib/utils/access-control";
 
 export function AuthGuard({ children, fallback = null }) {
   const { data: session, status } = useSession();

@@ -28,23 +28,23 @@ export function FormField({
   type = "text",
   placeholder,
   disabled = false,
-  options = null, // For select fields
-  iconPosition = "label", // "label" or "input"
+  options = null, 
+  iconPosition = "label", 
   className = "",
   render,
-  component = "input", // "input", "textarea", "switch", "select", "image"
-  switchDescription = "", // Description for switch components
+  component = "input", 
+  switchDescription = "", 
   ...props
 }) {
   const renderInput = (field) => {
-    // Handle custom render function
+
     if (render) {
       return render(field);
     }
 
-    // Handle select component
+
     if (component === "select" || options) {
-      // Ensure the current value is a valid option; otherwise show placeholder
+
       const optionValues = Array.isArray(options)
         ? options.map((o) => o?.value)
         : [];
@@ -71,7 +71,7 @@ export function FormField({
       );
     }
 
-    // Handle switch component
+
     if (component === "switch") {
       return (
         <Switch
@@ -82,7 +82,7 @@ export function FormField({
       );
     }
 
-    // Handle textarea component
+
     if (component === "textarea") {
       return (
         <Textarea
@@ -95,7 +95,7 @@ export function FormField({
       );
     }
 
-    // Handle image upload component
+
     if (component === "image") {
       return (
         <ImageUpload
@@ -109,7 +109,7 @@ export function FormField({
       );
     }
 
-    // Handle input with icon inside
+
     if (iconPosition === "input" && Icon) {
       return (
         <div className="relative">
@@ -126,7 +126,7 @@ export function FormField({
       );
     }
 
-    // Default input component
+
     return (
       <Input
         type={type === "number" ? "text" : type}

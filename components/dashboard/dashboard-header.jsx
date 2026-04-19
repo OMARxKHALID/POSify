@@ -1,11 +1,12 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/lib/mock-auth";
 import { LogOut, LayoutDashboard, User } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { SimpleUserDisplay } from "@/components/ui/user-info";
+import { SyncIndicator } from "@/components/dashboard/sync-indicator";
 import Link from "next/link";
 
 export function DashboardHeader() {
@@ -29,12 +30,12 @@ export function DashboardHeader() {
         </div>
 
         <div className="flex items-center space-x-4">
+          <SyncIndicator />
           <ThemeToggle />
           {session && (
             <div className="flex items-center space-x-4">
               <SimpleUserDisplay session={session} />
 
-              {/* Navigation Links */}
               <div className="flex items-center gap-2">
                 <Link href="/admin/dashboard">
                   <Button
@@ -47,8 +48,8 @@ export function DashboardHeader() {
                   </Button>
                 </Link>
 
-                {/* POS Access for Admin/Staff */}
-                {(session.user.role === "admin" ||
+                {(session.user.role === "super_admin" ||
+                  session.user.role === "admin" ||
                   session.user.role === "staff") && (
                   <Link href="/pos">
                     <Button

@@ -61,7 +61,7 @@ export function PricingSection() {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
+
         <div className="mb-8 text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/50 px-4 py-2 backdrop-blur-sm">
             <Sparkles className="h-4 w-4 text-primary" />
@@ -78,7 +78,7 @@ export function PricingSection() {
             Start with our free trial. Upgrade anytime as your business grows.
           </p>
 
-          {/* Toggle */}
+
           <div className="mx-auto flex w-fit items-center gap-4 rounded-full border border-border/50 bg-card/50 p-1 backdrop-blur-sm">
             <button
               onClick={() => setIsAnnual(false)}
@@ -106,7 +106,7 @@ export function PricingSection() {
           </div>
         </div>
 
-        {/* Pricing Cards */}
+
         <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-3">
           {pricingPlans.map((plan) => {
             const price =
@@ -131,7 +131,7 @@ export function PricingSection() {
                   </div>
                 )}
 
-                {/* Card Content */}
+
                 <div className="mb-8 text-center">
                   <h3 className="mb-2 text-xl font-bold text-foreground">
                     {plan.name}
@@ -149,7 +149,7 @@ export function PricingSection() {
                   </p>
                 </div>
 
-                {/* Features */}
+
                 <ul className="mb-8 space-y-4">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-center gap-3">
@@ -161,7 +161,7 @@ export function PricingSection() {
                   ))}
                 </ul>
 
-                {/* CTA Button */}
+
                 <Button
                   asChild
                   variant={plan.popular ? "default" : "outline"}
@@ -179,7 +179,7 @@ export function PricingSection() {
           })}
         </div>
 
-        {/* Bottom CTA */}
+
         <div className="mt-16 text-center">
           <p className="mb-4 text-muted-foreground">
             Need a custom solution for your business? We're here to help.

@@ -1,7 +1,4 @@
-/**
- * Settings Form Section Component
- * Reusable component for settings form sections
- */
+
 
 import {
   Card,

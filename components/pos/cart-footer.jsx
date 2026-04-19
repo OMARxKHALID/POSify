@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getTaxBreakdown } from "@/lib/utils/business-utils";
-import { formatCurrency } from "@/lib/utils/format-utils";
+import { formatCurrency } from "@/lib/utils/display-formatters";
 import { Row } from "@/components/ui/row";
 
 export function CartFooter({

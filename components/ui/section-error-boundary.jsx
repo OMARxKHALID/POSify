@@ -34,12 +34,12 @@ class SectionErrorBoundary extends React.Component {
       errorInfo,
     });
 
-    // Log error to monitoring service in production
+
     if (process.env.NODE_ENV === "production") {
       console.error("Section Error Boundary caught an error:", error, errorInfo);
     }
 
-    // Report to error monitoring service
+
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
@@ -55,12 +55,12 @@ class SectionErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      // Custom fallback component
+
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      // Default error UI
+
       return (
         <Card className="border-destructive/50 bg-destructive/5">
           <CardHeader className="pb-3">

@@ -10,16 +10,14 @@ import {
   LANGUAGES,
 } from "@/constants";
 
-/**
- * Organization information schema
- */
+
 export const organizationInfoSchema = z.object({
   legalName: z.string().trim().optional(),
   displayName: z.string().trim().optional(),
-  orgPhone: z.string().trim().optional(), // Fixed: match model field name
-  orgEmail: z.string().email().toLowerCase().trim().optional(), // Fixed: match model field name
+  orgPhone: z.string().trim().optional(), 
+  orgEmail: z.string().email().toLowerCase().trim().optional(), 
   website: z.string().trim().optional(),
-  address: addressSchema.optional(), // uses base address schema
+  address: addressSchema.optional(), 
   logoUrl: z.string().trim().optional(),
   taxId: z.string().trim().optional(),
   currency: z.enum(CURRENCIES).default("USD"),
@@ -27,9 +25,7 @@ export const organizationInfoSchema = z.object({
   language: z.enum(LANGUAGES).default("en"),
 });
 
-/**
- * Subscription schema
- */
+
 export const subscriptionSchema = z.object({
   plan: z.enum(SUBSCRIPTION_PLANS).default("free"),
   status: z.enum(SUBSCRIPTION_STATUSES).default("trialing"),
@@ -38,9 +34,7 @@ export const subscriptionSchema = z.object({
   trialEnd: z.date().optional(),
 });
 
-/**
- * Limits schema
- */
+
 export const limitsSchema = z.object({
   users: z.number().default(2),
   menuItems: z.number().default(50),
@@ -48,9 +42,7 @@ export const limitsSchema = z.object({
   locations: z.number().default(1),
 });
 
-/**
- * Usage schema
- */
+
 export const usageSchema = z.object({
   currentUsers: z.number().default(0),
   currentMenuItems: z.number().default(0),
@@ -58,44 +50,39 @@ export const usageSchema = z.object({
   lastResetDate: z.date().default(() => new Date()),
 });
 
-/**
- * Organization schema
- * Aligns with the Mongoose Organization model
- */
+
 export const organizationSchema = baseSchema.extend({
-  // Required fields
+
   name: z.string().min(1, "Organization name is required").trim(),
 
-  // Optional fields
+
   slug: z.string().trim().toLowerCase().optional(),
   domain: z.string().trim().toLowerCase().optional(),
   status: z.enum(ORGANIZATION_STATUSES).default("active"),
   businessType: z.enum(BUSINESS_TYPES).default("restaurant"),
 
-  // Business/store information
+
   information: organizationInfoSchema.default({}),
 
-  // Owner (Admin user)
+
   owner: z.string().min(1, "Owner ID is required"),
 
-  // Subscription management
+
   subscription: subscriptionSchema.default({}),
 
-  // Usage limits
+
   limits: limitsSchema.default({}),
 
-  // Current usage tracking
+
   usage: usageSchema.default({}),
 
   onboardingCompleted: z.boolean().default(false),
 
-  // Audit fields
+
   ...auditSchema.shape,
 });
 
-/**
- * Organization registration schema (for existing users)
- */
+
 export const organizationRegisterSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
   organizationName: z.string().min(1, "Organization name is required").trim(),

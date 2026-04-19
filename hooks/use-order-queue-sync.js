@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
-import { useOrderQueueStore } from "@/lib/store/use-queue-order-store";
+import { useOrderQueueStore } from "@/components/providers/store-provider";
+import { useShallow } from "zustand/react/shallow";
 import { toast } from "sonner";
 import { useCreateOrder } from "@/hooks/use-orders";
 import { useSettings } from "@/hooks/use-settings";
@@ -24,7 +25,7 @@ const isDuplicateError = (error) => {
 const isNetworkError = (error) => {
   const message = error?.message || error?.toString() || "";
   return ["network", "fetch", "timeout"].some((keyword) =>
-    message.includes(keyword)
+    message.includes(keyword),
   );
 };
 
@@ -37,10 +38,24 @@ export function useOrderQueueSync() {
     removeOrder,
     addFailedOrder,
     removeFailedOrder,
-    getQueuedOrders,
-    getFailedOrders,
-    isOrderProcessed,
-  } = useOrderQueueStore();
+    queuedOrders,
+    failedOrders,
+    getOrderStatus,
+  } = useOrderQueueStore(
+    useShallow((state) => ({
+      removeOrder: state.removeOrder,
+      addFailedOrder: state.addFailedOrder,
+      removeFailedOrder: state.removeFailedOrder,
+      queuedOrders: state.queuedOrders,
+      failedOrders: state.failedOrders,
+      getOrderStatus: state.getOrderStatus,
+    })),
+  );
+
+  const getQueuedOrders = useCallback(() => queuedOrders, [queuedOrders]);
+  const getFailedOrders = useCallback(() => failedOrders, [failedOrders]);
+  const isOrderProcessed = useCallback((key) => getOrderStatus(key) === "processed", [getOrderStatus]);
+
   const createOrder = useCreateOrder();
   const { settings } = useSettings();
   const { isOnline } = useNetworkStatus();
@@ -53,7 +68,7 @@ export function useOrderQueueSync() {
       removeOrder(idempotencyKey);
       removeFailedOrder(idempotencyKey);
     },
-    [removeOrder, removeFailedOrder]
+    [removeOrder, removeFailedOrder],
   );
   const showSyncToast = useCallback(
     (order, created = true, totalPending = 0) => {
@@ -63,7 +78,7 @@ export function useOrderQueueSync() {
         });
       }
     },
-    []
+    [],
   );
   const showErrorToast = useCallback((order, error) => {
     const message = error?.message || error?.toString() || "Unknown error";
@@ -78,7 +93,7 @@ export function useOrderQueueSync() {
       const totalPending = getQueuedOrders().length + getFailedOrders().length;
       showSyncToast(order, created, totalPending);
     },
-    [cleanupOrder, getQueuedOrders, getFailedOrders, showSyncToast]
+    [cleanupOrder, getQueuedOrders, getFailedOrders, showSyncToast],
   );
   const handleSyncError = useCallback(
     (order, error) => {
@@ -90,7 +105,7 @@ export function useOrderQueueSync() {
       addFailedOrder(order, message);
       showErrorToast(order, error);
     },
-    [addFailedOrder, handleSyncSuccess, showErrorToast]
+    [addFailedOrder, handleSyncSuccess, showErrorToast],
   );
   const processOrderWithRetry = useCallback(
     async (order) => {
@@ -110,7 +125,7 @@ export function useOrderQueueSync() {
           }
           if (attempt < MAX_RETRIES && isNetworkError(error)) {
             await new Promise((resolve) =>
-              setTimeout(resolve, RETRY_DELAY * (attempt + 1))
+              setTimeout(resolve, RETRY_DELAY * (attempt + 1)),
             );
             continue;
           }
@@ -119,7 +134,7 @@ export function useOrderQueueSync() {
         }
       }
     },
-    [createOrder, handleSyncSuccess, handleSyncError, cleanupOrder]
+    [createOrder, handleSyncSuccess, handleSyncError, cleanupOrder],
   );
   const syncQueuedOrders = useCallback(async () => {
     if (syncingRef.current) return;
@@ -173,13 +188,13 @@ export function useOrderQueueSync() {
       const queuedOrders = getQueuedOrders();
       const failedOrders = getFailedOrders();
       const order = [...queuedOrders, ...failedOrders].find(
-        (o) => o.idempotencyKey === idempotencyKey
+        (o) => o.idempotencyKey === idempotencyKey,
       );
       if (order) {
         await processOrderWithRetry(order);
       }
     },
-    [getQueuedOrders, getFailedOrders, processOrderWithRetry]
+    [getQueuedOrders, getFailedOrders, processOrderWithRetry],
   );
   useEffect(() => {
     if (syncMode !== "auto") return;

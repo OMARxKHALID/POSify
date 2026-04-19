@@ -44,12 +44,12 @@ export function FaqSection() {
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      {/* Background effects */}
+
       <div className="absolute top-1/2 -right-20 h-64 w-64 rounded-full bg-primary/20 opacity-80 blur-3xl" />
       <div className="absolute top-1/2 -left-20 h-64 w-64 rounded-full bg-primary/20 opacity-80 blur-3xl" />
 
       <div className="container mx-auto px-4">
-        {/* Header */}
+
         <div className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 px-3 py-1 text-sm uppercase text-primary">
             <span>✶</span>
@@ -64,7 +64,7 @@ export function FaqSection() {
           </h2>
         </div>
 
-        {/* FAQ Items */}
+
         <div className="mx-auto mt-6 max-w-xl space-y-3">
           {faqs.map((faq, index) => {
             const isOpen = openItems.includes(index);

@@ -2,8 +2,8 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/lib/utils/format-utils";
+import { cn } from "@/lib/utils/ui-utils";
+import { formatCurrency } from "@/lib/utils/display-formatters";
 import {
   getCategoryColor,
   getCategoryName,
@@ -12,7 +12,7 @@ import {
 import { normalizeItem } from "@/lib/utils/common-utils";
 
 export function MenuItemCard({ item, onItemSelect }) {
-  // Normalize item to ensure consistent ID field
+
   const normalizedItem = normalizeItem(item);
   
   if (!normalizedItem) {

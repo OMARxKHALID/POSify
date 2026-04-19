@@ -1,10 +1,7 @@
-/**
- * useUsers Hook
- * Custom hook for user management operations using TanStack React Query
- */
+
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/mock-auth";
 import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
@@ -12,48 +9,32 @@ import {
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
-  isDemoModeEnabled,
-} from "@/lib/hooks/hook-utils";
-import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
+  createDemoQueryFn,
+} from "@/lib/helpers/hook-helpers";
+import { useIsDemoModeEnabled } from "@/hooks/use-demo-mode";
+import { mockFallback } from "@/lib/mockup-data";
 
-/**
- * Hook to fetch users based on authenticated user's role and permissions
- */
 export const useUsers = (options = {}) => {
   const { data: session } = useSession();
-
-  const queryOptions = getDefaultQueryOptions({
-    staleTime: 3 * 60 * 1000, // 3 minutes (users data changes moderately)
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-    ...options,
-  });
+  const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
-    queryKey: [...queryKeys.users, session?.user?.id], // Include session user ID in query key to force refresh on session change
-    queryFn: async () => {
-      try {
-        const data = await apiClient.get("/dashboard/users");
-        if (isDemoModeEnabled() && isDataEmpty(data)) {
-          return mockFallback.users().data;
-        }
-        return data;
-      } catch (error) {
-        if (isDemoModeEnabled()) {
-          console.warn("Users API failed, using demo data:", error.message);
-          return mockFallback.users().data;
-        }
-        throw error;
-      }
-    },
-    ...queryOptions,
+    queryKey: [...queryKeys.users, session?.user?.id],
+    queryFn: createDemoQueryFn(
+      "/dashboard/users",
+      () => mockFallback.users().data,
+      isDemoMode,
+    ),
+    ...getDefaultQueryOptions({
+      staleTime: 3 * 60 * 1000,
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      ...options,
+    }),
   });
 };
 
-/**
- * User Creation Hook
- * Creates a new user (admin/super_admin only)
- */
+
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
 
@@ -73,10 +54,7 @@ export const useCreateUser = () => {
   });
 };
 
-/**
- * User Edit Hook
- * Edits/updates an existing user
- */
+
 export const useEditUser = () => {
   const queryClient = useQueryClient();
 
@@ -96,10 +74,7 @@ export const useEditUser = () => {
   });
 };
 
-/**
- * User Delete Hook
- * Deletes a user
- */
+
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
@@ -118,10 +93,7 @@ export const useDeleteUser = () => {
   });
 };
 
-/**
- * Main Users Management Hook
- * Provides a unified interface for all user management operations
- */
+
 export const useUsersManagement = () => {
   const usersQuery = useUsers();
   const createUserMutation = useCreateUser();

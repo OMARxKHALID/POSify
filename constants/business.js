@@ -1,7 +1,3 @@
-/**
- * Business & Organization Constants
- */
-
 export const BUSINESS_TYPES = [
   "restaurant",
   "cafe",

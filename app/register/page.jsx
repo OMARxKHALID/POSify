@@ -33,7 +33,7 @@ export default function RegisterPage() {
         router.push("/admin/login");
       }
     } catch {
-      // Error handled inside hook via toast
+
     }
   }
 
@@ -41,11 +41,11 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-background relative">
       <GeometricBackground />
 
-      {/* Decorative glowing shapes */}
+
       <div className="absolute top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
 
-      {/* Back to Home */}
+
       <Link
         href="/"
         className="absolute top-6 left-6 z-30 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-200"

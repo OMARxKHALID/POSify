@@ -20,7 +20,7 @@ export class ReceiptTemplate {
           }
         }
       </script>
-      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body class="font-poppins text-gray-900 bg-white p-5 text-xs leading-relaxed font-normal max-w-xs mx-auto">
     <div class="w-full max-w-[280px] mx-auto">
@@ -155,7 +155,7 @@ export class ReceiptTemplate {
   }
 
   static generateTotalsSection(totals, settings) {
-    // Generate tax breakdown HTML
+
     const taxBreakdownHTML =
       totals.taxBreakdown && totals.taxBreakdown.length > 0
         ? totals.taxBreakdown

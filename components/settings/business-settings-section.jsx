@@ -1,16 +1,11 @@
-/**
- * Business Settings Section
- * Renders service charge and tipping fields using the shared FormField API.
- * Note: This component intentionally does NOT render its own Card wrapper so it can be embedded
- * inside different layouts while keeping actions (like Save Section) in the parent.
- */
+
 
 import { SettingsFormGrid, SettingsFormField } from "./settings-form-section";
 
 export function BusinessSettingsSection({ form, isDisabled = false, serviceChargeOptions = [], }) {
   return (
     <div className="space-y-6">
-      {/* Service Charge */}
+
       <div className="space-y-4">
         <h4 className="text-sm font-medium">Service Charge</h4>
         <SettingsFormGrid className="md:grid-cols-3">
@@ -43,7 +38,7 @@ export function BusinessSettingsSection({ form, isDisabled = false, serviceCharg
         </SettingsFormGrid>
       </div>
 
-      {/* Tipping */}
+
       <div className="space-y-4">
         <h4 className="text-sm font-medium">Tipping</h4>
         <SettingsFormGrid>

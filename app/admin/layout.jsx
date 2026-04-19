@@ -1,16 +1,17 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "@/lib/mock-auth";
 import { useMemo } from "react";
 import { AUTH_ROUTES, DEFAULT_REDIRECTS } from "@/constants";
 
-// Components
+
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { AuthGuard } from "@/components/auth-guard";
+import { SimpleUserDisplay } from "@/components/ui/user-info";
 import {
   SidebarInset,
   SidebarProvider,
@@ -18,10 +19,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-// Icons
+
 import { LogOut, Bell, Settings } from "lucide-react";
 
-// Components
+
 import { ThemeToggle } from "@/components/theme-toggle";
 
 function MainContent({ children }) {
@@ -29,7 +30,7 @@ function MainContent({ children }) {
 
   const handleMainClick = useMemo(() => {
     return (e) => {
-      // Only close sidebar on mobile when clicking anywhere in main content
+
       if (isMobile) {
         setOpenMobile(false);
       }
@@ -53,8 +54,8 @@ function MainContent({ children }) {
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
-  // Define public routes that should not show dashboard layout
   const publicRoutes = useMemo(() => [AUTH_ROUTES.LOGIN], []);
   const isPublicRoute = useMemo(() => {
     return publicRoutes.includes(pathname);
@@ -64,12 +65,12 @@ export default function AdminLayout({ children }) {
     await signOut({ callbackUrl: DEFAULT_REDIRECTS.AFTER_LOGOUT });
   };
 
-  // For public routes (like login), render without dashboard layout
+
   if (isPublicRoute) {
     return <>{children}</>;
   }
 
-  // For protected routes, use AuthGuard and dashboard layout
+
   return (
     <AuthGuard>
       <SidebarProvider defaultOpen={false}>
@@ -81,6 +82,12 @@ export default function AdminLayout({ children }) {
             </div>
 
             <div className="flex items-center gap-2">
+              {session && (
+                <div className="hidden md:flex">
+                  <SimpleUserDisplay session={session} />
+                </div>
+              )}
+
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Bell className="h-4 w-4" />
                 <span className="sr-only">Notifications</span>

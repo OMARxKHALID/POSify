@@ -1,10 +1,5 @@
-/**
- * useOrders Hook
- * Custom hooks for order management using TanStack React Query
- */
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/mock-auth";
 import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
@@ -12,32 +7,24 @@ import {
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
-  isDemoModeEnabled,
-} from "@/lib/hooks/hook-utils";
-import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
+  createDemoQueryFn,
+} from "@/lib/helpers/hook-helpers";
+import { useIsDemoModeEnabled } from "@/hooks/use-demo-mode";
+import { mockFallback } from "@/lib/mockup-data";
 
 export const useOrders = (options = {}) => {
   const { data: session } = useSession();
+  const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
     queryKey: [...queryKeys.orders(), session?.user?.id],
-    queryFn: async () => {
-      try {
-        const data = await apiClient.get("/dashboard/orders");
-        if (isDemoModeEnabled() && isDataEmpty(data)) {
-          return mockFallback.orders().data;
-        }
-        return data;
-      } catch (error) {
-        if (isDemoModeEnabled()) {
-          console.warn("Orders API failed, using demo data:", error.message);
-          return mockFallback.orders().data;
-        }
-        throw error;
-      }
-    },
+    queryFn: createDemoQueryFn(
+      "/dashboard/orders",
+      () => mockFallback.orders().data,
+      isDemoMode,
+    ),
     ...getDefaultQueryOptions({
-      staleTime: 60 * 1000, // 1 min
+      staleTime: 60 * 1000,
       refetchOnMount: true,
       refetchOnWindowFocus: true,
       ...options,
@@ -53,7 +40,7 @@ export const useOrder = (orderId, options = {}) => {
     queryFn: () => apiClient.get(`/dashboard/orders/${orderId}`),
     enabled: Boolean(orderId),
     ...getDefaultQueryOptions({
-      staleTime: 2 * 60 * 1000, // 2 min
+      staleTime: 2 * 60 * 1000,
       ...options,
     }),
   });
@@ -63,11 +50,11 @@ export const useCreateOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: ["orders"],
     mutationFn: (orderData) =>
       apiClient.post("/dashboard/orders/create", orderData),
     onSuccess: () => {
       invalidateQueries.orders(queryClient);
-      // If creation produced a transaction (paid orders), refresh transactions
       invalidateQueries.transactions(queryClient);
       invalidateQueries.transactionStats(queryClient);
       handleHookSuccess("ORDER_CREATED_SUCCESSFULLY");
@@ -100,7 +87,6 @@ export const useUpdateOrderStatus = () => {
     onSuccess: (_, variables) => {
       invalidateQueries.orders(queryClient);
       invalidateQueries.order(queryClient, variables.orderId);
-      // Completing orders can create transactions; refresh them
       invalidateQueries.transactions(queryClient);
       invalidateQueries.transactionStats(queryClient);
       handleHookSuccess("ORDER_STATUS_UPDATED_SUCCESSFULLY");

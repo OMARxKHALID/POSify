@@ -43,7 +43,7 @@ export default function EditCategoryPage() {
   const targetCategory =
     categories.find((category) => category.id === categoryId) || null;
 
-  // Initialize form with validation
+
   const form = useForm({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
@@ -55,7 +55,7 @@ export default function EditCategoryPage() {
     },
   });
 
-  // Update form when category data is loaded
+
   useEffect(() => {
     if (targetCategory) {
       form.reset({
@@ -68,7 +68,7 @@ export default function EditCategoryPage() {
     }
   }, [targetCategory, form]);
 
-  // Handle form submission
+
   const onSubmit = async (data) => {
     if (!categoryId) return;
 
@@ -79,19 +79,19 @@ export default function EditCategoryPage() {
       });
       router.push(ADMIN_ROUTES.CATEGORIES);
     } catch (error) {
-      // Error handling is already done in the hook with toast notifications
+
     }
   };
 
-  // Handle cancel
+
   const handleCancel = () => {
     router.push(ADMIN_ROUTES.CATEGORIES);
   };
 
-  // Check if we're in a loading or error state
+
   const isMutating = editCategoryMutation.isPending;
 
-  // Show loading state
+
   if (categoriesLoading) {
     return (
       <PageLayout isLoading={true} error={null} errorMessage="">
@@ -104,7 +104,7 @@ export default function EditCategoryPage() {
     );
   }
 
-  // Show error state if category not found
+
   if (!targetCategory) {
     return (
       <PageLayout
@@ -130,7 +130,7 @@ export default function EditCategoryPage() {
       />
 
       <div className="grid gap-6">
-        {/* Category Info Card */}
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export default function EditCategoryPage() {
           </CardContent>
         </Card>
 
-        {/* Category Form */}
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

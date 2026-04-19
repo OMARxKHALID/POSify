@@ -4,14 +4,12 @@ import { Menu } from "lucide-react";
 import { MenuItemCard } from "./menu-item-card";
 import { getCategoryId } from "@/lib/utils/menu-utils";
 
-/**
- * Filter menu items based on category and search query
- */
+
 const filterMenuItems = (menuItems, selectedCategory, searchQuery) => {
   return menuItems.filter((item) => {
     if (!item) return false;
 
-    // Get the category ID from the item's category object or categoryId field
+
     const itemCategoryId =
       (item.category && (item.category.id || item.category._id)) ||
       item.categoryId ||
@@ -34,9 +32,7 @@ const filterMenuItems = (menuItems, selectedCategory, searchQuery) => {
   });
 };
 
-/**
- * Get grid column classes based on cart state
- */
+
 const getGridCols = (isCartOpen) => {
   const baseCols =
     "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
@@ -51,7 +47,7 @@ export function MenuGrid({
   menuItems = [],
   isLoading = false,
 }) {
-  // Filter items based on category and search
+
   const filteredItems = filterMenuItems(
     menuItems,
     selectedCategory,

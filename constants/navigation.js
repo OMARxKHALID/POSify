@@ -1,9 +1,6 @@
-/**
- * Navigation & Permissions Constants
- * Maps navigation items to required permissions and allowed roles
- */
 
-// Icons
+
+
 import {
   LayoutDashboard,
   Building2,
@@ -86,7 +83,7 @@ export const NAVIGATION_PERMISSIONS = {
     },
     {
       title: "Reports",
-      url: ADMIN_ROUTES.ANALYTICS,
+      url: ADMIN_ROUTES.REPORTS,
       icon: TrendingUp,
       permissions: ["reports:view"],
       roles: ["super_admin", "admin"],

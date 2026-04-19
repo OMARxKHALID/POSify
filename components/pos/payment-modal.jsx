@@ -24,8 +24,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { formatCurrency } from "@/lib/utils/format-utils";
-import { PAYMENT_METHODS } from "@/constants/payment-methods";
+import { formatCurrency } from "@/lib/utils/display-formatters";
+import { PAYMENT_METHOD_OPTIONS } from "@/constants";
 
 const TIP_PERCENTAGES = [0, 10, 15, 20, 25];
 
@@ -53,7 +53,7 @@ export function PaymentModal({
   const tipAmount = (total * tipPercentage) / 100;
   const finalTotal = total + tipAmount;
 
-  // Reset form when modal closes
+
   useEffect(() => {
     if (!open) {
       form.reset();
@@ -92,7 +92,7 @@ export function PaymentModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Error Display */}
+
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md">
               <div className="flex items-center gap-2 text-red-800 text-sm">
@@ -102,7 +102,7 @@ export function PaymentModal({
             </div>
           )}
 
-          {/* Customer Info */}
+
           <div className="space-y-2">
             <Label className="text-sm font-medium">Customer Name</Label>
             <Input
@@ -117,7 +117,7 @@ export function PaymentModal({
             )}
           </div>
 
-          {/* Payment Method */}
+
           <div className="space-y-2">
             <Label className="text-sm font-medium">Payment Method</Label>
             <Select
@@ -128,7 +128,7 @@ export function PaymentModal({
                 <SelectValue placeholder="Select payment method" />
               </SelectTrigger>
               <SelectContent>
-                {PAYMENT_METHODS.map((method) => (
+                {PAYMENT_METHOD_OPTIONS.map((method) => (
                   <SelectItem key={method.value} value={method.value}>
                     <div className="flex items-center gap-2">
                       <method.icon className="h-4 w-4" />
@@ -145,7 +145,7 @@ export function PaymentModal({
             )}
           </div>
 
-          {/* Tip */}
+
           <div className="space-y-2">
             <Label className="text-sm font-medium">Tip</Label>
             <div className="grid grid-cols-5 gap-1">
@@ -169,7 +169,7 @@ export function PaymentModal({
             )}
           </div>
 
-          {/* Order Summary */}
+
           <div className="p-3 bg-muted rounded-lg space-y-1 text-sm">
             <div className="flex justify-between">
               <span>Total:</span>
@@ -192,7 +192,7 @@ export function PaymentModal({
             )}
           </div>
 
-          {/* Actions */}
+
           <div className="flex gap-2 pt-2">
             <Button
               type="button"

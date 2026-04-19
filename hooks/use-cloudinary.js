@@ -5,7 +5,6 @@ const DEFAULT_CONFIG = {
   cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
 };
 
-// Check Cloudinary configuration (non-blocking)
 const checkConfig = (config) => {
   const missing = [];
   if (!config.cloudName) missing.push("cloudName");
@@ -17,7 +16,7 @@ const checkConfig = (config) => {
     error:
       missing.length > 0
         ? `Missing Cloudinary configuration: ${missing.join(
-            ", "
+            ", ",
           )}. Please check your environment variables.`
         : null,
   };
@@ -29,16 +28,13 @@ export const useCloudinary = (config = {}) => {
     cloudName = DEFAULT_CONFIG.cloudName,
   } = config;
 
-  // Check configuration (non-blocking)
   const configCheck = checkConfig({ cloudName, uploadPreset });
 
-  // Cloudinary upload
   const uploadToCloudinary = useCallback(
     async (file) => {
-      // Check if configuration is valid
       if (!cloudName || !uploadPreset) {
         throw new Error(
-          "Cloudinary is not configured. Please check your environment variables."
+          "Cloudinary is not configured. Please check your environment variables.",
         );
       }
 
@@ -53,7 +49,7 @@ export const useCloudinary = (config = {}) => {
           {
             method: "POST",
             body: formData,
-          }
+          },
         );
 
         if (!response.ok) {
@@ -62,10 +58,9 @@ export const useCloudinary = (config = {}) => {
             errorData.error?.message ||
             `Upload failed with status ${response.status}`;
 
-          // Handle specific Cloudinary errors
           if (errorMessage.includes("cloud_name is disabled")) {
             throw new Error(
-              "Cloudinary cloud name is disabled. Please check your Cloudinary account settings."
+              "Cloudinary cloud name is disabled. Please check your Cloudinary account settings.",
             );
           }
 
@@ -78,7 +73,7 @@ export const useCloudinary = (config = {}) => {
         throw new Error(error.message || "Failed to upload image");
       }
     },
-    [cloudName, uploadPreset]
+    [cloudName, uploadPreset],
   );
 
   return {

@@ -5,7 +5,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/ui-utils";
 
 const ScrambleHover = ({
   text,
@@ -74,7 +74,7 @@ const ScrambleHover = ({
           .filter((p) => !p.isSpace && !p.isRevealed)
           .map((p) => p.char);
 
-        // Shuffle remaining non-revealed, non-space characters
+
         for (let i = nonSpaceChars.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [nonSpaceChars[i], nonSpaceChars[j]] = [
@@ -132,7 +132,7 @@ const ScrambleHover = ({
         }
       }, scrambleSpeed);
     } else {
-      // Don't clear the text immediately, let it finish the current scramble
+
       if (isScrambling) {
         setTimeout(() => {
           setDisplayText(text);

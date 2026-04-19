@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/ui-utils";
 
 export function CategoryNav({
   selectedCategory,
@@ -9,13 +9,13 @@ export function CategoryNav({
   menuItems = [],
   isLoading = false,
 }) {
-  // Calculate item counts for each category
+
   const getCategoryItemCount = (categoryId) => {
     if (categoryId === "all") {
       return menuItems.length;
     }
     return menuItems.filter((item) => {
-      // Handle both populated category object and categoryId string
+
       const itemCategoryId =
         (item.category && (item.category.id || item.category._id)) ||
         item.categoryId ||
@@ -24,7 +24,7 @@ export function CategoryNav({
     }).length;
   };
 
-  // Create "All" category with total count
+
   const allCategory = {
     id: "all",
     name: "All",
@@ -32,16 +32,16 @@ export function CategoryNav({
     count: getCategoryItemCount("all"),
   };
 
-  // Add count to each category
+
   const categoriesWithCount = categories.map((cat) => ({
     ...cat,
-    id: cat.id || cat._id, // Normalize ID to fix selection bug
+    id: cat.id || cat._id, 
     count: getCategoryItemCount(cat.id || cat._id),
   }));
 
   const displayCategories = [allCategory, ...categoriesWithCount];
 
-  // Show loading state when loading or no categories
+
   if (isLoading || categories.length === 0) {
     return (
       <div className="flex gap-2 mb-2 pb-3 overflow-x-auto scrollbar-hide max-w-full">

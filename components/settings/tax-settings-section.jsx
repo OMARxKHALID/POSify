@@ -1,7 +1,4 @@
-/**
- * Tax Settings Section (Section-only)
- * Compact list UI without internal Card wrapper; parent controls header/actions.
- */
+
 
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";

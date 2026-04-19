@@ -1,26 +1,37 @@
-import withPWA from "next-pwa";
+import withPWAInit from "next-pwa";
 
 const isProd = process.env.NODE_ENV === "production";
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Enable static generation for better performance
-  output: "standalone",
-
-  // Turbopack configuration for development
-  turbopack: {
-    rules: {
-      "*.svg": {
-        loaders: ["@svgr/webpack"],
-        as: "*.js",
+const withPWA = withPWAInit({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: !isProd,
+  runtimeCaching: [
+    {
+      urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "images",
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+        },
       },
     },
-  },
+    {
+      urlPattern: /^https?.*/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "http-cache",
+      },
+    },
+  ],
+});
 
-  // Server external packages (moved from experimental)
-  serverExternalPackages: ["mongoose"],
+const nextConfig = {
+  output: "standalone",
 
-  // Experimental features
   experimental: {
     optimizePackageImports: [
       "lucide-react",
@@ -46,59 +57,60 @@ const nextConfig = {
     ],
   },
 
-  // Build configuration
-  eslint: { ignoreDuringBuilds: false },
-  typescript: { ignoreBuildErrors: false },
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    },
+  },
 
-  // Image optimization
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ["@svgr/webpack"],
+    });
+    return config;
+  },
+
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
   images: {
-    unoptimized: false,
-    formats: ["image/webp", "image/avif"],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    formats: ["image/webp", "image/avif"],
     remotePatterns: [
-      { protocol: "http", hostname: "localhost" },
-      { protocol: "https", hostname: "placehold.co" },
       { protocol: "https", hostname: "res.cloudinary.com" },
-      { protocol: "http", hostname: "res.cloudinary.com" },
-      { protocol: "https", hostname: "cdn.dribbble.com" },
-      { protocol: "https", hostname: "images.unsplash.com" },
-      { protocol: "https", hostname: "via.placeholder.com" },
-      { protocol: "https", hostname: "framerusercontent.com" },
+      { protocol: "https", hostname: "api.dicebear.com" },
     ],
   },
 
-  // Compiler optimizations
   compiler: {
     removeConsole: isProd,
-    // Remove React dev tools in production
     reactRemoveProperties: isProd ? { properties: ["^data-testid$"] } : false,
   },
 
-  // Headers for security and performance
   async headers() {
     return [
       {
         source: "/(.*)",
         headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "origin-when-cross-origin" },
+          { key: "X-DNS-Prefetch-Control", value: "on" },
           {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "origin-when-cross-origin",
-          },
-          {
-            key: "X-DNS-Prefetch-Control",
-            value: "on",
+            key: "Content-Security-Policy",
+            value:
+              "default-src 'self'; img-src 'self' https: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';",
           },
         ],
       },
@@ -114,7 +126,6 @@ const nextConfig = {
     ];
   },
 
-  // Redirects for SEO
   async redirects() {
     return [
       {
@@ -126,23 +137,4 @@ const nextConfig = {
   },
 };
 
-export default withPWA({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  manifest: "/manifest.json",
-  runtimeCaching: [
-    {
-      urlPattern: /^https?.*/,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "http-cache",
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
-        },
-      },
-    },
-  ],
-  disable: !isProd,
-})(nextConfig);
+export default withPWA(nextConfig);

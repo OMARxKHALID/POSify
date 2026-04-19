@@ -1,8 +1,3 @@
-/**
- * Currency Constants
- */
-
-// Re-export from localization for consistency
 export { CURRENCIES } from "./localization";
 
 export const CURRENCY_OPTIONS = [

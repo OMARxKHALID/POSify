@@ -12,7 +12,7 @@ import {
 function Digit({ place, value, digitHeight, duration }) {
   const valueRoundedToPlace = Math.floor(value / place);
   const animatedValue = useSpring(valueRoundedToPlace, {
-    duration: duration * 1000, // Convert to milliseconds
+    duration: duration * 1000, 
   });
 
   useEffect(() => {
@@ -72,34 +72,34 @@ export function SlidingNumber({
   digitHeight = 40,
 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: false }); // Always use false, manage once manually
+  const isInView = useInView(ref, { once: false }); 
   const [currentValue, setCurrentValue] = useState(from);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
 
-  // Reset animation state on component mount (route changes)
+
   useEffect(() => {
     setCurrentValue(from);
     setHasAnimated(false);
     setAnimationKey((prev) => prev + 1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - runs on every mount
 
-  // Reset animation state when from/to values change
+  }, []); 
+
+
   useEffect(() => {
     setCurrentValue(from);
     setHasAnimated(false);
     setAnimationKey((prev) => prev + 1);
   }, [from, to]);
 
-  // Manage animation triggering manually
+
   useEffect(() => {
     if (!startOnView || !isInView) return;
 
-    // If once=true and already animated on this mount, don't animate again
+
     if (once && hasAnimated) return;
 
-    // Trigger animation
+
     const timer = setTimeout(() => {
       setAnimationKey((prev) => prev + 1);
     }, 50);
@@ -140,17 +140,17 @@ export function SlidingNumber({
     return () => clearTimeout(timer);
   }, [shouldStart, currentValue, to, duration, delay, onComplete]);
 
-  // Round the current value to avoid showing decimals during animation
+
   const roundedValue = Math.round(currentValue);
   const absValue = Math.abs(roundedValue);
 
-  // Determine the maximum number of digits needed
+
   const maxDigits = Math.max(
     Math.abs(from).toString().length,
     Math.abs(to).toString().length
   );
 
-  // Create array of place values (1, 10, 100, 1000, etc.)
+
   const places = Array.from({ length: maxDigits }, (_, i) =>
     Math.pow(10, maxDigits - i - 1)
   );

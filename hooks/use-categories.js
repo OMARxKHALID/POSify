@@ -6,39 +6,27 @@ import {
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
-  isDemoModeEnabled,
-} from "@/lib/hooks/hook-utils";
-import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
+  createDemoQueryFn,
+} from "@/lib/helpers/hook-helpers";
+import { useIsDemoModeEnabled } from "@/hooks/use-demo-mode";
+import { mockFallback } from "@/lib/mockup-data";
 
 export const useCategories = (options = {}) => {
-  const queryOptions = getDefaultQueryOptions({
-    staleTime: 3 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    ...options,
-  });
+  const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
     queryKey: queryKeys.categories,
-    queryFn: async () => {
-      try {
-        const data = await apiClient.get("/dashboard/categories");
-        if (isDemoModeEnabled() && isDataEmpty(data)) {
-          return mockFallback.categories().data;
-        }
-        return data;
-      } catch (error) {
-        if (isDemoModeEnabled()) {
-          console.warn(
-            "Categories API failed, using demo data:",
-            error.message,
-          );
-          return mockFallback.categories().data;
-        }
-        throw error;
-      }
-    },
-    ...queryOptions,
+    queryFn: createDemoQueryFn(
+      "/dashboard/categories",
+      () => mockFallback.categories().data,
+      isDemoMode,
+    ),
+    ...getDefaultQueryOptions({
+      staleTime: 3 * 60 * 1000,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      ...options,
+    }),
   });
 };
 
@@ -80,10 +68,7 @@ export const useEditCategory = () => {
   });
 };
 
-/**
- * Category Delete Hook
- * Deletes a category
- */
+
 export const useDeleteCategory = () => {
   const queryClient = useQueryClient();
 
@@ -102,10 +87,7 @@ export const useDeleteCategory = () => {
   });
 };
 
-/**
- * Main Categories Management Hook
- * Provides a unified interface for all category management operations
- */
+
 export const useCategoriesManagement = () => {
   const categoriesQuery = useCategories();
   const createCategoryMutation = useCreateCategory();

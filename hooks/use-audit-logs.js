@@ -1,17 +1,15 @@
-/**
- * useAuditLogs Hook
- * Custom hook for fetching audit logs data using TanStack React Query
- */
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
-import { apiClient } from "@/lib/api-client";
-import { getDefaultQueryOptions, queryKeys } from "@/lib/hooks/hook-utils";
+import { useSession } from "@/lib/mock-auth";
+import {
+  getDefaultQueryOptions,
+  queryKeys,
+  createDemoQueryFn,
+} from "@/lib/helpers/hook-helpers";
+import { useIsDemoModeEnabled } from "@/hooks/use-demo-mode";
+import { mockFallback } from "@/lib/mockup-data";
 
-/**
- * Build query parameters from filters
- */
+
 const buildQueryParams = (filters) => {
   const queryParams = new URLSearchParams();
 
@@ -24,33 +22,30 @@ const buildQueryParams = (filters) => {
   return queryParams;
 };
 
-/**
- * Hook to fetch audit logs with filtering and pagination
- */
+
 export const useAuditLogs = (filters = {}, options = {}) => {
   const { data: session } = useSession();
+  const isDemoMode = useIsDemoModeEnabled();
 
-  const queryOptions = getDefaultQueryOptions({
-    staleTime: 2 * 60 * 1000, // 2 minutes (shorter than users since audit logs change more frequently)
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-    ...options,
-  });
+  const queryParams = buildQueryParams(filters);
 
   return useQuery({
-    queryKey: [...queryKeys.auditLogs(filters), session?.user?.id], // Include session user ID to force refresh on session change
-    queryFn: async () => {
-      const queryParams = buildQueryParams(filters);
-      const data = await apiClient.get(`/dashboard/audit-logs?${queryParams}`);
-      return data;
-    },
-    ...queryOptions,
+    queryKey: [...queryKeys.auditLogs(filters), session?.user?.id],
+    queryFn: createDemoQueryFn(
+      `/dashboard/audit-logs?${queryParams}`,
+      () => mockFallback.auditLogs().data,
+      isDemoMode,
+    ),
+    ...getDefaultQueryOptions({
+      staleTime: 2 * 60 * 1000,
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      ...options,
+    }),
   });
 };
 
-/**
- * Hook for audit logs management (combines data fetching with common operations)
- */
+
 export const useAuditLogsManagement = (initialFilters = {}) => {
   const [filters, setFilters] = useState(initialFilters);
 
@@ -62,40 +57,40 @@ export const useAuditLogsManagement = (initialFilters = {}) => {
     refetch,
   } = useAuditLogs(filters);
 
-  // Extract data from API response
+
   const auditLogs = auditLogsData?.auditLogs || [];
   const pagination = auditLogsData?.pagination || {};
   const appliedFilters = auditLogsData?.filters || {};
   const currentUser = auditLogsData?.currentUser || null;
 
-  // Update filters with new values
+
   const updateFilters = (newFilters) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-  // Clear all filters
+
   const clearFilters = () => {
     setFilters({});
   };
 
-  // Refresh audit logs data
+
   const refresh = () => {
     refetch();
   };
 
   return {
-    // Data
+
     auditLogs,
     pagination,
     appliedFilters,
     currentUser,
 
-    // State
+
     isLoading,
     isError,
     error,
 
-    // Actions
+
     updateFilters,
     clearFilters,
     refresh,

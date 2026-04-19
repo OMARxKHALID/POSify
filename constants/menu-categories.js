@@ -1,7 +1,3 @@
-/**
- * Menu category constants and mappings
- */
-
 export const CATEGORY_COLORS = {
   burger: "bg-amber-100 text-amber-800",
   pizza: "bg-red-100 text-red-800",

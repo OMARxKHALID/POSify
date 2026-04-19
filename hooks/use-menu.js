@@ -1,7 +1,4 @@
-/**
- * useMenu Hook
- * Custom hook for menu management operations using TanStack React Query
- */
+
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
@@ -11,46 +8,31 @@ import {
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
-  isDemoModeEnabled,
-} from "@/lib/hooks/hook-utils";
-import { mockFallback, isDataEmpty } from "@/lib/mockup-data";
+  createDemoQueryFn,
+} from "@/lib/helpers/hook-helpers";
+import { useIsDemoModeEnabled } from "@/hooks/use-demo-mode";
+import { mockFallback } from "@/lib/mockup-data";
 
-/**
- * Hook to fetch menu items
- */
 export const useMenu = (options = {}) => {
-  const queryOptions = getDefaultQueryOptions({
-    staleTime: 3 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    ...options,
-  });
+  const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
     queryKey: queryKeys.menu,
-    queryFn: async () => {
-      try {
-        const data = await apiClient.get("/dashboard/menu");
-        if (isDemoModeEnabled() && isDataEmpty(data)) {
-          return mockFallback.menu().data;
-        }
-        return data;
-      } catch (error) {
-        if (isDemoModeEnabled()) {
-          console.warn("Menu API failed, using demo data:", error.message);
-          return mockFallback.menu().data;
-        }
-        throw error;
-      }
-    },
-    ...queryOptions,
+    queryFn: createDemoQueryFn(
+      "/dashboard/menu",
+      () => mockFallback.menu().data,
+      isDemoMode,
+    ),
+    ...getDefaultQueryOptions({
+      staleTime: 3 * 60 * 1000,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      ...options,
+    }),
   });
 };
 
-/**
- * Menu Item Creation Hook
- * Creates a new menu item
- */
+
 export const useCreateMenuItem = () => {
   const queryClient = useQueryClient();
 
@@ -70,10 +52,7 @@ export const useCreateMenuItem = () => {
   });
 };
 
-/**
- * Menu Item Edit Hook
- * Edits/updates an existing menu item
- */
+
 export const useEditMenuItem = () => {
   const queryClient = useQueryClient();
 
@@ -93,10 +72,7 @@ export const useEditMenuItem = () => {
   });
 };
 
-/**
- * Menu Item Delete Hook
- * Deletes a menu item
- */
+
 export const useDeleteMenuItem = () => {
   const queryClient = useQueryClient();
 
@@ -115,10 +91,7 @@ export const useDeleteMenuItem = () => {
   });
 };
 
-/**
- * Main Menu Management Hook
- * Provides a unified interface for all menu management operations
- */
+
 export const useMenuManagement = () => {
   const menuQuery = useMenu();
   const createMenuItemMutation = useCreateMenuItem();

@@ -64,7 +64,7 @@ export function DataTable({
     pageSize: 10,
   });
 
-  // Memoize table configuration for better performance
+
   const tableConfig = useMemo(
     () => ({
       data,
@@ -104,7 +104,7 @@ export function DataTable({
 
   return (
     <div className="w-full space-y-4">
-      {/* Controls */}
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center space-x-2">
           {searchKey && (
@@ -161,7 +161,7 @@ export function DataTable({
         </div>
       </div>
 
-      {/* Table */}
+
       <div className="w-full overflow-x-auto rounded-md border">
         <Table className="min-w-full">
           <TableHeader>
@@ -211,7 +211,7 @@ export function DataTable({
         </Table>
       </div>
 
-      {/* Pagination */}
+
       <div className="flex flex-col gap-3 px-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}

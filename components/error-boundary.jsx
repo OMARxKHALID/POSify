@@ -5,11 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
-/**
- * Error Boundary Component
- * Catches JavaScript errors anywhere in the child component tree
- * and displays a fallback UI instead of crashing the entire app
- */
+
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -17,12 +13,12 @@ class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
-    // Update state so the next render will show the fallback UI
+
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log error details
+
     console.error("ErrorBoundary caught an error:", error, errorInfo);
 
     this.setState({
@@ -30,8 +26,8 @@ class ErrorBoundary extends React.Component {
       errorInfo: errorInfo,
     });
 
-    // You can also log the error to an error reporting service here
-    // Example: logErrorToService(error, errorInfo);
+
+
   }
 
   handleRetry = () => {
@@ -40,12 +36,12 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      // Custom fallback UI
+
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      // Default fallback UI
+
       return (
         <div className="flex items-center justify-center min-h-[400px] p-6">
           <Card className="w-full max-w-md">
@@ -89,10 +85,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-/**
- * Hook-based Error Boundary for functional components
- * Wraps the ErrorBoundary class component
- */
+
 export function ErrorBoundaryWrapper({
   children,
   fallback,

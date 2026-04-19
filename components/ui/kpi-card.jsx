@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
-// KPI Card Component (matching analytics page design)
+
 export function KPICard({
   title,
   value,
@@ -69,7 +69,7 @@ export function KPICard({
   );
 }
 
-// KPI Cards Grid Component
+
 export function KPICardsGrid({ children, className = "" }) {
   return (
     <div

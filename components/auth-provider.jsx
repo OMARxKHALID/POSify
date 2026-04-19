@@ -1,13 +1,9 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider } from "@/lib/mock-auth";
 import { SESSION_CONFIG } from "@/constants";
 
-/**
- * Auth Provider Component
- * Wraps the app with NextAuth SessionProvider
- * Optimized for performance with minimal refetching
- */
+
 export default function AuthProvider({ children }) {
   return (
     <SessionProvider

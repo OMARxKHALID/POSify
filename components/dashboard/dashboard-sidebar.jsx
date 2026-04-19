@@ -3,9 +3,9 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/mock-auth";
 
-// UI Components
+
 import {
   Sidebar,
   SidebarContent,
@@ -30,21 +30,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Icons
+
 import { Building2, Crown, ChevronDown, Check } from "lucide-react";
 
-// Import navigation permissions and helper functions
+
 import { NAVIGATION_PERMISSIONS } from "@/constants";
-import { filterNavigationByPermissions } from "@/lib/utils/permission-utils";
+import { filterNavigationByPermissions } from "@/lib/utils/access-control";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 
-// Static fallback data outside component to prevent recreation
+
 const FALLBACK_ORGS = [
   { id: "2", name: "Demo Store", isActive: false },
   { id: "3", name: "Test Location", isActive: false },
 ];
 
-// Helper Components
+
 function OrganizationSwitcher({ user, organizations = [] }) {
   const [selectedOrg, setSelectedOrg] = useState(
     user?.organizationName || "No Organization"
@@ -55,7 +55,7 @@ function OrganizationSwitcher({ user, organizations = [] }) {
       return organizations;
     }
     
-    // Only create array when user organization exists
+
     if (user?.organizationName) {
       return [
         {
@@ -185,7 +185,7 @@ export function DashboardSidebar({ ...props }) {
   const user = session?.user;
   const isSuperAdmin = user?.role === "super_admin";
 
-  // Filter navigation based on user permissions
+
   const filteredNavigation = useMemo(() => {
     const filtered = filterNavigationByPermissions(
       NAVIGATION_PERMISSIONS,
@@ -194,7 +194,7 @@ export function DashboardSidebar({ ...props }) {
     return filtered;
   }, [user]);
 
-  // Handle sidebar click to close on mobile only
+
   const handleSidebarClick = useMemo(() => {
     return (e) => {
       if (isMobile) {
@@ -206,10 +206,10 @@ export function DashboardSidebar({ ...props }) {
   return (
     <Sidebar {...props} onClick={handleSidebarClick}>
       <SidebarHeader className="border-b">
-        {/* Organization Switcher - Hide for super admin */}
+
         {!isSuperAdmin && <OrganizationSwitcher user={user} />}
 
-        {/* Only show separator if organization switcher is visible */}
+
         {!isSuperAdmin && <Separator className="my-2" />}
 
         {user && <UserProfile user={user} isSuperAdmin={isSuperAdmin} />}

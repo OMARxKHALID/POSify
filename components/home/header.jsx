@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/mock-auth";
 import { useScroll } from "@/hooks/use-scroll";
 import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
@@ -38,13 +38,13 @@ export function Header() {
 
   return (
     <>
-      {/* Desktop Header */}
+
       <header
         className={`sticky top-4 z-50 mx-auto hidden w-full items-center justify-between rounded-full border border-border/50 bg-background/80 px-4 py-2 shadow-lg backdrop-blur-sm md:flex transition-all duration-200 ${
           isScrolled ? "max-w-4xl px-2" : "max-w-5xl px-4"
         }`}
       >
-        {/* Logo */}
+
         <Link
           href="/"
           className={`flex items-center gap-2 transition-all duration-300 ${
@@ -54,7 +54,7 @@ export function Header() {
           <Logo className="h-8 w-8" />
         </Link>
 
-        {/* Nav */}
+
         <nav className="absolute inset-0 hidden flex-1 items-center justify-center md:flex pointer-events-none">
           {NAV_ITEMS.map((item) => (
             <button
@@ -67,7 +67,7 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Actions */}
+
         <div className="relative z-10 flex items-center gap-2">
           <ThemeToggle />
 
@@ -91,7 +91,7 @@ export function Header() {
         </div>
       </header>
 
-      {/* Mobile Header */}
+
       <header className="sticky top-4 z-50 mx-2 sm:mx-4 flex items-center justify-between rounded-full border border-border/50 bg-background/80 px-3 sm:px-4 py-2 sm:py-3 shadow-lg backdrop-blur-sm md:hidden">
         <Link href="/" className="flex items-center gap-2">
           <Logo className="h-7 w-7" />
@@ -127,7 +127,7 @@ export function Header() {
         </div>
       </header>
 
-      {/* Mobile Menu */}
+
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-background/50 backdrop-blur-sm md:hidden">
           <div className="absolute top-20 left-4 right-4 rounded-2xl border border-border/50 bg-background/95 p-6 shadow-2xl backdrop-blur-md">

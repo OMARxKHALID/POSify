@@ -24,18 +24,11 @@ export const ORG_ROUTES = {
   REGISTER: "/organization/register",
 };
 
-export const API_ROUTES = {
-  AUTH: "/api/auth",
-  ORGANIZATIONS: "/api/organizations",
-  REGISTER: "/api/register",
-};
-
 export const PUBLIC_ROUTES = [
   AUTH_ROUTES.LOGIN,
   AUTH_ROUTES.REGISTER,
   AUTH_ROUTES.HOME,
   ORG_ROUTES.REGISTER,
-  API_ROUTES.AUTH,
 ];
 
 export const DEFAULT_REDIRECTS = {

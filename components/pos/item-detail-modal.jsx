@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { QuantityControl } from "@/components/ui/quantity-control";
-import { useCartStore } from "@/lib/store/use-cart-store";
+import { useCartStore } from "@/components/providers/store-provider";
 import { normalizeItem } from "@/lib/utils/common-utils";
 
 export function ItemDetailModal({
@@ -33,9 +33,9 @@ export function ItemDetailModal({
     },
   });
 
-  const { addToCart } = useCartStore();
+  const addToCart = useCartStore((state) => state.addToCart);
 
-  // Early return if no item is selected
+
   if (!selectedItem) {
     return null;
   }
@@ -79,7 +79,7 @@ export function ItemDetailModal({
 
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 space-y-4 overflow-y-auto pr-1">
-            {/* Item Info */}
+
             <div className="flex items-start gap-3 p-3 bg-muted rounded-md">
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 rounded-md bg-background flex items-center justify-center text-xl">
@@ -116,7 +116,7 @@ export function ItemDetailModal({
               </div>
             </div>
 
-            {/* Quantity */}
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Quantity</label>
               <QuantityControl
@@ -133,7 +133,7 @@ export function ItemDetailModal({
               )}
             </div>
 
-            {/* Total */}
+
             <div className="bg-muted p-3 rounded-md">
               <div className="flex items-center justify-between text-sm font-semibold">
                 <span>Total:</span>
@@ -144,7 +144,7 @@ export function ItemDetailModal({
             </div>
           </div>
 
-          {/* Actions */}
+
           <div className="flex gap-2 pt-4 flex-shrink-0">
             <Button
               type="button"

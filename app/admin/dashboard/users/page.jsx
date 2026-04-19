@@ -54,9 +54,9 @@ import {
   canEditUser,
   canDeleteUser,
   canCreateUsers,
-} from "@/lib/utils/user-utils";
+} from "@/lib/utils/access-control";
 
-// Column helper for table
+
 const columnHelper = createColumnHelper();
 
 export default function UsersPage() {
@@ -72,7 +72,7 @@ export default function UsersPage() {
     deleteUser,
   } = useUsersManagement();
 
-  // Extract users from API response
+
   const users = useMemo(() => usersData?.users || [], [usersData?.users]);
   const currentUser = useMemo(
     () => usersData?.currentUser,
@@ -83,14 +83,14 @@ export default function UsersPage() {
     [usersData?.organization]
   );
 
-  // Delete confirmation dialog state
+
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     userId: null,
     userInfo: null,
   });
 
-  // Define table columns
+
   const columns = [
     columnHelper.accessor("name", {
       header: "User",
@@ -140,7 +140,7 @@ export default function UsersPage() {
                 >
                   All
                 </DropdownMenuCheckboxItem>
-                {/* Only super_admin can see and filter by super_admin role */}
+
                 {currentUser?.role === "super_admin" && (
                   <DropdownMenuCheckboxItem
                     checked={column.getFilterValue() === "super_admin"}
@@ -151,7 +151,7 @@ export default function UsersPage() {
                     Super Admin
                   </DropdownMenuCheckboxItem>
                 )}
-                {/* Only super_admin can see and filter by admin role */}
+
                 {currentUser?.role === "super_admin" && (
                   <DropdownMenuCheckboxItem
                     checked={column.getFilterValue() === "admin"}
@@ -289,7 +289,7 @@ export default function UsersPage() {
     }),
   ];
 
-  // Handle user deletion
+
   const handleDeleteUser = (userId) => {
     const user = users.find((u) => u.id === userId);
     if (user) {
@@ -304,7 +304,7 @@ export default function UsersPage() {
     }
   };
 
-  // Confirm user deletion
+
   const confirmDeleteUser = async () => {
     if (!deleteDialog.userId) return;
 
@@ -312,16 +312,16 @@ export default function UsersPage() {
       await deleteUser.mutateAsync(deleteDialog.userId);
       setDeleteDialog({ isOpen: false, userId: null, userInfo: null });
     } catch (error) {
-      // Error handling is already done in the hook with toast notifications
+
     }
   };
 
-  // Close delete dialog
+
   const closeDeleteDialog = () => {
     setDeleteDialog({ isOpen: false, userId: null, userInfo: null });
   };
 
-  // Handle create user navigation
+
   const handleCreateUser = () => {
     router.push("/admin/dashboard/users/create");
   };
@@ -338,7 +338,7 @@ export default function UsersPage() {
         icon={Users}
       />
 
-      {/* Stats Cards */}
+
       <KPICardsGrid>
         <KPICard
           title="Total Users"
@@ -366,7 +366,7 @@ export default function UsersPage() {
         />
       </KPICardsGrid>
 
-      {/* Organization Info (for admins) */}
+
       {organization && (
         <Card>
           <CardHeader>
@@ -400,7 +400,7 @@ export default function UsersPage() {
         </Card>
       )}
 
-      {/* Users Table */}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -424,7 +424,7 @@ export default function UsersPage() {
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Dialog */}
+
       <DeleteConfirmationDialog
         isOpen={deleteDialog.isOpen}
         onClose={closeDeleteDialog}

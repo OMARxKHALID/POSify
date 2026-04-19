@@ -33,7 +33,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useTransactionsWithFilters } from "@/hooks/use-transactions";
-import { formatCurrency, formatDate } from "@/lib/utils/format-utils";
+import { formatCurrency } from "@/lib/utils/display-formatters";
+import { formatOrderDate } from "@/lib/utils/order-utils";
 
 export default function TransactionsPage() {
   const [type, setType] = useState("all");
@@ -155,7 +156,7 @@ export default function TransactionsPage() {
         header: "Date",
         cell: ({ row }) => {
           const date = row.getValue("processedAt");
-          const { date: d, time } = formatDate(date);
+          const { date: d, time } = formatOrderDate(date);
           return (
             <div className="text-sm">
               <div className="font-medium">{d}</div>

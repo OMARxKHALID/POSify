@@ -21,7 +21,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { FormActions } from "@/components/form/form-actions";
 import { FormField } from "@/components/form/form-field";
 import { useCreateUser, useUsers } from "@/hooks/use-users";
-import { canCreateUsers } from "@/lib/utils/user-utils";
+import { canCreateUsers } from "@/lib/utils/access-control";
 
 export default function CreateUserPage() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function CreateUserPage() {
   const currentUser = usersData?.currentUser;
   const userCanCreate = canCreateUsers(currentUser);
 
-  // Initialize form with validation
+
   const form = useForm({
     resolver: zodResolver(userCreationSchema),
     defaultValues: {
@@ -43,24 +43,24 @@ export default function CreateUserPage() {
     },
   });
 
-  // Handle form submission
+
   const onSubmit = async (data) => {
     try {
       await createUserMutation.mutateAsync(data);
       router.push(ADMIN_ROUTES.USERS);
     } catch (error) {
-      // Error handling is already done in the hook with toast notifications
+
     }
   };
 
-  // Redirect if user doesn't have permission
+
   useEffect(() => {
     if (!usersLoading && !userCanCreate) {
       router.push(ADMIN_ROUTES.USERS);
     }
   }, [userCanCreate, router, usersLoading]);
 
-  // Show loading while checking permissions
+
   if (usersLoading || !userCanCreate) {
     return (
       <PageLayout
@@ -80,7 +80,7 @@ export default function CreateUserPage() {
         onBackClick={() => router.back()}
       />
 
-      {/* Create User Form */}
+
       <div className="grid gap-4 lg:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card>
@@ -153,7 +153,7 @@ export default function CreateUserPage() {
           </Card>
         </div>
 
-        {/* Sidebar */}
+
         <div className="space-y-4 lg:space-y-6">
           <Card>
             <CardHeader>

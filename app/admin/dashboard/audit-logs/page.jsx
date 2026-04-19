@@ -49,12 +49,12 @@ import { PageLayout } from "@/components/dashboard/page-layout";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { useAuditLogsManagement } from "@/hooks/use-audit-logs";
 import {
-  getActionBadgeVariant,
-  getResourceBadgeVariant,
-} from "@/lib/utils/audit-log-utils";
-import { getRoleBadgeVariant } from "@/lib/utils/ui-utils";
+  getAuditActionVariant,
+  getAuditResourceVariant,
+  getRoleBadgeVariant,
+} from "@/lib/utils/ui-utils";
 
-// Column helper for table
+
 const columnHelper = createColumnHelper();
 
 export default function AuditLogsPage() {
@@ -71,7 +71,7 @@ export default function AuditLogsPage() {
 
   const [tableKey, setTableKey] = useState(0);
 
-  // Memoized stats calculations for better performance
+
   const stats = useMemo(() => {
     const today = new Date();
     const todayActions = auditLogs.filter((log) => {
@@ -87,12 +87,12 @@ export default function AuditLogsPage() {
     };
   }, [auditLogs]);
 
-  // Helper function to handle filter changes
+
   const handleFilterChange = (column, filterKey, value) => {
     column.setFilterValue(value);
   };
 
-  // Helper function to create filter dropdown items
+
   const createFilterItems = (options, column, filterKey) => {
     return [
       {
@@ -115,7 +115,7 @@ export default function AuditLogsPage() {
     ];
   };
 
-  // Reusable filter header component
+
   const FilterHeader = ({
     title,
     filterValue,
@@ -161,7 +161,7 @@ export default function AuditLogsPage() {
     );
   };
 
-  // Define table columns
+
   const columns = [
     columnHelper.accessor("action", {
       header: ({ column }) => {
@@ -186,7 +186,7 @@ export default function AuditLogsPage() {
       cell: ({ getValue }) => {
         const action = getValue();
         return (
-          <Badge variant={getActionBadgeVariant(action)} className="text-xs">
+          <Badge variant={getAuditActionVariant(action)} className="text-xs">
             {action}
           </Badge>
         );
@@ -216,7 +216,7 @@ export default function AuditLogsPage() {
         const resource = getValue();
         return (
           <Badge
-            variant={getResourceBadgeVariant(resource)}
+            variant={getAuditResourceVariant(resource)}
             className="text-xs"
           >
             {resource}
@@ -226,10 +226,10 @@ export default function AuditLogsPage() {
     }),
     columnHelper.accessor("userEmail", {
       header: ({ column }) => {
-        // Role options based on current user permissions
+
         const roleOptions = [];
 
-        // Only super_admin can see and filter by super_admin and admin roles
+
         if (currentUser?.role === "super_admin") {
           roleOptions.push(
             { value: "super_admin", label: "Super Admin" },
@@ -237,7 +237,7 @@ export default function AuditLogsPage() {
           );
         }
 
-        // All users can see staff role
+
         roleOptions.push({ value: "staff", label: "Staff" });
 
         return (
@@ -350,7 +350,7 @@ export default function AuditLogsPage() {
 
               <div className="flex-1 overflow-y-auto p-1">
                 <div className="space-y-4">
-                  {/* Action Summary Card */}
+
                   <Card className="border-l-4 border-l-primary">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base flex items-center gap-2">
@@ -365,7 +365,7 @@ export default function AuditLogsPage() {
                             Action Type:
                           </label>
                           <Badge
-                            variant={getActionBadgeVariant(log.action)}
+                            variant={getAuditActionVariant(log.action)}
                             className="text-xs px-2 py-1"
                           >
                             {log.action}
@@ -376,7 +376,7 @@ export default function AuditLogsPage() {
                             Resource:
                           </label>
                           <Badge
-                            variant={getResourceBadgeVariant(log.resource)}
+                            variant={getAuditResourceVariant(log.resource)}
                             className="text-xs px-2 py-1"
                           >
                             {log.resource}
@@ -397,7 +397,7 @@ export default function AuditLogsPage() {
                     </CardContent>
                   </Card>
 
-                  {/* User Information Card */}
+
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base flex items-center gap-2">
@@ -468,7 +468,7 @@ export default function AuditLogsPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Description Card */}
+
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base flex items-center gap-2">
@@ -485,7 +485,7 @@ export default function AuditLogsPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Changes Card */}
+
                   {log.changes && (
                     <Card>
                       <CardHeader className="pb-2">
@@ -507,7 +507,7 @@ export default function AuditLogsPage() {
                     </Card>
                   )}
 
-                  {/* Metadata Card */}
+
                   {log.metadata && (
                     <Card>
                       <CardHeader className="pb-2">
@@ -585,7 +585,7 @@ export default function AuditLogsPage() {
         icon={Activity}
       />
 
-      {/* Stats Cards */}
+
       <KPICardsGrid>
         <KPICard
           title="Total Logs"
@@ -613,7 +613,7 @@ export default function AuditLogsPage() {
         />
       </KPICardsGrid>
 
-      {/* Audit Logs Table */}
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -630,7 +630,7 @@ export default function AuditLogsPage() {
               variant="outline"
               size="sm"
               onClick={() => {
-                // Force table re-render to clear all filters
+
                 setTableKey((prev) => prev + 1);
               }}
               className="text-xs"

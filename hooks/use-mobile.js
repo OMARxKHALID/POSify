@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { MOBILE_BREAKPOINT } from "@/constants";
 
-/**
- * Hook to detect if the current viewport is mobile
- */
+
 export function useIsMobile() {
   const [isMobile, setIsMobile] = useState(undefined);
 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useCloudinary } from "@/hooks/use-cloudinary";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/ui-utils";
 
 export function ImageUpload({
   value,
@@ -26,7 +26,7 @@ export function ImageUpload({
   const { uploadToCloudinary } = useCloudinary();
   const fileInputRef = useRef(null);
 
-  // Update preview when value changes (for edit mode)
+
   useEffect(() => {
     setPreview(value || "");
   }, [value]);
@@ -201,7 +201,7 @@ export function ImageUpload({
                 <div className="flex gap-2">
                   <Input
                     type="url"
-                    placeholder="https://example.com/image.jpg"
+                    placeholder="https://images.unsplash.com/photo-1..."
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
                     className="flex-1"

@@ -1,12 +1,9 @@
-/**
- * Quantity Control Component
- * Input control for quantity with increment/decrement buttons
- */
+
 
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/ui-utils";
 
 export function QuantityControl({
   value,

@@ -11,10 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 
-/**
- * Delete Confirmation Dialog Component
- * Reusable dialog for confirming destructive actions
- */
+
 export function DeleteConfirmationDialog({
   isOpen,
   onClose,

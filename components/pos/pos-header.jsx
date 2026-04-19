@@ -8,20 +8,25 @@ import {
   CloudOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCartStore } from "@/lib/store/use-cart-store";
+import { useCartStore } from "@/components/providers/store-provider";
+import { useShallow } from "zustand/react/shallow";
 import { useMounted } from "@/hooks/use-mounted";
 import { useNetworkStatus } from "@/hooks/use-network-status";
-import { useOrderQueueStore } from "@/lib/store/use-queue-order-store";
+import { useOrderQueueStore } from "@/components/providers/store-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { OrderQueueManager } from "./order-queue-manager";
 import { ADMIN_ROUTES } from "@/constants/routes";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/mock-auth";
 import { SimpleUserDisplay } from "@/components/ui/user-info";
 import Link from "next/link";
 
 export function POSHeader() {
-  const { getTotalQuantity, toggleCart } = useCartStore();
-  const totalItems = getTotalQuantity();
+  const { totalItems, toggleCart } = useCartStore(
+    useShallow((state) => ({
+      totalItems: state.getTotalQuantity(),
+      toggleCart: state.toggleCart,
+    })),
+  );
   const mounted = useMounted();
   const { isOnline } = useNetworkStatus();
   const { data: session } = useSession();
@@ -33,7 +38,7 @@ export function POSHeader() {
 
   return (
     <header className="flex items-center justify-between bg-card border-b border-border/50 px-4 py-3">
-      {/* Left side - Title and User */}
+
       <div className="flex items-center gap-4">
         <h1 className="text-lg font-semibold text-card-foreground hidden sm:block">
           POS System
@@ -42,13 +47,13 @@ export function POSHeader() {
           POS
         </h1>
 
-        {/* User Info */}
+
         <SimpleUserDisplay session={session} />
       </div>
 
-      {/* Right side - Actions */}
+
       <div className="flex items-center gap-2">
-        {/* Network Status */}
+
         <div className="flex items-center gap-1.5">
           {isOnline ? (
             <Wifi className="w-4 h-4 text-green-600" />
@@ -60,7 +65,7 @@ export function POSHeader() {
           </span>
         </div>
 
-        {/* Dashboard Button */}
+
         <Link href={ADMIN_ROUTES.DASHBOARD}>
           <Button variant="outline" size="sm" className="hidden md:flex">
             <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -71,10 +76,10 @@ export function POSHeader() {
           </Button>
         </Link>
 
-        {/* Theme Toggle */}
+
         <ThemeToggle />
 
-        {/* Cart Button */}
+
         <Button
           variant="outline"
           size="sm"
@@ -91,7 +96,7 @@ export function POSHeader() {
           )}
         </Button>
 
-        {/* Queue Manager - Show when offline or has queued orders */}
+
         {shouldShowQueueManager && (
           <OrderQueueManager
             trigger={

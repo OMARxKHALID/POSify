@@ -1,8 +1,4 @@
-/**
- * Settings Form Actions
- * Reusable actions block to place Save/Reset buttons.
- * Note: Keep actions minimal to align with page-level behaviors.
- */
+
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

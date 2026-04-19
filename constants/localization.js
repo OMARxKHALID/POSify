@@ -1,7 +1,3 @@
-/**
- * Localization Constants
- */
-
 export const CURRENCIES = [
   "USD",
   "EUR",
@@ -69,7 +65,7 @@ export const LANGUAGE_OPTIONS = [
 
 export const DATE_FORMATS = [
   "MM/DD/YYYY",
-  "DD/MM/YYYY", 
+  "DD/MM/YYYY",
   "YYYY-MM-DD",
   "DD-MM-YYYY",
 ];
@@ -81,10 +77,7 @@ export const DATE_FORMAT_OPTIONS = [
   { value: "DD-MM-YYYY", label: "DD-MM-YYYY" },
 ];
 
-export const TIME_FORMATS = [
-  "12h",
-  "24h",
-];
+export const TIME_FORMATS = ["12h", "24h"];
 
 export const TIME_FORMAT_OPTIONS = [
   { value: "12h", label: "12 Hour (AM/PM)" },

@@ -38,7 +38,7 @@ import { PageLayout } from "@/components/dashboard/page-layout";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { useCategoriesManagement } from "@/hooks/use-categories";
 
-// Column helper for table
+
 const columnHelper = createColumnHelper();
 
 export default function CategoriesPage() {
@@ -51,20 +51,20 @@ export default function CategoriesPage() {
     deleteCategory,
   } = useCategoriesManagement();
 
-  // Extract data from API response
+
   const categories = useMemo(
     () => categoriesData?.categories || [],
     [categoriesData?.categories]
   );
 
-  // Delete confirmation dialog state
+
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     categoryId: null,
     categoryInfo: null,
   });
 
-  // Define table columns
+
   const columns = [
     columnHelper.accessor("name", {
       header: "Category",
@@ -174,7 +174,7 @@ export default function CategoriesPage() {
     }),
   ];
 
-  // Handle category deletion
+
   const handleDeleteCategory = (categoryId) => {
     const category = categories.find((item) => item.id === categoryId);
     if (category) {
@@ -189,7 +189,7 @@ export default function CategoriesPage() {
     }
   };
 
-  // Confirm category deletion
+
   const confirmDeleteCategory = async () => {
     if (!deleteDialog.categoryId) return;
 
@@ -197,16 +197,16 @@ export default function CategoriesPage() {
       await deleteCategory.mutateAsync(deleteDialog.categoryId);
       setDeleteDialog({ isOpen: false, categoryId: null, categoryInfo: null });
     } catch (error) {
-      // Error handling is already done in the hook with toast notifications
+
     }
   };
 
-  // Close delete dialog
+
   const closeDeleteDialog = () => {
     setDeleteDialog({ isOpen: false, categoryId: null, categoryInfo: null });
   };
 
-  // Handle create category navigation
+
   const handleCreateCategory = () => {
     router.push("/admin/dashboard/categories/create");
   };
@@ -223,7 +223,7 @@ export default function CategoriesPage() {
         icon={FolderOpen}
       />
 
-      {/* Categories Table */}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -247,7 +247,7 @@ export default function CategoriesPage() {
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Dialog */}
+
       <DeleteConfirmationDialog
         isOpen={deleteDialog.isOpen}
         onClose={closeDeleteDialog}

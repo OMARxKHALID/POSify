@@ -49,7 +49,7 @@ import {
   getSpecialStatus,
 } from "@/lib/utils/menu-utils";
 
-// Column helper for table
+
 const columnHelper = createColumnHelper();
 
 export default function MenuPage() {
@@ -62,7 +62,7 @@ export default function MenuPage() {
     deleteMenuItem,
   } = useMenuManagement();
 
-  // Extract data from API response
+
   const menuItems = useMemo(
     () => menuData?.menuItems || [],
     [menuData?.menuItems]
@@ -72,14 +72,14 @@ export default function MenuPage() {
     [menuData?.categories]
   );
 
-  // Delete confirmation dialog state
+
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     menuItemId: null,
     menuItemInfo: null,
   });
 
-  // Define table columns
+
   const columns = [
     columnHelper.accessor("name", {
       header: "Menu Item",
@@ -254,7 +254,7 @@ export default function MenuPage() {
     }),
   ];
 
-  // Handle menu item deletion
+
   const handleDeleteMenuItem = (menuItemId) => {
     const menuItem = menuItems.find((item) => item.id === menuItemId);
     if (menuItem) {
@@ -269,7 +269,7 @@ export default function MenuPage() {
     }
   };
 
-  // Confirm menu item deletion
+
   const confirmDeleteMenuItem = async () => {
     if (!deleteDialog.menuItemId) return;
 
@@ -277,16 +277,16 @@ export default function MenuPage() {
       await deleteMenuItem.mutateAsync(deleteDialog.menuItemId);
       setDeleteDialog({ isOpen: false, menuItemId: null, menuItemInfo: null });
     } catch (error) {
-      // Error handling is already done in the hook with toast notifications
+
     }
   };
 
-  // Close delete dialog
+
   const closeDeleteDialog = () => {
     setDeleteDialog({ isOpen: false, menuItemId: null, menuItemInfo: null });
   };
 
-  // Handle create menu item navigation
+
   const handleCreateMenuItem = () => {
     router.push("/admin/dashboard/menu/create");
   };
@@ -302,7 +302,7 @@ export default function MenuPage() {
         description="Manage your restaurant menu items, pricing, and availability"
         icon={Utensils}
       />
-      {/* Menu Items Table */}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -326,7 +326,7 @@ export default function MenuPage() {
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Dialog */}
+
       <DeleteConfirmationDialog
         isOpen={deleteDialog.isOpen}
         onClose={closeDeleteDialog}

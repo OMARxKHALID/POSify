@@ -1,6 +1,6 @@
 "use client";
 
-import { signOut } from "next-auth/react";
+import { signOut } from "@/lib/mock-auth";
 import {
   User,
   LogOut,
@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 
-// Helper functions for user display
+
 const getRoleIcon = (role) => {
   switch (role) {
     case "super_admin":
@@ -63,7 +63,7 @@ const getRoleBadgeVariant = (role) => {
   }
 };
 
-// User Info Display Component
+
 export function UserInfoDisplay({
   session,
   showOrganization = true,
@@ -89,7 +89,7 @@ export function UserInfoDisplay({
   );
 }
 
-// User Dropdown Menu Component
+
 export function UserDropdownMenu({
   session,
   showPOS = true,
@@ -125,7 +125,7 @@ export function UserDropdownMenu({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {/* Dashboard Access */}
+
         <DropdownMenuItem asChild>
           <Link href="/admin/dashboard" className="flex items-center gap-2">
             <LayoutDashboard className="w-4 h-4" />
@@ -133,7 +133,7 @@ export function UserDropdownMenu({
           </Link>
         </DropdownMenuItem>
 
-        {/* POS Access for Admin/Staff */}
+
         {showPOS &&
           (session.user.role === "admin" || session.user.role === "staff") && (
             <DropdownMenuItem asChild>
@@ -144,7 +144,7 @@ export function UserDropdownMenu({
             </DropdownMenuItem>
           )}
 
-        {/* Settings for Admin */}
+
         {showSettings && session.user.role === "admin" && (
           <DropdownMenuItem asChild>
             <Link
@@ -159,7 +159,7 @@ export function UserDropdownMenu({
 
         <DropdownMenuSeparator />
 
-        {/* Logout */}
+
         <DropdownMenuItem
           onClick={() => signOut({ callbackUrl: logoutCallback })}
           className="flex items-center gap-2 text-red-600 focus:text-red-600"
@@ -172,7 +172,7 @@ export function UserDropdownMenu({
   );
 }
 
-// Mobile User Info Component
+
 export function MobileUserInfo({ session, className = "" }) {
   if (!session?.user) return null;
 
@@ -187,7 +187,7 @@ export function MobileUserInfo({ session, className = "" }) {
   );
 }
 
-// Mobile User Menu Component
+
 export function MobileUserMenu({
   session,
   showPOS = true,
@@ -198,7 +198,7 @@ export function MobileUserMenu({
 
   return (
     <>
-      {/* User Info */}
+
       <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
         <div className="flex items-center gap-2">
           {getRoleIcon(session.user.role)}
@@ -215,7 +215,7 @@ export function MobileUserMenu({
         </div>
       </div>
 
-      {/* Navigation Links */}
+
       <Button variant="ghost" asChild className="justify-start h-12 text-lg">
         <Link href="/admin/dashboard" className="flex items-center gap-3">
           <LayoutDashboard className="w-5 h-5" />
@@ -261,7 +261,7 @@ export function MobileUserMenu({
   );
 }
 
-// Simple User Display (for compact spaces)
+
 export function SimpleUserDisplay({ session, className = "" }) {
   if (!session?.user) return null;
 
@@ -281,5 +281,5 @@ export function SimpleUserDisplay({ session, className = "" }) {
   );
 }
 
-// Export helper functions for use in other components
+
 export { getRoleIcon, getRoleLabel, getRoleBadgeVariant };

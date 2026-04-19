@@ -1,7 +1,4 @@
-/**
- * Cart calculations hook
- * Centralizes all cart-related calculations
- */
+
 
 import { useMemo } from "react";
 import {
@@ -9,12 +6,10 @@ import {
   getTaxBreakdown,
 } from "@/lib/utils/business-utils";
 
-/**
- * Hook for cart calculations with optimized memoization
- */
+
 export const useCartCalculations = (orderItems, cartDiscount, taxes) => {
   return useMemo(() => {
-    // Early return for empty cart
+
     if (!orderItems || orderItems.length === 0) {
       return {
         subtotal: 0,

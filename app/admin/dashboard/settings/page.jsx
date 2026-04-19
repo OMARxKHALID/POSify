@@ -14,7 +14,6 @@ import {
   Save,
   AlertTriangle,
   Plus,
-  Trash2,
 } from "lucide-react";
 
 import { Form } from "@/components/ui/form";
@@ -31,7 +30,7 @@ import { PageLayout } from "@/components/dashboard/page-layout";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { FormField } from "@/components/form/form-field";
 import { useSettingsManagement, useUpdateSettings } from "@/hooks/use-settings";
-import { useDemoModeStore } from "@/lib/store/use-demo-mode-store";
+import { useDemoModeStore } from "@/components/providers/store-provider";
 import { BusinessSettingsSection } from "@/components/settings/business-settings-section";
 import { TaxSettingsSection } from "@/components/settings/tax-settings-section";
 import {
@@ -114,17 +113,6 @@ export default function SettingsPage() {
     return cleaned;
   };
 
-  const onSubmit = async (data) => {
-    try {
-      const payload = cleanSettingsPayload(data);
-      await updateSettings.mutateAsync(payload);
-    } catch (_) {}
-  };
-
-  const handleResetAll = () => {
-    if (settingsData) form.reset(settingsData);
-  };
-
   const saveGeneralSection = async () => {
     const values = form.getValues();
     const payload = {
@@ -142,8 +130,7 @@ export default function SettingsPage() {
       } else {
         disableDemoMode();
       }
-      
-      // Invalidate all queries to force refetch without mock data
+
       queryClient.invalidateQueries();
     } catch (_) {}
   };
@@ -218,9 +205,9 @@ export default function SettingsPage() {
       <Form {...form}>
         <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-3">
-            {/* Main Content */}
+
             <div className="lg:col-span-2 space-y-6">
-              {/* General Settings */}
+
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -283,7 +270,7 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
 
-              {/* Tax Configuration */}
+
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -339,7 +326,7 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
 
-              {/* Receipt Settings */}
+
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -452,7 +439,7 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
 
-              {/* Business Settings */}
+
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -495,9 +482,9 @@ export default function SettingsPage() {
               </Card>
             </div>
 
-            {/* Sidebar */}
+
             <div className="space-y-6">
-              {/* Settings Help */}
+
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2">
@@ -517,7 +504,7 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
 
-              {/* Form Actions removed per request: use section-level Save only */}
+
             </div>
           </div>
         </form>

@@ -52,7 +52,7 @@ export default function EditMenuItemPage() {
   const targetMenuItem =
     menuItems.find((item) => item.id === menuItemId) || null;
 
-  // Form setup
+
   const form = useForm({
     resolver: zodResolver(menuFormSchema),
     defaultValues: {
@@ -87,7 +87,7 @@ export default function EditMenuItemPage() {
     }
   }, [targetMenuItem, form]);
 
-  // Handle form submission
+
   const onSubmit = async (data) => {
     try {
       await editMenuItemMutation.mutateAsync({
@@ -96,18 +96,18 @@ export default function EditMenuItemPage() {
       });
       router.push(ADMIN_ROUTES.MENU || "/admin/dashboard/menu");
     } catch (error) {
-      // Error handling is already done in the hook with toast notifications
+
     }
   };
 
-  // Redirect if user doesn't have permission (only admin can edit menu items)
+
   useEffect(() => {
     if (!menuLoading && currentUser?.role !== "admin") {
       router.push(ADMIN_ROUTES.MENU || "/admin/dashboard/menu");
     }
   }, [currentUser?.role, router, menuLoading]);
 
-  // Show loading while checking permissions
+
   if (menuLoading || currentUser?.role !== "admin") {
     return (
       <PageLayout
@@ -117,7 +117,7 @@ export default function EditMenuItemPage() {
     );
   }
 
-  // If targetMenuItem doesn't exist (but we have permission) -> show not found
+
   if (!targetMenuItem) {
     return (
       <PageLayout error={{ message: "Menu item not found" }}>
@@ -155,7 +155,7 @@ export default function EditMenuItemPage() {
         onBackClick={() => router.back()}
       />
 
-      {/* Menu Item Info Card */}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -214,7 +214,7 @@ export default function EditMenuItemPage() {
         </CardContent>
       </Card>
 
-      {/* Edit Menu Item Form */}
+
       <div className="grid gap-4 lg:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card>
@@ -362,7 +362,7 @@ export default function EditMenuItemPage() {
           </Card>
         </div>
 
-        {/* Sidebar */}
+
         <div className="space-y-4 lg:space-y-6">
           <Card>
             <CardHeader>

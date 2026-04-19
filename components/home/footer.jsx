@@ -27,7 +27,7 @@ export function Footer() {
           const windowHeight = window.innerHeight;
           const documentHeight = document.documentElement.scrollHeight;
 
-          // More conservative approach - only show when truly at bottom
+
           const nearBottom = scrollTop + windowHeight >= documentHeight - 50;
 
           setIsAtBottom(nearBottom);
@@ -38,7 +38,7 @@ export function Footer() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // run once on mount
+    handleScroll(); 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -53,7 +53,7 @@ export function Footer() {
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
           <div className="relative flex h-full w-full items-start justify-end overflow-hidden px-7 py-7 text-right sm:px-12 sm:py-12">
-            {/* Links */}
+
             <motion.div
               className="flex flex-row space-x-8 text-sm sm:space-x-12 sm:text-base md:space-x-16 md:text-lg lg:space-x-20"
               initial={{ opacity: 0, y: 20 }}
@@ -74,7 +74,7 @@ export function Footer() {
               ))}
             </motion.div>
 
-            {/* Brand */}
+
             <motion.h2
               className="absolute bottom-0 left-0 select-none text-[80px] font-bold text-primary-foreground/90 sm:text-[120px] md:text-[160px] lg:text-[192px] translate-y-1/3"
               initial={{ opacity: 0, x: -100 }}

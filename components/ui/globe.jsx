@@ -3,7 +3,7 @@
 import React from "react";
 import { useEffect, useRef } from "react";
 import createGlobe from "cobe";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/ui-utils";
 
 const Earth = ({
   className,
@@ -29,7 +29,7 @@ const Earth = ({
     onResize();
     let phi = 0;
 
-    // Ensure we have a valid width before creating globe
+
     if (width === 0) width = 400;
 
     const globe = createGlobe(canvasRef.current, {

@@ -11,10 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 
-/**
- * Ownership Transfer Confirmation Dialog Component
- * Dialog for confirming organization ownership transfer when promoting staff to admin
- */
+
 export function OwnershipTransferDialog({
   isOpen,
   onClose,

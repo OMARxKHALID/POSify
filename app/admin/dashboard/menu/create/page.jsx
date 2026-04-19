@@ -42,10 +42,10 @@ export default function CreateMenuItemPage() {
   const currentUser = menuData?.currentUser;
   const categories = menuData?.categories || [];
 
-  // Show warning if categories failed to load
+
   const categoriesError = !menuLoading && categories.length === 0 && menuData;
 
-  // Initialize form with validation
+
   const form = useForm({
     resolver: zodResolver(menuFormSchema),
     defaultValues: {
@@ -61,24 +61,24 @@ export default function CreateMenuItemPage() {
     },
   });
 
-  // Handle form submission
+
   const onSubmit = async (data) => {
     try {
       await createMenuItemMutation.mutateAsync(data);
       router.push(ADMIN_ROUTES.MENU || "/admin/dashboard/menu");
     } catch (error) {
-      // Error handling is already done in the hook with toast notifications
+
     }
   };
 
-  // Redirect if user doesn't have permission (only admin can create menu items)
+
   useEffect(() => {
     if (!menuLoading && currentUser?.role !== "admin") {
       router.push(ADMIN_ROUTES.MENU || "/admin/dashboard/menu");
     }
   }, [currentUser?.role, router, menuLoading]);
 
-  // Show loading while checking permissions
+
   if (menuLoading || currentUser?.role !== "admin") {
     return (
       <PageLayout
@@ -98,7 +98,7 @@ export default function CreateMenuItemPage() {
         onBackClick={() => router.back()}
       />
 
-      {/* Create Menu Item Form */}
+
       <div className="grid gap-4 lg:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card>
@@ -261,7 +261,7 @@ export default function CreateMenuItemPage() {
           </Card>
         </div>
 
-        {/* Sidebar */}
+
         <div className="space-y-4 lg:space-y-6">
           <Card>
             <CardHeader>

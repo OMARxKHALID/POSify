@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/mock-auth";
 import Link from "next/link";
 import { Store } from "lucide-react";
 
@@ -25,14 +25,14 @@ import { BUSINESS_TYPES, REGISTRATION_TYPES } from "@/constants";
 import { useRegistration } from "@/hooks/use-registration";
 import { PageLoading } from "@/components/ui/loading";
 import { GeometricBackground } from "@/components/ui/geometric-background";
-import { sessionUtils } from "@/lib/hooks/hook-utils";
+import { sessionUtils } from "@/lib/helpers/hook-helpers";
 
 export default function OrganizationRegisterPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   const organizationRegistrationMutation = useRegistration(
-    REGISTRATION_TYPES.ORGANIZATION
+    REGISTRATION_TYPES.ORGANIZATION,
   );
 
   const form = useForm({
@@ -51,28 +51,23 @@ export default function OrganizationRegisterPage() {
     },
   });
 
-  // Handle session changes and redirects
   useEffect(() => {
     if (!session) return;
 
-    // Set userId from session
     if (session.user?.id) {
       form.setValue("userId", session.user.id);
     }
 
-    // Redirect unauthenticated users
     if (status === "unauthenticated") {
       router.push("/admin/login");
       return;
     }
 
-    // Redirect users who have completed onboarding
     if (session.user?.onboardingCompleted && session.user?.organizationId) {
       router.replace("/admin/dashboard");
     }
   }, [session, status, router, form]);
 
-  // Show loading while session is loading, unauthenticated, or user has completed onboarding
   if (
     status === "loading" ||
     status === "unauthenticated" ||
@@ -104,9 +99,8 @@ function OrganizationForm({
     try {
       const formData = { ...data, userId: session.user.id };
 
-      const result = await organizationRegistrationMutation.mutateAsync(
-        formData
-      );
+      const result =
+        await organizationRegistrationMutation.mutateAsync(formData);
 
       if (result?.sessionRefresh) {
         setIsRefreshingSession(true);
@@ -118,7 +112,6 @@ function OrganizationForm({
       router.push("/admin/dashboard");
     } catch {
       setIsRefreshingSession(false);
-      // Toast errors handled in useRegistration
     }
   }
 
@@ -130,11 +123,9 @@ function OrganizationForm({
     <div className="relative min-h-screen bg-background">
       <GeometricBackground />
 
-      {/* Decorative blobs */}
       <div className="absolute top-20 right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
 
-      {/* Back to Home */}
       <Link
         href="/"
         className="absolute top-6 left-6 z-30 flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
@@ -173,7 +164,6 @@ function OrganizationForm({
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-6"
                 >
-                  {/* Main Fields */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -209,7 +199,6 @@ function OrganizationForm({
                     />
                   </div>
 
-                  {/* Additional Information */}
                   <div>
                     <h3 className="mb-4 text-sm font-medium text-foreground">
                       Additional Information (Optional)
@@ -324,7 +313,7 @@ function OrganizationForm({
                               <Input
                                 {...field}
                                 type="url"
-                                placeholder="https://myrestaurant.com"
+                                placeholder="https://www.example.com"
                                 className="h-10"
                                 disabled={
                                   organizationRegistrationMutation.isPending
@@ -338,7 +327,6 @@ function OrganizationForm({
                     </div>
                   </div>
 
-                  {/* Submit */}
                   <Button
                     type="submit"
                     className="w-full h-11 font-medium"

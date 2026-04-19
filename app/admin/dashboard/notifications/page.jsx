@@ -17,7 +17,7 @@ export default function NotificationsPage() {
       />
 
       <div className="space-y-6">
-        {/* Quick Actions */}
+
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="relative">
@@ -44,7 +44,7 @@ export default function NotificationsPage() {
           </div>
         </div>
 
-        {/* Notifications Content */}
+
         <Card>
           <CardHeader>
             <CardTitle>System Notifications</CardTitle>

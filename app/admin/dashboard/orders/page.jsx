@@ -16,6 +16,7 @@ import {
 import { PageLayout } from "@/components/dashboard/page-layout";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { useOrdersManagement } from "@/hooks/use-orders";
+import { useMutationState } from "@tanstack/react-query";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -34,6 +35,7 @@ import {
   formatOrderDate,
 } from "@/lib/utils/order-utils";
 import { filterOrders } from "@/lib/utils/order-utils";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -45,18 +47,36 @@ export default function OrdersPage() {
     refetch,
   } = useOrdersManagement();
 
-  // Extract data from API response
-  const orders = useMemo(() => ordersData?.orders || [], [ordersData?.orders]);
+  const pendingOrders = useMutationState({
+    filters: { mutationKey: ["orders"], status: "pending" },
+    select: (mutation) => {
+      const order = mutation.state.variables;
+      return {
+        ...order,
+        id: `pending-${Math.random()}`,
+        orderNumber: "SYNCING...",
+        createdAt: new Date().toISOString(),
+        isPending: true,
+      };
+    },
+  });
 
-  // Filter states
+  const orders = useMemo(() => {
+    const fetchedOrders = ordersData?.orders || [];
+
+    const existingKeys = new Set(fetchedOrders.map((o) => o.idempotencyKey));
+    const uniquePending = pendingOrders.filter(
+      (o) => !existingKeys.has(o.idempotencyKey),
+    );
+
+    return [...uniquePending, ...fetchedOrders];
+  }, [ordersData?.orders, pendingOrders]);
+
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Filter orders based on selected filters
   const filteredOrders = useMemo(() => {
     return filterOrders(orders, { status: statusFilter });
   }, [orders, statusFilter]);
-
-  // Removed new order creation button per request
 
   const columnHelper = createColumnHelper();
 
@@ -65,7 +85,14 @@ export default function OrdersPage() {
       columnHelper.accessor("orderNumber", {
         header: "Order #",
         cell: ({ row }) => (
-          <div className="font-medium text-sm">{row.original.orderNumber}</div>
+          <div className="flex items-center gap-2">
+            <div className="font-medium text-sm">
+              {row.original.orderNumber}
+            </div>
+            {row.original.isPending && (
+              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            )}
+          </div>
         ),
       }),
       columnHelper.accessor("customerName", {
@@ -100,7 +127,7 @@ export default function OrdersPage() {
           const items = row.getValue("items");
           const totalItems = items.reduce(
             (sum, item) => sum + item.quantity,
-            0
+            0,
           );
           return (
             <div className="text-sm">
@@ -206,7 +233,7 @@ export default function OrdersPage() {
         },
       }),
     ],
-    [router]
+    [router],
   );
 
   return (
@@ -221,7 +248,6 @@ export default function OrdersPage() {
         icon={Utensils}
       />
 
-      {/* Orders Table */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -250,13 +276,73 @@ export default function OrdersPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <DataTable
-            data={filteredOrders}
-            columns={columns}
-            searchKey="orderNumber"
-            searchPlaceholder="Search orders by number or customer..."
-            showAddButton={false}
-          />
+          <div className="space-y-4">
+            <Tabs
+              defaultValue="all"
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+              className="w-full"
+            >
+              <TabsList className="flex flex-wrap h-auto gap-2 bg-transparent p-0">
+                <TabsTrigger
+                  value="all"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border"
+                >
+                  All Orders
+                </TabsTrigger>
+                <TabsTrigger
+                  value="pending"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border"
+                >
+                  Pending
+                </TabsTrigger>
+                <TabsTrigger
+                  value="confirmed"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border"
+                >
+                  Confirmed
+                </TabsTrigger>
+                <TabsTrigger
+                  value="preparing"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border"
+                >
+                  Preparing
+                </TabsTrigger>
+                <TabsTrigger
+                  value="ready"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border"
+                >
+                  Ready
+                </TabsTrigger>
+                <TabsTrigger
+                  value="completed"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border"
+                >
+                  Completed
+                </TabsTrigger>
+                <TabsTrigger
+                  value="cancelled"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border"
+                >
+                  Cancelled
+                </TabsTrigger>
+                <TabsTrigger
+                  value="refunded"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border"
+                >
+                  Refunded
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <DataTable
+              data={filteredOrders}
+              columns={columns}
+              searchKey="orderNumber"
+              searchPlaceholder="Search orders by number or customer..."
+              showAddButton={false}
+            />
+          </div>
         </CardContent>
       </Card>
     </PageLayout>

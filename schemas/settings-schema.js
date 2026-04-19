@@ -9,9 +9,6 @@ import {
   DEFAULT_SUGGESTED_TIP_PERCENTAGES,
 } from "@/constants";
 
-/**
- * Tax settings schema
- */
 export const taxSettingsSchema = z.object({
   id: z.string().min(1, "Tax ID is required").trim(),
   name: z.string().min(1, "Tax name is required").trim(),
@@ -23,9 +20,6 @@ export const taxSettingsSchema = z.object({
   type: z.enum(TAX_TYPES).default("percentage"),
 });
 
-/**
- * Receipt settings schema
- */
 export const receiptSettingsSchema = z.object({
   template: z.enum(RECEIPT_TEMPLATES).default("default"),
   footer: z.string().trim().default(DEFAULT_RECEIPT_FOOTER),
@@ -38,24 +32,15 @@ export const receiptSettingsSchema = z.object({
   autoPrint: z.boolean().default(false),
 });
 
-/**
- * Order management schema
- */
 export const orderManagementSchema = z.object({
   defaultStatus: z.enum(ORDER_STATUSES).default("pending"),
 });
 
-/**
- * Operational settings schema
- */
 export const operationalSettingsSchema = z.object({
   orderManagement: orderManagementSchema.default({}),
   demoMode: z.boolean().default(true),
 });
 
-/**
- * Service charge schema
- */
 export const serviceChargeSchema = z.object({
   enabled: z.boolean().default(false),
   percentage: z.coerce
@@ -66,9 +51,6 @@ export const serviceChargeSchema = z.object({
   applyOn: z.enum(SERVICE_CHARGE_APPLY_ON).default("subtotal"),
 });
 
-/**
- * Tipping schema
- */
 export const tippingSchema = z.object({
   enabled: z.boolean().default(true),
   suggestedPercentages: z
@@ -77,36 +59,17 @@ export const tippingSchema = z.object({
   allowCustomTip: z.boolean().default(true),
 });
 
-/**
- * Business config schema
- */
 export const businessConfigSchema = z.object({
   serviceCharge: serviceChargeSchema.default({}),
   tipping: tippingSchema.default({}),
 });
 
-/**
- * Settings schema - simplified to only essential settings
- * Aligns with the Mongoose Settings model
- */
 export const settingsSchema = organizationBaseSchema.extend({
-  // Tax configuration
   taxes: z.array(taxSettingsSchema).default([]),
-
-  // Receipt configuration
   receipt: receiptSettingsSchema.default({}),
-
-  // Operational settings
   operational: operationalSettingsSchema.default({}),
-
-  // Business configuration
   business: businessConfigSchema.default({}),
-
-  // Currency
   currency: z.string().default("USD"),
 });
 
-/**
- * Update schema: allows partial updates and excludes organizationId (derived server-side)
- */
 export const updateSettingsSchema = updateSchema(settingsSchema);

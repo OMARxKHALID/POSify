@@ -87,7 +87,7 @@ export default function HelpPage() {
       />
 
       <div className="space-y-6">
-        {/* Search */}
+
         <Card>
           <CardContent className="pt-6">
             <div className="relative">
@@ -108,7 +108,7 @@ export default function HelpPage() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Quick Links */}
+
             <Card>
               <CardHeader>
                 <CardTitle>Quick Links</CardTitle>
@@ -138,7 +138,7 @@ export default function HelpPage() {
               </CardContent>
             </Card>
 
-            {/* Help Categories */}
+
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {helpCategories.map((category, index) => (
                 <Card key={index} className="hover:shadow-md transition-shadow">

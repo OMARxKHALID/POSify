@@ -18,8 +18,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { useCartStore } from "@/lib/store/use-cart-store";
-import { formatCurrency } from "@/lib/utils/format-utils";
+import { useCartStore } from "@/components/providers/store-provider";
+import { useShallow } from "zustand/react/shallow";
+import { formatCurrency } from "@/lib/utils/display-formatters";
 
 export function DiscountModal({ open = false, onClose = () => {} }) {
   const [isApplying, setIsApplying] = useState(false);
@@ -34,12 +35,18 @@ export function DiscountModal({ open = false, onClose = () => {} }) {
   });
 
   const { orderItems, applyCartDiscount, cartDiscount, removeCartDiscount } =
-    useCartStore();
+    useCartStore(
+      useShallow((state) => ({
+        orderItems: state.orderItems,
+        applyCartDiscount: state.applyCartDiscount,
+        cartDiscount: state.cartDiscount,
+        removeCartDiscount: state.removeCartDiscount,
+      })),
+    );
 
-  // Calculate actual subtotal from cart items
   const subtotal = orderItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
   const maxDiscountPercentage = 50;
 
@@ -60,12 +67,10 @@ export function DiscountModal({ open = false, onClose = () => {} }) {
       setError("No items in cart to apply discount to");
       return;
     }
-
     setIsApplying(true);
 
     try {
       if (data.discountType === "percentage") {
-        // Validate percentage
         if (data.discountValue > maxDiscountPercentage) {
           setError(`Maximum discount allowed is ${maxDiscountPercentage}%`);
           setIsApplying(false);
@@ -74,19 +79,17 @@ export function DiscountModal({ open = false, onClose = () => {} }) {
         applyCartDiscount(data.discountValue);
         toast.success(`${data.discountValue}% discount applied`);
       } else {
-        // Validate fixed amount
         if (data.discountValue > subtotal) {
           setError("Discount amount cannot exceed subtotal");
           setIsApplying(false);
           return;
         }
-        // Convert fixed amount to percentage
+
         const percentage = (data.discountValue / subtotal) * 100;
         applyCartDiscount(percentage);
         toast.success(`${formatCurrency(data.discountValue)} discount applied`);
       }
 
-      // Reset form and close
       form.reset();
       setError("");
       onClose();
@@ -114,7 +117,6 @@ export function DiscountModal({ open = false, onClose = () => {} }) {
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Error Display */}
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md">
               <div className="flex items-center gap-2 text-red-800 text-sm">
@@ -123,8 +125,6 @@ export function DiscountModal({ open = false, onClose = () => {} }) {
               </div>
             </div>
           )}
-
-          {/* Current Applied Discount */}
           {cartDiscount > 0 && (
             <div className="bg-muted border rounded-md p-3 space-y-2">
               <div className="flex items-center justify-between">
@@ -151,7 +151,6 @@ export function DiscountModal({ open = false, onClose = () => {} }) {
             </div>
           )}
 
-          {/* Discount Type */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Discount Type</Label>
             <RadioGroup
@@ -181,8 +180,6 @@ export function DiscountModal({ open = false, onClose = () => {} }) {
               </p>
             )}
           </div>
-
-          {/* Discount Value */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">
               {discountType === "percentage" ? "Discount %" : "Discount Amount"}
@@ -215,8 +212,6 @@ export function DiscountModal({ open = false, onClose = () => {} }) {
               </p>
             )}
           </div>
-
-          {/* Preview */}
           {discountValue > 0 && (
             <div className="p-3 bg-muted rounded-lg space-y-1 text-sm">
               <div className="flex justify-between">
@@ -236,8 +231,6 @@ export function DiscountModal({ open = false, onClose = () => {} }) {
               </div>
             </div>
           )}
-
-          {/* Actions */}
           <div className="flex gap-2 pt-2">
             <Button
               type="button"

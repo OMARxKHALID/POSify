@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useOrderQueueStore } from "@/lib/store/use-queue-order-store";
+import { useOrderQueueStore } from "@/components/providers/store-provider";
+import { useShallow } from "zustand/react/shallow";
 import { useOrderQueueSync } from "@/hooks/use-order-queue-sync";
 import { useNetworkStatus } from "@/hooks/use-network-status";
 import { toast } from "sonner";
@@ -63,18 +64,22 @@ export function OrderQueueManager({ trigger }) {
   } = useOrderQueueSync();
 
   const {
-    getQueuedOrders,
-    getFailedOrders,
+    queuedOrders,
+    failedOrders,
     removeOrder,
     removeFailedOrder,
     clearAllOrders,
     clearFailedOrders,
-    getQueueStats,
-  } = useOrderQueueStore();
-
-  const queuedOrders = getQueuedOrders();
-  const failedOrders = getFailedOrders();
-  const queueStats = getQueueStats();
+  } = useOrderQueueStore(
+    useShallow((state) => ({
+      queuedOrders: state.queuedOrders,
+      failedOrders: state.failedOrders,
+      removeOrder: state.removeOrder,
+      removeFailedOrder: state.removeFailedOrder,
+      clearAllOrders: state.clearAllOrders,
+      clearFailedOrders: state.clearFailedOrders,
+    })),
+  );
 
   const handleSyncAll = async () => {
     if (!isOnline) {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Trash2 } from "lucide-react";
 import { QuantityControl } from "@/components/ui/quantity-control";
-import { formatCurrency } from "@/lib/utils/format-utils";
+import { formatCurrency } from "@/lib/utils/display-formatters";
 import { useSwipeGesture } from "@/hooks/use-swipe-gesture";
 
 const OrderItem = React.memo(function OrderItem({
@@ -19,28 +19,28 @@ const OrderItem = React.memo(function OrderItem({
 
   if (!item) return null;
 
-  // Swipe gesture handlers
+
   const handleSwipeLeft = (deltaX) => {
     if (deltaX > 100) {
-      // Swipe left to remove
+
       onRemove?.(item._id);
     } else {
-      // Reset position if not enough swipe
+
       setSwipeOffset(0);
       setIsSwipeActive(false);
     }
   };
 
   const handleSwipeRight = (deltaX) => {
-    // Swipe right to reset
+
     setSwipeOffset(0);
     setIsSwipeActive(false);
   };
 
   const handleSwipeMove = (deltaX) => {
-    // Only allow left swipes (negative deltaX)
+
     if (deltaX > 0) {
-      const maxSwipe = 120; // Maximum swipe distance
+      const maxSwipe = 120; 
       const clampedOffset = Math.min(deltaX, maxSwipe);
       setSwipeOffset(-clampedOffset);
       setIsSwipeActive(true);
@@ -54,7 +54,7 @@ const OrderItem = React.memo(function OrderItem({
     threshold: 50,
   });
 
-  // Custom touch handlers with visual feedback
+
   const handleTouchStart = (e) => {
     setIsTouching(true);
     swipeHandlers.onTouchStart(e);
@@ -63,7 +63,7 @@ const OrderItem = React.memo(function OrderItem({
   const handleTouchEnd = (e) => {
     setIsTouching(false);
     swipeHandlers.onTouchEnd(e);
-    // If swipe wasn't enough to trigger removal, reset position
+
     if (Math.abs(swipeOffset) < 100) {
       setSwipeOffset(0);
       setIsSwipeActive(false);
@@ -82,9 +82,9 @@ const OrderItem = React.memo(function OrderItem({
 
   return (
     <div className="relative overflow-hidden rounded-xl">
-      {/* Swipe Background - Delete Action */}
+
       <div className="absolute inset-0 bg-destructive/10 rounded-xl flex items-center justify-end pr-3 z-0">
-        {/* Touch hint - appears when touching */}
+
         {isTouching && (
           <div className="flex items-center gap-1.5 text-destructive/70">
             <span className="text-xs font-medium">Swipe left to remove</span>
@@ -92,7 +92,7 @@ const OrderItem = React.memo(function OrderItem({
         )}
       </div>
 
-      {/* Main Item Card */}
+
       <div
         className={`group relative bg-gradient-to-r from-card to-card/50 border border-border/50 rounded-xl p-3 shadow-sm hover:shadow-md transition-all duration-200 hover:border-border z-10 ${
           isTouching ? "scale-[0.98] shadow-lg" : ""
@@ -105,7 +105,7 @@ const OrderItem = React.memo(function OrderItem({
         onTouchMove={swipeHandlers.onTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Remove Button - Always Visible */}
+
         <Button
           variant="ghost"
           size="icon"
@@ -120,14 +120,14 @@ const OrderItem = React.memo(function OrderItem({
         </Button>
 
         <div className="flex items-center gap-3">
-          {/* Item Icon */}
+
           <div className="flex-shrink-0">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-lg shadow-sm border border-primary/10">
               {item.icon || "🍽️"}
             </div>
           </div>
 
-          {/* Item Details */}
+
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
@@ -148,7 +148,7 @@ const OrderItem = React.memo(function OrderItem({
                 </div>
               </div>
 
-              {/* Price */}
+
               <div className="text-right pr-6">
                 <div className="text-sm font-bold text-foreground">
                   {formatCurrency(totalPrice)}
@@ -161,7 +161,7 @@ const OrderItem = React.memo(function OrderItem({
               </div>
             </div>
 
-            {/* Quantity Control */}
+
             <div className="flex items-center justify-between mt-3">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Qty:</span>
@@ -177,7 +177,7 @@ const OrderItem = React.memo(function OrderItem({
                 />
               </div>
 
-              {/* Total Price Breakdown */}
+
               <div className="text-right">
                 <div className="text-xs text-muted-foreground">
                   {item.quantity} × {formatCurrency(finalPrice)}

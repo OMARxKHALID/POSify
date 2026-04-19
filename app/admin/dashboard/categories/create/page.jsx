@@ -35,7 +35,7 @@ export default function CreateCategoryPage() {
 
   const currentUser = categoriesData?.currentUser;
 
-  // Initialize form with validation
+
   const form = useForm({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
@@ -47,17 +47,17 @@ export default function CreateCategoryPage() {
     },
   });
 
-  // Handle form submission
+
   const onSubmit = async (data) => {
     try {
       await createCategoryMutation.mutateAsync(data);
       router.push(ADMIN_ROUTES.CATEGORIES);
     } catch (error) {
-      // Error handling is already done in the hook with toast notifications
+
     }
   };
 
-  // Handle cancel
+
   const handleCancel = () => {
     router.push(ADMIN_ROUTES.CATEGORIES);
   };
@@ -71,7 +71,7 @@ export default function CreateCategoryPage() {
       />
 
       <div className="grid gap-6">
-        {/* Category Form */}
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -148,7 +148,7 @@ export default function CreateCategoryPage() {
           </CardContent>
         </Card>
 
-        {/* Category Preview */}
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

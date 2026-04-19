@@ -27,9 +27,11 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAnalytics } from "@/hooks/use-analytics";
 import { BarChart, Bar, XAxis, CartesianGrid, Area, AreaChart } from "recharts";
 import { TrendingUp, AlertTriangle } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { PageLayout } from "@/components/dashboard/page-layout";
+import { PageHeader } from "@/components/dashboard/page-header";
 
-// Chart configurations
 const chartConfig = {
   sales: {
     label: "Sales",
@@ -37,7 +39,6 @@ const chartConfig = {
   },
 };
 
-// Table column definitions
 const topItemsColumns = [
   {
     accessorKey: "name",
@@ -110,11 +111,10 @@ const inventoryColumns = [
   },
 ];
 
-// Analytics Dashboard Page
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState("30d");
+  const router = useRouter();
 
-  // Fetch analytics data from API
   const {
     data: analyticsData,
     isLoading,
@@ -127,96 +127,69 @@ export default function AnalyticsPage() {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  // Extract data from API response with fallbacks
   const sales = analyticsData?.sales || {
     dailySales: [],
     hourlySales: [],
     topItems: [],
   };
-  const performance = analyticsData?.performance || { kpis: [] };
+  const rawPerformance = analyticsData?.performance || {};
   const inventory = analyticsData?.inventory || { lowStock: [] };
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen w-full max-w-full overflow-x-hidden space-y-3 p-3 sm:space-y-4 sm:p-4 lg:p-6">
-        <div className="mb-2">
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
-            Analytics Dashboard
-          </h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            Loading analytics data...
-          </p>
-        </div>
-        <div className="grid gap-3 sm:gap-4 lg:gap-6">
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
-            ))}
-          </div>
-          <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-64 bg-muted animate-pulse rounded-lg" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const kpis = useMemo(() => {
+    const raw = rawPerformance.kpis;
+    if (Array.isArray(raw)) return raw;
+    if (raw && typeof raw === "object") {
+      return [
+        {
+          title: "Total Revenue",
+          value: `$${Number(raw.totalRevenue || 0).toLocaleString()}`,
+          change: "",
+          trend: "up",
+          period: "",
+        },
+        {
+          title: "Total Orders",
+          value: String(raw.totalOrders || 0),
+          change: "",
+          trend: "up",
+          period: "",
+        },
+        {
+          title: "Avg Order Value",
+          value: `$${Number(raw.averageOrderValue || 0).toFixed(2)}`,
+          change: "",
+          trend: "up",
+          period: "",
+        },
+        {
+          title: "Completion Rate",
+          value: `${raw.completionRate || 0}%`,
+          change: "",
+          trend: "up",
+          period: "",
+        },
+      ];
+    }
+    return [];
+  }, [rawPerformance.kpis]);
 
-  // Show error state
-  if (isError) {
-    return (
-      <div className="min-h-screen w-full max-w-full overflow-x-hidden space-y-3 p-3 sm:space-y-4 sm:p-4 lg:p-6">
-        <div className="mb-2">
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
-            Analytics Dashboard
-          </h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            Error loading analytics data
-          </p>
-        </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              Failed to load analytics
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {error?.message ||
-                "An error occurred while loading analytics data"}
-            </p>
-            <button
-              onClick={() => refetch()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show empty state if no data
   const hasData =
     sales.dailySales.length > 0 ||
     sales.topItems.length > 0 ||
-    performance.kpis.some((kpi) => kpi.value !== "$0" && kpi.value !== "0");
+    kpis.some((kpi) => kpi.value !== "$0" && kpi.value !== "0");
 
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden space-y-3 p-3 sm:space-y-4 sm:p-4 lg:p-6">
-      {/* Page Header */}
-      <div className="mb-2">
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
-          Analytics Dashboard
-        </h1>
-        <p className="text-xs text-muted-foreground sm:text-sm">
-          Comprehensive insights into your restaurant's performance
-        </p>
-      </div>
+    <PageLayout
+      isLoading={isLoading}
+      error={isError ? error : null}
+      errorMessage="Failed to load analytics data. Please try refreshing the page."
+    >
+      <PageHeader
+        title="Analytics Dashboard"
+        description="Comprehensive insights into your restaurant's performance"
+        icon={TrendingUp}
+      />
 
-      {/* Empty State */}
       {!hasData && (
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
@@ -233,11 +206,9 @@ export default function AnalyticsPage() {
         </div>
       )}
 
-      {/* Main Content Grid */}
       <div className="grid gap-3 sm:gap-4 lg:gap-6">
-        {/* Key Performance Indicators */}
         <KPICardsGrid>
-          {performance.kpis.map((kpi, index) => (
+          {kpis.map((kpi, index) => (
             <KPICard
               key={index}
               title={kpi.title}
@@ -249,9 +220,7 @@ export default function AnalyticsPage() {
           ))}
         </KPICardsGrid>
 
-        {/* Charts Row */}
         <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
-          {/* Daily Sales Trend */}
           <Card className="@container/card w-full">
             <CardHeader className="pb-3">
               <div>
@@ -362,7 +331,6 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          {/* Hourly Sales */}
           <Card className="w-full">
             <CardHeader className="pb-3">
               <div>
@@ -401,7 +369,6 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          {/* Top Selling Items */}
           <Card className="w-full">
             <CardHeader className="pb-3">
               <div>
@@ -424,7 +391,6 @@ export default function AnalyticsPage() {
           </Card>
         </div>
 
-        {/* Bottom Row - Inventory Alerts */}
         <div className="w-full">
           <Card className="w-full">
             <CardHeader className="pb-3">
@@ -449,12 +415,11 @@ export default function AnalyticsPage() {
                 onAddClick={() => {
                   router.push("/admin/dashboard/menu");
                 }}
-
               />
             </CardContent>
           </Card>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
