@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getDefaultQueryOptions,
   queryKeys,
-  createDemoQueryFn,
+  createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
 import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
+import { dashboardService } from "../services/dashboard.service";
 
 export const useAnalytics = (options = {}) => {
   const isDemoMode = useIsDemoModeEnabled();
@@ -18,8 +19,8 @@ export const useAnalytics = (options = {}) => {
 
   return useQuery({
     queryKey: queryKeys.analytics(timeRange),
-    queryFn: createDemoQueryFn(
-      `/dashboard/analytics?timeRange=${timeRange}`,
+    queryFn: createServiceQueryFn(
+      () => dashboardService.getAnalytics(timeRange),
       () => mockFallback.analytics(timeRange).data,
       isDemoMode,
     ),

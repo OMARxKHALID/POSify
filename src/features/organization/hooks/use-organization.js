@@ -4,25 +4,24 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
-  handleHookSuccess,
   queryKeys,
   invalidateQueries,
-  createDemoQueryFn,
+  createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
 import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
+import { organizationService } from "../services/organization.service";
 
 export const useOrganizationOverview = (options = {}) => {
   const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
     queryKey: queryKeys.organization(),
-    queryFn: createDemoQueryFn(
-      "/organizations/overview",
+    queryFn: createServiceQueryFn(
+      organizationService.getOverview,
       () => mockFallback.organization().data,
       isDemoMode,
     ),
@@ -38,8 +37,8 @@ export const useSuspenseOrganizationOverview = (options = {}) => {
 
   return useSuspenseQuery({
     queryKey: queryKeys.organization(),
-    queryFn: createDemoQueryFn(
-      "/organizations/overview",
+    queryFn: createServiceQueryFn(
+      organizationService.getOverview,
       () => mockFallback.organization().data,
       isDemoMode,
     ),
@@ -55,8 +54,8 @@ export const useAvailableStaff = (organizationId, options = {}) => {
 
   return useQuery({
     queryKey: queryKeys.availableStaff(organizationId),
-    queryFn: createDemoQueryFn(
-      `/dashboard/organizations/available-staff?organizationId=${organizationId}`,
+    queryFn: createServiceQueryFn(
+      () => organizationService.getAvailableStaff(organizationId),
       () => mockFallback.users().data,
       isDemoMode,
     ),
@@ -73,10 +72,7 @@ export const useOwnershipTransfer = (options = {}) => {
 
   return useMutation({
     mutationFn: ({ organizationId, newOwnerId }) =>
-      apiClient.post("/dashboard/organizations/transfer-ownership", {
-        organizationId,
-        newOwnerId,
-      }),
+      organizationService.transferOwnership(organizationId, newOwnerId),
     onSuccess: (_, variables) => {
       invalidateQueries.organization(queryClient);
       invalidateQueries.users(queryClient);

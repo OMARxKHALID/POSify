@@ -4,7 +4,6 @@ import {
   getSuccessMessage,
 } from "@/lib/helpers/error.helpers";
 import { apiClient } from "@/lib/api-client";
-import { isDataEmpty } from "@/lib/mockup-data";
 
 export const handleHookError = (error, operation = "operation") => {
   const statusCode = error?.statusCode ?? 0;
@@ -96,35 +95,27 @@ export const sessionUtils = {
       }
     }
 
-    console.error("All session refresh attempts failed");
     return false;
   },
 
   async handleSessionRefresh(updateSession, responseData) {
     if (!responseData?.data?.sessionRefresh) return true;
-
-    const refreshed = await sessionUtils.forceRefreshSession(updateSession);
-
-    if (!refreshed) {
-      console.warn("Session refresh failed, user may need to refresh the page");
-    }
-
-    return refreshed;
+    return await sessionUtils.forceRefreshSession(updateSession);
   },
 };
 
-export const createDemoQueryFn = (endpoint, fallbackFn, isDemoMode) => {
+export const createServiceQueryFn = (serviceFn, fallbackFn, isDemoMode) => {
   return async () => {
-    try {
-      const data = await apiClient.get(endpoint);
-      if (isDemoMode && isDataEmpty(data)) return fallbackFn();
-      return data;
-    } catch (error) {
-      if (isDemoMode) {
-        console.warn(`[Demo] ${endpoint} failed:`, error?.message ?? error);
+    if (isDemoMode) {
+      try {
+        const data = await serviceFn();
+        if (data !== null && data !== undefined) return data;
+        return fallbackFn();
+      } catch (error) {
+        console.warn("[Demo Mode] Service failed, using fallback:", error.message);
         return fallbackFn();
       }
-      throw error;
     }
+    return await serviceFn();
   };
 };

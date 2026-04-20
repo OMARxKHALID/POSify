@@ -9,7 +9,7 @@ export const baseSchema = z.object({
 
 
 export const organizationBaseSchema = baseSchema.extend({
-  organizationId: z.string().min(1, "Organization ID is required"),
+  organizationId: z.string().trim().optional().or(z.literal("")),
 });
 
 
@@ -51,4 +51,3 @@ export const updateSchema = (baseSchema) =>
     createdAt: true,
     updatedAt: true,
   });
-

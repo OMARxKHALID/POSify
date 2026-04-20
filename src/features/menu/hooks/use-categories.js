@@ -1,23 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
-  createDemoQueryFn,
+  createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
 import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
+import { menuService } from "../services/menu.service";
 
 export const useCategories = (options = {}) => {
   const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
     queryKey: queryKeys.categories(),
-    queryFn: createDemoQueryFn(
-      "/dashboard/categories",
+    queryFn: createServiceQueryFn(
+      menuService.getCategories,
       () => mockFallback.categories().data,
       isDemoMode,
     ),
@@ -34,13 +34,7 @@ export const useCreateCategory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (categoryData) => {
-      const response = await apiClient.post(
-        "/dashboard/categories/create",
-        categoryData,
-      );
-      return response;
-    },
+    mutationFn: (categoryData) => menuService.createCategory(categoryData),
     onSuccess: () => {
       invalidateQueries.categories(queryClient);
       handleHookSuccess("CATEGORY_CREATED_SUCCESSFULLY");
@@ -53,13 +47,7 @@ export const useEditCategory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ categoryId, categoryData }) => {
-      const response = await apiClient.put(
-        `/dashboard/categories/edit?categoryId=${categoryId}`,
-        categoryData,
-      );
-      return response;
-    },
+    mutationFn: ({ categoryId, categoryData }) => menuService.updateCategory(categoryId, categoryData),
     onSuccess: () => {
       invalidateQueries.categories(queryClient);
       handleHookSuccess("CATEGORY_UPDATED_SUCCESSFULLY");
@@ -68,17 +56,11 @@ export const useEditCategory = () => {
   });
 };
 
-
 export const useDeleteCategory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (categoryId) => {
-      const response = await apiClient.delete(
-        `/dashboard/categories/delete?categoryId=${categoryId}`,
-      );
-      return response;
-    },
+    mutationFn: (categoryId) => menuService.deleteCategory(categoryId),
     onSuccess: () => {
       invalidateQueries.categories(queryClient);
       handleHookSuccess("CATEGORY_DELETED_SUCCESSFULLY");
@@ -86,7 +68,6 @@ export const useDeleteCategory = () => {
     ...getDefaultMutationOptions({ operation: "Category deletion" }),
   });
 };
-
 
 export const useCategoriesManagement = () => {
   const categoriesQuery = useCategories();

@@ -1,16 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "@/lib/mock-auth";
-import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
-  createDemoQueryFn,
+  createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
 import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
+import { dashboardService } from "../services/dashboard.service";
 
 export const useTransactions = (options = {}) => {
   const { data: session } = useSession();
@@ -18,8 +18,8 @@ export const useTransactions = (options = {}) => {
 
   return useQuery({
     queryKey: [...queryKeys.transactions(), session?.user?.id],
-    queryFn: createDemoQueryFn(
-      "/dashboard/transactions",
+    queryFn: createServiceQueryFn(
+      dashboardService.getTransactions,
       () => mockFallback.transactions().data,
       isDemoMode,
     ),
@@ -37,7 +37,7 @@ export const useTransaction = (transactionId, options = {}) => {
 
   return useQuery({
     queryKey: [...queryKeys.transaction(transactionId), session?.user?.id],
-    queryFn: () => apiClient.get(`/dashboard/transactions/${transactionId}`),
+    queryFn: () => dashboardService.getTransactionById(transactionId),
     enabled: Boolean(transactionId),
     ...getDefaultQueryOptions({
       staleTime: 2 * 60 * 1000,
@@ -52,8 +52,8 @@ export const useTransactionStats = (options = {}) => {
 
   return useQuery({
     queryKey: [...queryKeys.transactionStats(), session?.user?.id],
-    queryFn: createDemoQueryFn(
-      "/dashboard/transactions/stats",
+    queryFn: createServiceQueryFn(
+      dashboardService.getTransactionStats,
       () => mockFallback.transactions().data.stats,
       isDemoMode,
     ),
@@ -77,8 +77,8 @@ export const useTransactionsWithFilters = (filters = {}, options = {}) => {
       JSON.stringify(filters),
       session?.user?.id,
     ],
-    queryFn: createDemoQueryFn(
-      "/dashboard/transactions",
+    queryFn: createServiceQueryFn(
+      () => dashboardService.getTransactions(filters),
       () => mockFallback.transactions().data,
       isDemoMode,
     ),
@@ -95,8 +95,7 @@ export const useCreateTransaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (transactionData) =>
-      apiClient.post("/dashboard/transactions/create", transactionData),
+    mutationFn: (transactionData) => dashboardService.createTransaction(transactionData),
     onSuccess: () => {
       handleHookSuccess("TRANSACTION_CREATED_SUCCESSFULLY");
       invalidateQueries.transactions(queryClient);

@@ -4,8 +4,6 @@ import { immer } from "zustand/middleware/immer";
 import {
   normalizeItem,
   itemsHaveSameId,
-  findItemById,
-  filterItemsById,
 } from "@/lib/utils/common.utils";
 import { createPersistConfig } from "@/lib/utils/zustand-storage";
 
@@ -101,7 +99,13 @@ export const createCartStore = (initState = {}) => {
           getTotalQuantity: () =>
             get().orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0),
         })),
-        createPersistConfig("cart-store")
+        {
+          ...createPersistConfig("cart-store"),
+          partialize: (state) => ({
+            orderItems: state.orderItems,
+            cartDiscount: state.cartDiscount,
+          }),
+        }
       ),
       { name: "CartStore" }
     )

@@ -1,25 +1,23 @@
-
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
-  createDemoQueryFn,
+  createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
 import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
+import { menuService } from "../services/menu.service";
 
 export const useMenu = (options = {}) => {
   const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
     queryKey: queryKeys.menu(),
-    queryFn: createDemoQueryFn(
-      "/dashboard/menu",
+    queryFn: createServiceQueryFn(
+      menuService.getMenu,
       () => mockFallback.menu().data,
       isDemoMode,
     ),
@@ -32,18 +30,11 @@ export const useMenu = (options = {}) => {
   });
 };
 
-
 export const useCreateMenuItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (menuItemData) => {
-      const response = await apiClient.post(
-        "/dashboard/menu/create",
-        menuItemData
-      );
-      return response;
-    },
+    mutationFn: (menuItemData) => menuService.createMenuItem(menuItemData),
     onSuccess: () => {
       invalidateQueries.menu(queryClient);
       handleHookSuccess("MENU_ITEM_CREATED_SUCCESSFULLY");
@@ -52,18 +43,11 @@ export const useCreateMenuItem = () => {
   });
 };
 
-
 export const useEditMenuItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ menuItemId, menuItemData }) => {
-      const response = await apiClient.put(
-        `/dashboard/menu/edit?menuItemId=${menuItemId}`,
-        menuItemData
-      );
-      return response;
-    },
+    mutationFn: ({ menuItemId, menuItemData }) => menuService.updateMenuItem(menuItemId, menuItemData),
     onSuccess: () => {
       invalidateQueries.menu(queryClient);
       handleHookSuccess("MENU_ITEM_UPDATED_SUCCESSFULLY");
@@ -72,17 +56,11 @@ export const useEditMenuItem = () => {
   });
 };
 
-
 export const useDeleteMenuItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (menuItemId) => {
-      const response = await apiClient.delete(
-        `/dashboard/menu/delete?menuItemId=${menuItemId}`
-      );
-      return response;
-    },
+    mutationFn: (menuItemId) => menuService.deleteMenuItem(menuItemId),
     onSuccess: () => {
       invalidateQueries.menu(queryClient);
       handleHookSuccess("MENU_ITEM_DELETED_SUCCESSFULLY");
@@ -90,7 +68,6 @@ export const useDeleteMenuItem = () => {
     ...getDefaultMutationOptions({ operation: "Menu item deletion" }),
   });
 };
-
 
 export const useMenuManagement = () => {
   const menuQuery = useMenu();

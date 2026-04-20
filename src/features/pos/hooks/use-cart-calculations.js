@@ -1,15 +1,11 @@
-
-
 import { useMemo } from "react";
 import {
   calculateCartTotal,
   getTaxBreakdown,
 } from "@/features/pos/utils/business.utils";
 
-
 export const useCartCalculations = (orderItems, cartDiscount, taxes) => {
   return useMemo(() => {
-
     if (!orderItems || orderItems.length === 0) {
       return {
         subtotal: 0,
@@ -26,7 +22,7 @@ export const useCartCalculations = (orderItems, cartDiscount, taxes) => {
     const itemDiscounts = orderItems.reduce(
       (sum, item) =>
         sum + item.price * item.quantity * ((item.discount || 0) / 100),
-      0
+      0,
     );
 
     const subtotalAfterDiscounts =

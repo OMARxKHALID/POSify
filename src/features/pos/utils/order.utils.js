@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import {
   Clock,
   CheckCircle,
@@ -60,7 +60,7 @@ export const getDeliveryTypeInfo = (type) => {
   return typeMap[type] || typeMap["dine-in"];
 };
 
-export const getAuditActionVariant = (action) => {
+export const getAuditActionVariant = (action = "") => {
   if (action.includes("CREATE")) return "default";
   if (action.includes("UPDATE")) return "secondary";
   if (action.includes("DELETE")) return "destructive";
@@ -68,7 +68,7 @@ export const getAuditActionVariant = (action) => {
   return "secondary";
 };
 
-export const getAuditResourceVariant = (resource) => {
+export const getAuditResourceVariant = (resource = "") => {
   switch (resource.toLowerCase()) {
     case "user":
       return "default";
@@ -83,26 +83,33 @@ export const getAuditResourceVariant = (resource) => {
   }
 };
 
-export const formatOrderDate = (date) => ({
-  date: format(new Date(date), "MMM dd, yyyy"),
-  time: format(new Date(date), "HH:mm"),
-});
+export const formatOrderDate = (date) => {
+  const dateObj = new Date(date);
+  if (!isValid(dateObj)) {
+    return { date: "N/A", time: "N/A" };
+  }
+  return {
+    date: format(dateObj, "MMM dd, yyyy"),
+    time: format(dateObj, "HH:mm"),
+  };
+};
 
-export const calculateOrderStats = (orders) => {
+export const calculateOrderStats = (orders = []) => {
   const today = new Date();
   const todayOrders = orders.filter((order) => {
-    return new Date(order.createdAt).toDateString() === today.toDateString();
+    const orderDate = new Date(order.createdAt);
+    return isValid(orderDate) && orderDate.toDateString() === today.toDateString();
   });
 
   return {
     totalOrders: orders.length,
     pendingOrders: orders.filter((o) => o.status === "pending").length,
     completedOrders: orders.filter((o) => o.status === "completed").length,
-    todayRevenue: todayOrders.reduce((sum, o) => sum + o.total, 0),
+    todayRevenue: todayOrders.reduce((sum, o) => sum + (o.total || 0), 0),
   };
 };
 
-export const filterOrders = (orders, filters) => {
+export const filterOrders = (orders = [], filters = {}) => {
   const { status, paymentMethod, deliveryType, search } = filters;
 
   return orders.filter((order) => {
@@ -122,9 +129,9 @@ export const filterOrders = (orders, filters) => {
     if (search) {
       const searchLower = search.toLowerCase();
       return (
-        order.orderNumber.toLowerCase().includes(searchLower) ||
-        order.customerName.toLowerCase().includes(searchLower) ||
-        order.mobileNumber?.toLowerCase().includes(searchLower)
+        (order.orderNumber || "").toLowerCase().includes(searchLower) ||
+        (order.customerName || "").toLowerCase().includes(searchLower) ||
+        (order.mobileNumber || "").toLowerCase().includes(searchLower)
       );
     }
     return true;

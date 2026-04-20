@@ -1,16 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "@/lib/mock-auth";
-import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
-  createDemoQueryFn,
+  createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
 import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
+import { posService } from "../services/pos.service";
 
 export const useOrders = (options = {}) => {
   const { data: session } = useSession();
@@ -18,8 +18,8 @@ export const useOrders = (options = {}) => {
 
   return useQuery({
     queryKey: [...queryKeys.orders(), session?.user?.id],
-    queryFn: createDemoQueryFn(
-      "/dashboard/orders",
+    queryFn: createServiceQueryFn(
+      posService.getAllOrders,
       () => mockFallback.orders().data,
       isDemoMode,
     ),
@@ -37,7 +37,7 @@ export const useOrder = (orderId, options = {}) => {
 
   return useQuery({
     queryKey: [...queryKeys.order(orderId), session?.user?.id],
-    queryFn: () => apiClient.get(`/dashboard/orders/${orderId}`),
+    queryFn: () => posService.getOrderById(orderId),
     enabled: Boolean(orderId),
     ...getDefaultQueryOptions({
       staleTime: 2 * 60 * 1000,
@@ -51,8 +51,7 @@ export const useCreateOrder = () => {
 
   return useMutation({
     mutationKey: ["orders"],
-    mutationFn: (orderData) =>
-      apiClient.post("/dashboard/orders/create", orderData),
+    mutationFn: (orderData) => posService.createOrder(orderData),
     onSuccess: () => {
       invalidateQueries.orders(queryClient);
       invalidateQueries.transactions(queryClient);
@@ -67,8 +66,7 @@ export const useEditOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ orderId, orderData }) =>
-      apiClient.put(`/dashboard/orders/${orderId}`, orderData),
+    mutationFn: ({ orderId, orderData }) => posService.updateOrder(orderId, orderData),
     onSuccess: (_, variables) => {
       invalidateQueries.orders(queryClient);
       invalidateQueries.order(queryClient, variables.orderId);
@@ -82,8 +80,7 @@ export const useUpdateOrderStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ orderId, status, notes }) =>
-      apiClient.put(`/dashboard/orders/${orderId}/status`, { status, notes }),
+    mutationFn: ({ orderId, status, notes }) => posService.updateOrderStatus(orderId, status, notes),
     onSuccess: (_, variables) => {
       invalidateQueries.orders(queryClient);
       invalidateQueries.order(queryClient, variables.orderId);
@@ -99,7 +96,7 @@ export const useDeleteOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (orderId) => apiClient.delete(`/dashboard/orders/${orderId}`),
+    mutationFn: (orderId) => posService.deleteOrder(orderId),
     onSuccess: (_, orderId) => {
       invalidateQueries.orders(queryClient);
       invalidateQueries.order(queryClient, orderId);
@@ -113,8 +110,7 @@ export const useProcessRefund = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ orderId, refundData }) =>
-      apiClient.post(`/dashboard/orders/${orderId}/refund`, refundData),
+    mutationFn: ({ orderId, refundData }) => posService.processRefund(orderId, refundData),
     onSuccess: (_, variables) => {
       invalidateQueries.orders(queryClient);
       invalidateQueries.order(queryClient, variables.orderId);
