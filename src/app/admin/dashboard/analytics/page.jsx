@@ -79,35 +79,35 @@ const topItemsColumns = [
 
 const inventoryColumns = [
   {
-    accessorKey: "item",
+    accessorKey: "name",
     header: "Item",
     cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("item")}</div>
+      <div className="font-medium">{row.getValue("name")}</div>
     ),
   },
   {
-    accessorKey: "category",
-    header: "Category",
-    cell: ({ row }) => (
-      <Badge variant="secondary">{row.getValue("category")}</Badge>
-    ),
+    accessorKey: "quantity",
+    header: "Qty",
+    cell: ({ row }) => row.getValue("quantity"),
   },
   {
-    accessorKey: "current",
-    header: "Current Stock",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("current")}</div>
-    ),
-  },
-  {
-    accessorKey: "min",
-    header: "Minimum Required",
-    cell: ({ row }) => <div className="text-center">{row.getValue("min")}</div>,
+    accessorKey: "threshold",
+    header: "Min",
+    cell: ({ row }) => row.getValue("threshold"),
   },
   {
     id: "status",
     header: "Status",
-    cell: ({ row }) => <Badge variant="destructive">Low Stock</Badge>,
+    cell: ({ row }) => {
+      const qty = row.original.quantity;
+      const min = row.original.threshold;
+      const isLow = qty <= min;
+      return (
+        <Badge variant={isLow ? "destructive" : "secondary"}>
+          {isLow ? "Low Stock" : "OK"}
+        </Badge>
+      );
+    },
   },
 ];
 
@@ -133,7 +133,7 @@ export default function AnalyticsPage() {
     topItems: [],
   };
   const rawPerformance = analyticsData?.performance || {};
-  const inventory = analyticsData?.inventory || { lowStock: [] };
+  const inventory = analyticsData?.inventory || { lowStockItems: [], outOfStock: [] };
 
   const kpis = useMemo(() => {
     const raw = rawPerformance.kpis;
@@ -161,7 +161,7 @@ export default function AnalyticsPage() {
           trend: "up",
           period: "",
         },
-        {
+{
           title: "Completion Rate",
           value: `${raw.completionRate || 0}%`,
           change: "",
@@ -320,7 +320,7 @@ export default function AnalyticsPage() {
                     }
                   />
                   <Area
-                    dataKey="sales"
+                    dataKey="revenue"
                     type="natural"
                     fill="url(#fillSales)"
                     stroke="var(--color-sales)"
@@ -360,7 +360,7 @@ export default function AnalyticsPage() {
                     content={<ChartTooltipContent indicator="dot" />}
                   />
                   <Bar
-                    dataKey="sales"
+                    dataKey="revenue"
                     fill="var(--color-sales)"
                     radius={[4, 4, 0, 0]}
                   />
@@ -406,9 +406,9 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <DataTable
-                data={inventory.lowStock}
+                data={inventory.lowStockItems || []}
                 columns={inventoryColumns}
-                searchKey="item"
+                searchKey="name"
                 searchPlaceholder="Search inventory..."
                 showAddButton={true}
                 addButtonText="Add Item"

@@ -84,13 +84,14 @@ export const mockAnalytics = {
     },
   },
   inventory: {
-    lowStock: [
-      { item: "Ribeye Steak", category: "Main Courses", current: 3, min: 5 },
-      { item: "Mango Sticky Rice", category: "Desserts", current: 2, min: 3 },
-      { item: "House Red Wine", category: "Beverages", current: 8, min: 10 },
-      { item: "Spring Rolls", category: "Sides", current: 6, min: 8 },
-      { item: "Thai Iced Tea", category: "Beverages", current: 12, min: 15 },
+    lowStockItems: [
+      { name: "Ribeye Steak", quantity: 3, threshold: 5 },
+      { name: "Mango Sticky Rice", quantity: 2, threshold: 3 },
+      { name: "House Red Wine", quantity: 8, threshold: 10 },
+      { name: "Spring Rolls", quantity: 6, threshold: 8 },
+      { name: "Thai Iced Tea", quantity: 12, threshold: 15 },
     ],
+    outOfStock: [],
   },
   revenueByCategory: [
     { category: "Main Courses", revenue: 6250.50, percentage: 50.2 },

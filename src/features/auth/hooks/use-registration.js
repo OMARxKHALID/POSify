@@ -6,6 +6,8 @@ import {
 } from "@/lib/helpers/hook.helpers";
 import { authService } from "../services/auth.service";
 
+export const useRegistration = useRegister;
+
 export const useRegister = (options = {}) => {
   return useMutation({
     mutationFn: (userData) => authService.register(userData),

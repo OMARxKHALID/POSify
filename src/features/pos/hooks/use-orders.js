@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "@/lib/mock-auth";
+import { useAppContext } from "@/lib/hooks/use-app-context";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
@@ -8,16 +8,14 @@ import {
   invalidateQueries,
   createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
-import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
 import { posService } from "../services/pos.service";
 
 export const useOrders = (options = {}) => {
-  const { data: session } = useSession();
-  const isDemoMode = useIsDemoModeEnabled();
+  const { userId, isDemoMode } = useAppContext();
 
   return useQuery({
-    queryKey: [...queryKeys.orders(), session?.user?.id],
+    queryKey: queryKeys.orders(userId),
     queryFn: createServiceQueryFn(
       posService.getAllOrders,
       () => mockFallback.orders().data,
@@ -33,11 +31,15 @@ export const useOrders = (options = {}) => {
 };
 
 export const useOrder = (orderId, options = {}) => {
-  const { data: session } = useSession();
+  const { userId, isDemoMode } = useAppContext();
 
   return useQuery({
-    queryKey: [...queryKeys.order(orderId), session?.user?.id],
-    queryFn: () => posService.getOrderById(orderId),
+    queryKey: queryKeys.order(orderId, userId),
+    queryFn: createServiceQueryFn(
+      () => posService.getOrderById(orderId),
+      () => mockFallback.orders().data.orders.find(o => o._id === orderId) || mockFallback.orders().data.orders[0],
+      isDemoMode,
+    ),
     enabled: Boolean(orderId),
     ...getDefaultQueryOptions({
       staleTime: 2 * 60 * 1000,

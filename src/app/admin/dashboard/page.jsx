@@ -2,17 +2,18 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ADMIN_ROUTES } from "@/constants";
-
+import { useSession } from "@/lib/mock-auth";
+import { getDefaultRouteForRole } from "@/constants";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { data: session } = useSession();
 
   useEffect(() => {
-
-    router.replace(ADMIN_ROUTES.ANALYTICS);
-  }, [router]);
-
+    const userRole = session?.user?.role || "admin";
+    const targetRoute = getDefaultRouteForRole(userRole);
+    router.replace(targetRoute);
+  }, [router, session]);
 
   return null;
 }

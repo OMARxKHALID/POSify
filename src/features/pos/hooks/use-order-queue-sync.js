@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useOrderQueueStore } from "@/components/providers/store-provider";
 import { useShallow } from "zustand/react/shallow";
 import { toast } from "sonner";
@@ -61,6 +61,7 @@ export function useOrderQueueSync() {
   const { isOnline } = useNetworkStatus();
   const syncMode = settings?.operational?.syncMode || "auto";
   const syncingRef = useRef(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const lastSyncTimeRef = useRef(0);
   const lastTriggerTimeRef = useRef(0);
   const cleanupOrder = useCallback(
@@ -138,9 +139,10 @@ export function useOrderQueueSync() {
   );
   const syncQueuedOrders = useCallback(async () => {
     if (syncingRef.current) return;
+    syncingRef.current = true;
+    setIsSyncing(true);
     const now = Date.now();
     if (now - lastSyncTimeRef.current < SYNC_DEBOUNCE_TIME) return;
-    syncingRef.current = true;
     lastSyncTimeRef.current = now;
     try {
       const queuedOrders = getQueuedOrders();
@@ -176,6 +178,7 @@ export function useOrderQueueSync() {
       toast.error("Sync process encountered an error");
     } finally {
       syncingRef.current = false;
+      setIsSyncing(false);
     }
   }, [
     getQueuedOrders,
@@ -238,6 +241,6 @@ export function useOrderQueueSync() {
     syncQueuedOrders,
     syncSingleOrder,
     syncMode,
-    isSyncing: syncingRef.current,
+    isSyncing,
   };
 }

@@ -4,6 +4,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import { useAppContext } from "@/lib/hooks/use-app-context";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
@@ -11,15 +12,14 @@ import {
   invalidateQueries,
   createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
-import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
 import { organizationService } from "../services/organization.service";
 
 export const useOrganizationOverview = (options = {}) => {
-  const isDemoMode = useIsDemoModeEnabled();
+  const { userId, isDemoMode } = useAppContext();
 
   return useQuery({
-    queryKey: queryKeys.organization(),
+    queryKey: queryKeys.organization(userId),
     queryFn: createServiceQueryFn(
       organizationService.getOverview,
       () => mockFallback.organization().data,
@@ -33,10 +33,10 @@ export const useOrganizationOverview = (options = {}) => {
 };
 
 export const useSuspenseOrganizationOverview = (options = {}) => {
-  const isDemoMode = useIsDemoModeEnabled();
+  const { userId, isDemoMode } = useAppContext();
 
   return useSuspenseQuery({
-    queryKey: queryKeys.organization(),
+    queryKey: queryKeys.organization(userId),
     queryFn: createServiceQueryFn(
       organizationService.getOverview,
       () => mockFallback.organization().data,
@@ -50,10 +50,10 @@ export const useSuspenseOrganizationOverview = (options = {}) => {
 };
 
 export const useAvailableStaff = (organizationId, options = {}) => {
-  const isDemoMode = useIsDemoModeEnabled();
+  const { userId, isDemoMode } = useAppContext();
 
   return useQuery({
-    queryKey: queryKeys.availableStaff(organizationId),
+    queryKey: queryKeys.availableStaff(organizationId, userId),
     queryFn: createServiceQueryFn(
       () => organizationService.getAvailableStaff(organizationId),
       () => mockFallback.users().data,

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAppContext } from "@/lib/hooks/use-app-context";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
@@ -7,15 +8,14 @@ import {
   invalidateQueries,
   createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
-import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
 import { menuService } from "../services/menu.service";
 
 export const useCategories = (options = {}) => {
-  const isDemoMode = useIsDemoModeEnabled();
+  const { userId, isDemoMode } = useAppContext();
 
   return useQuery({
-    queryKey: queryKeys.categories(),
+    queryKey: queryKeys.categories(userId),
     queryFn: createServiceQueryFn(
       menuService.getCategories,
       () => mockFallback.categories().data,

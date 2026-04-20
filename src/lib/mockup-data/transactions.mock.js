@@ -55,7 +55,7 @@ export const mockTransactions = [
     status: "completed",
     processedBy: { name: "Jane Staff", email: "staff@demo.com" },
     processedAt: "2024-01-15T17:45:00Z",
-    receiptNumber: null,
+    receiptNumber: "",
     reference: "RCP-004-REFUND",
     createdAt: "2024-01-15T17:15:00Z",
     updatedAt: "2024-01-15T17:45:00Z",
@@ -63,13 +63,14 @@ export const mockTransactions = [
 ];
 
 export const mockTransactionStats = {
-  totalTransactions: 156,
+  totalTransactions: 4,
   totalRevenue: 12450.75,
-  totalRefunds: 245.00,
-  netRevenue: 12205.75,
-  todayTransactions: 23,
-  todayRevenue: 1845.50,
-  byPaymentMethod: {
+  averageOrderValue: 79.81,
+  completedTransactions: 3,
+  pendingTransactions: 0,
+  failedTransactions: 0,
+  refundedTransactions: 1,
+  revenueByPaymentMethod: {
     card: 8450.50,
     cash: 3200.25,
     digital: 800.00,

@@ -10,6 +10,7 @@ import { PageLayout } from "@/features/dashboard/components/page-layout";
 import { PageHeader } from "@/features/dashboard/components/page-header";
 import { useSuspenseOrganizationOverview } from "@/features/organization/hooks/use-organization";
 import { format } from "date-fns";
+import { safeFormatDate, safeFormatDateTime } from "@/lib/utils/date.utils";
 import { Suspense } from "react";
 import { PageLoading } from "@/components/ui/loading";
 import { User, Calendar, Shield, Mail, Crown, TrendingUp } from "lucide-react";
@@ -79,7 +80,7 @@ function OverviewContent() {
               </div>
               <p className="font-medium">
                 {user?.lastLogin
-                  ? format(new Date(user.lastLogin), "MMM dd, yyyy 'at' h:mm a")
+                  ? safeFormatDateTime(user.lastLogin)
                   : "Never"}
               </p>
             </div>
@@ -115,7 +116,7 @@ function OverviewContent() {
               </div>
               <p className="font-medium">
                 {user?.createdAt
-                  ? format(new Date(user.createdAt), "MMM dd, yyyy")
+                  ? safeFormatDate(user.createdAt)
                   : "Unknown"}
               </p>
             </div>

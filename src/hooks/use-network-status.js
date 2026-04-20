@@ -28,10 +28,9 @@ export function useNetworkStatus() {
           method: "HEAD",
           cache: "no-store",
         });
-        const online = response.ok;
+        const online = response.ok || response.status === 404;
         setIsOnline((prev) => (prev !== online ? online : prev));
       } catch {
-
         setIsOnline((prev) => (prev ? false : prev));
       }
     };

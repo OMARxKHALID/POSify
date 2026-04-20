@@ -36,3 +36,13 @@ export const DEFAULT_REDIRECTS = {
   AFTER_LOGOUT: AUTH_ROUTES.LOGIN,
   FALLBACK: ADMIN_ROUTES.ANALYTICS,
 };
+
+export const ROLE_DEFAULT_ROUTES = {
+  super_admin: ADMIN_ROUTES.USERS,
+  admin: ADMIN_ROUTES.OVERVIEW,
+  staff: "/pos",
+};
+
+export const getDefaultRouteForRole = (role) => {
+  return ROLE_DEFAULT_ROUTES[role] || ADMIN_ROUTES.OVERVIEW;
+};

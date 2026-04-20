@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "@/lib/mock-auth";
+import { useAppContext } from "@/lib/hooks/use-app-context";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
@@ -8,16 +8,14 @@ import {
   invalidateQueries,
   createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
-import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
 import { dashboardService } from "../services/dashboard.service";
 
 export const useTransactions = (options = {}) => {
-  const { data: session } = useSession();
-  const isDemoMode = useIsDemoModeEnabled();
+  const { userId, isDemoMode } = useAppContext();
 
   return useQuery({
-    queryKey: [...queryKeys.transactions(), session?.user?.id],
+    queryKey: queryKeys.transactions(userId),
     queryFn: createServiceQueryFn(
       dashboardService.getTransactions,
       () => mockFallback.transactions().data,
@@ -33,11 +31,15 @@ export const useTransactions = (options = {}) => {
 };
 
 export const useTransaction = (transactionId, options = {}) => {
-  const { data: session } = useSession();
+  const { userId, isDemoMode } = useAppContext();
 
   return useQuery({
-    queryKey: [...queryKeys.transaction(transactionId), session?.user?.id],
-    queryFn: () => dashboardService.getTransactionById(transactionId),
+    queryKey: queryKeys.transaction(transactionId, userId),
+    queryFn: createServiceQueryFn(
+      () => dashboardService.getTransactionById(transactionId),
+      () => mockFallback.transactions().data.transactions.find(t => t._id === transactionId) || mockFallback.transactions().data.transactions[0],
+      isDemoMode,
+    ),
     enabled: Boolean(transactionId),
     ...getDefaultQueryOptions({
       staleTime: 2 * 60 * 1000,
@@ -47,11 +49,10 @@ export const useTransaction = (transactionId, options = {}) => {
 };
 
 export const useTransactionStats = (options = {}) => {
-  const { data: session } = useSession();
-  const isDemoMode = useIsDemoModeEnabled();
+  const { userId, isDemoMode } = useAppContext();
 
   return useQuery({
-    queryKey: [...queryKeys.transactionStats(), session?.user?.id],
+    queryKey: queryKeys.transactionStats(userId),
     queryFn: createServiceQueryFn(
       dashboardService.getTransactionStats,
       () => mockFallback.transactions().data.stats,
@@ -67,16 +68,10 @@ export const useTransactionStats = (options = {}) => {
 };
 
 export const useTransactionsWithFilters = (filters = {}, options = {}) => {
-  const { data: session } = useSession();
-  const isDemoMode = useIsDemoModeEnabled();
+  const { userId, isDemoMode } = useAppContext();
 
   return useQuery({
-    queryKey: [
-      ...queryKeys.transactions(),
-      "filtered",
-      JSON.stringify(filters),
-      session?.user?.id,
-    ],
+    queryKey: queryKeys.transactionsFiltered(filters, userId),
     queryFn: createServiceQueryFn(
       () => dashboardService.getTransactions(filters),
       () => mockFallback.transactions().data,

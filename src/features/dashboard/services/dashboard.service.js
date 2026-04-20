@@ -1,11 +1,12 @@
 import { apiClient } from "@/lib/api-client";
 import { transactionSchema } from "../schemas/transaction.schema";
+import { analyticsSchema, transactionStatsSchema } from "../schemas/analytics.schema";
 import { z } from "zod";
 
 export const dashboardService = {
   getAnalytics: async (timeRange) => {
     const response = await apiClient.get(`/dashboard/analytics?timeRange=${timeRange}`);
-    return response.data;
+    return analyticsSchema.parse(response.data);
   },
 
   getTransactions: async (filters = {}) => {
@@ -25,7 +26,7 @@ export const dashboardService = {
 
   getTransactionStats: async () => {
     const response = await apiClient.get("/dashboard/transactions/stats");
-    return response.data;
+    return transactionStatsSchema.parse(response.data);
   },
 
   createTransaction: async (transactionData) => {

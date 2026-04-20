@@ -5,6 +5,18 @@ import { SUBSCRIPTION_STATUSES } from "@/features/settings/constants/business.co
 import { ORGANIZATION_STATUSES } from "@/features/settings/constants/business.constants";
 import { BUSINESS_TYPES, SUBSCRIPTION_PLANS } from "@/features/settings/constants/business.constants";
 
+export const limitsSchema = z.object({
+  maxUsers: z.number().default(10),
+  maxMenuItems: z.number().default(100),
+  maxOrdersPerDay: z.number().default(500),
+});
+
+export const usageSchema = z.object({
+  usersCount: z.number().default(1),
+  menuItemsCount: z.number().default(0),
+  ordersCount: z.number().default(0),
+});
+
 export const organizationInfoSchema = z.object({
   legalName: z.string().trim().optional(),
   displayName: z.string().trim().optional(),
@@ -22,23 +34,10 @@ export const organizationInfoSchema = z.object({
 export const subscriptionSchema = z.object({
   plan: z.enum(SUBSCRIPTION_PLANS).default("free"),
   status: z.enum(SUBSCRIPTION_STATUSES).default("trialing"),
-  currentPeriodStart: z.date().optional(),
-  currentPeriodEnd: z.date().optional(),
-  trialEnd: z.date().optional(),
-});
-
-export const limitsSchema = z.object({
-  users: z.number().default(2),
-  menuItems: z.number().default(50),
-  ordersPerMonth: z.number().default(100),
-  locations: z.number().default(1),
-});
-
-export const usageSchema = z.object({
-  currentUsers: z.number().default(0),
-  currentMenuItems: z.number().default(0),
-  ordersThisMonth: z.number().default(0),
-  lastResetDate: z.date().default(() => new Date()),
+  currentPeriodStart: z.coerce.date().optional(),
+  currentPeriodEnd: z.coerce.date().optional(),
+  trialEnd: z.coerce.date().optional(),
+  lastResetDate: z.coerce.date().optional(),
 });
 
 export const organizationSchema = baseSchema.extend({

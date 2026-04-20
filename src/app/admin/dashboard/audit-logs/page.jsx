@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { safeFormatDate, safeFormatTime } from "@/lib/utils/date.utils";
 import {
   Shield,
   Eye,
@@ -309,10 +310,10 @@ export default function AuditLogsPage() {
         return (
           <div className="text-sm">
             <div className="font-medium">
-              {format(new Date(date), "MMM dd, yyyy")}
+              {safeFormatDate(date)}
             </div>
             <div className="text-muted-foreground">
-              {format(new Date(date), "HH:mm:ss")}
+              {safeFormatTime(date)}
             </div>
           </div>
         );
@@ -448,7 +449,7 @@ export default function AuditLogsPage() {
                                   )}
                                 </div>
                                 <div className="text-muted-foreground">
-                                  {format(new Date(log.createdAt), "HH:mm:ss")}
+                                  {safeFormatTime(log.createdAt)}
                                 </div>
                               </div>
                             </div>

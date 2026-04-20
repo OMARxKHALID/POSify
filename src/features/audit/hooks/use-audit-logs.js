@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSession } from "@/lib/mock-auth";
+import { useAppContext } from "@/lib/hooks/use-app-context";
 import {
   getDefaultQueryOptions,
   queryKeys,
-  createDemoQueryFn,
+  createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
-import { useIsDemoModeEnabled } from "@/features/settings/hooks/use-demo-mode";
 import { mockFallback } from "@/lib/mockup-data";
-
 
 const buildQueryParams = (filters) => {
   const queryParams = new URLSearchParams();
@@ -22,20 +20,19 @@ const buildQueryParams = (filters) => {
   return queryParams;
 };
 
-
 export const useAuditLogs = (filters = {}, options = {}) => {
-  const { data: session } = useSession();
-  const isDemoMode = useIsDemoModeEnabled();
+  const { userId, isDemoMode } = useAppContext();
 
   const queryParams = buildQueryParams(filters);
+  const queryFn = createServiceQueryFn(
+    () => mockFallback.auditLogs().data,
+    () => mockFallback.auditLogs().data,
+    isDemoMode,
+  );
 
   return useQuery({
-    queryKey: [...queryKeys.auditLogs(filters), session?.user?.id],
-    queryFn: createDemoQueryFn(
-      `/dashboard/audit-logs?${queryParams}`,
-      () => mockFallback.auditLogs().data,
-      isDemoMode,
-    ),
+    queryKey: queryKeys.auditLogs(filters, userId),
+    queryFn,
     ...getDefaultQueryOptions({
       staleTime: 2 * 60 * 1000,
       refetchOnMount: true,
@@ -44,7 +41,6 @@ export const useAuditLogs = (filters = {}, options = {}) => {
     }),
   });
 };
-
 
 export const useAuditLogsManagement = (initialFilters = {}) => {
   const [filters, setFilters] = useState(initialFilters);
@@ -57,40 +53,31 @@ export const useAuditLogsManagement = (initialFilters = {}) => {
     refetch,
   } = useAuditLogs(filters);
 
-
   const auditLogs = auditLogsData?.auditLogs || [];
   const pagination = auditLogsData?.pagination || {};
   const appliedFilters = auditLogsData?.filters || {};
   const currentUser = auditLogsData?.currentUser || null;
 
-
   const updateFilters = (newFilters) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-
   const clearFilters = () => {
     setFilters({});
   };
-
 
   const refresh = () => {
     refetch();
   };
 
   return {
-
     auditLogs,
     pagination,
     appliedFilters,
     currentUser,
-
-
     isLoading,
     isError,
     error,
-
-
     updateFilters,
     clearFilters,
     refresh,

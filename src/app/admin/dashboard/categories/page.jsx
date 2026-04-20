@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { safeFormatDate } from "@/lib/utils/date.utils";
 import {
   MoreHorizontal,
   Edit,
@@ -128,7 +129,7 @@ export default function CategoriesPage() {
         return (
           <div className="text-sm text-muted-foreground flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            {format(new Date(createdAt), "MMM dd, yyyy")}
+            {safeFormatDate(createdAt)}
           </div>
         );
       },

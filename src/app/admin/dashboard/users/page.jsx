@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { safeFormatDate } from "@/lib/utils/date.utils";
 import {
   MoreHorizontal,
   Edit,
@@ -224,7 +225,7 @@ export default function UsersPage() {
         return (
           <div className="text-sm text-muted-foreground flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            {lastLogin ? format(new Date(lastLogin), "MMM dd, yyyy") : "Never"}
+            {lastLogin ? safeFormatDate(lastLogin) : "Never"}
           </div>
         );
       },
@@ -235,7 +236,7 @@ export default function UsersPage() {
         const createdAt = row.getValue("createdAt");
         return (
           <div className="text-sm text-muted-foreground">
-            {format(new Date(createdAt), "MMM dd, yyyy")}
+            {safeFormatDate(createdAt)}
           </div>
         );
       },

@@ -13,10 +13,12 @@ export const orderItemSchema = z.object({
   price: z.number().min(0, "Price must be non-negative"),
   discount: z.number().min(0).default(0),
   prepTime: z.number().min(0).default(DEFAULT_PREP_TIME),
+  _id: z.string().optional(),
 });
 
 export const taxSchema = z.object({
-  id: z.string().min(1, "Tax ID is required"),
+  id: z.string().min(1, "Tax ID is required").optional(),
+  _id: z.string().min(1, "Tax ID is required").optional(),
   name: z.string().min(1, "Tax name is required").trim(),
   rate: z.number().min(0, "Tax rate must be non-negative"),
   type: z.enum(TAX_TYPES, { required_error: "Tax type is required" }),
@@ -28,14 +30,14 @@ export const returnItemSchema = z.object({
   quantity: z.number().min(1, "Return quantity must be at least 1"),
   amount: z.number().min(0, "Return amount must be non-negative"),
   reason: z.string().trim().optional(),
-  returnedAt: z.date().default(() => new Date()),
+  returnedAt: z.coerce.date().optional(),
   processedBy: z.string().optional(),
 });
 
 export const deliveryInfoSchema = z.object({
   address: z.string().trim().optional(),
   deliveryCharge: z.number().min(0).default(0),
-  estimatedDeliveryTime: z.date().optional(),
+  estimatedDeliveryTime: z.date().optional().or(z.string()),
   deliveryStatus: z.enum(DELIVERY_STATUSES).default("pending"),
   deliveryPartner: z.string().trim().optional(),
 });
