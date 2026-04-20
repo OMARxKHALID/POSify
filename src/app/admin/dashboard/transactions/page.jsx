@@ -183,7 +183,7 @@ export default function TransactionsPage() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(`/admin/dashboard/transactions/${t.id}`)
+                    router.push(`/admin/dashboard/transactions/${t._id}`)
                   }
                 >
                   <Eye className="mr-2 h-4 w-4" />

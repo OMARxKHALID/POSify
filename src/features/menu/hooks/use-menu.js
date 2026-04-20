@@ -17,7 +17,7 @@ export const useMenu = (options = {}) => {
   const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
-    queryKey: queryKeys.menu,
+    queryKey: queryKeys.menu(),
     queryFn: createDemoQueryFn(
       "/dashboard/menu",
       () => mockFallback.menu().data,

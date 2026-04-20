@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Marquee } from "@/components/ui/marquee";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -98,7 +97,7 @@ const TestimonialCard = ({ img, name, username, body }) => {
 
 export function TestimonialSection() {
   return (
-    <section id="testimonials" className="py-16">
+    <section id="testimonials" className="py-16 overflow-hidden">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-[540px]">
           <div className="flex justify-center">
@@ -129,8 +128,8 @@ export function TestimonialSection() {
                 index === 0
                   ? ""
                   : index === 1
-                  ? "hidden md:block"
-                  : "hidden lg:block"
+                    ? "hidden md:block"
+                    : "hidden lg:block"
               }
             >
               <Marquee

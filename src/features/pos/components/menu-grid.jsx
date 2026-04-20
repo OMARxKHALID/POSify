@@ -11,7 +11,7 @@ const filterMenuItems = (menuItems, selectedCategory, searchQuery) => {
 
 
     const itemCategoryId =
-      (item.category && (item.category.id || item.category._id)) ||
+      (item.category && item.category._id) ||
       item.categoryId ||
       getCategoryId(item.category);
 
@@ -111,7 +111,7 @@ export function MenuGrid({
         )} gap-3 p-4 w-full max-w-full`}
       >
         {filteredItems.map((item) => (
-          <div key={item.id || item._id} className="w-full min-w-0">
+          <div key={item._id} className="w-full min-w-0">
             <MenuItemCard item={item} onItemSelect={onItemSelect} />
           </div>
         ))}

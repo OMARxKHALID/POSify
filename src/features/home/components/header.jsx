@@ -38,13 +38,11 @@ export function Header() {
 
   return (
     <>
-
       <header
         className={`sticky top-4 z-50 mx-auto hidden w-full items-center justify-between rounded-full border border-border/50 bg-background/80 px-4 py-2 shadow-lg backdrop-blur-sm md:flex transition-all duration-200 ${
           isScrolled ? "max-w-4xl px-2" : "max-w-5xl px-4"
         }`}
       >
-
         <Link
           href="/"
           className={`flex items-center gap-2 transition-all duration-300 ${
@@ -53,7 +51,6 @@ export function Header() {
         >
           <Logo className="h-8 w-8" />
         </Link>
-
 
         <nav className="absolute inset-0 hidden flex-1 items-center justify-center md:flex pointer-events-none">
           {NAV_ITEMS.map((item) => (
@@ -66,7 +63,6 @@ export function Header() {
             </button>
           ))}
         </nav>
-
 
         <div className="relative z-10 flex items-center gap-2">
           <ThemeToggle />
@@ -90,7 +86,6 @@ export function Header() {
           )}
         </div>
       </header>
-
 
       <header className="sticky top-4 z-50 mx-2 sm:mx-4 flex items-center justify-between rounded-full border border-border/50 bg-background/80 px-3 sm:px-4 py-2 sm:py-3 shadow-lg backdrop-blur-sm md:hidden">
         <Link href="/" className="flex items-center gap-2">
@@ -126,7 +121,6 @@ export function Header() {
           </button>
         </div>
       </header>
-
 
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-background/50 backdrop-blur-sm md:hidden">

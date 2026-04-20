@@ -34,7 +34,6 @@ const nextConfig = {
 
   experimental: {
     optimizePackageImports: [
-      "lucide-react",
       "@radix-ui/react-icons",
       "@radix-ui/react-accordion",
       "@radix-ui/react-avatar",
@@ -72,10 +71,6 @@ const nextConfig = {
       use: ["@svgr/webpack"],
     });
     return config;
-  },
-
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 
   typescript: {

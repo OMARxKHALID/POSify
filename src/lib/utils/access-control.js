@@ -41,7 +41,9 @@ export function filterNavigationByPermissions(navigation, user) {
 }
 
 export const canEditUser = (currentUser, targetUser) => {
-  const isCurrentUser = currentUser?.id === targetUser?.id;
+  const currentUserId = currentUser?._id || currentUser?.id;
+  const targetUserId = targetUser?._id || targetUser?.id;
+  const isCurrentUser = currentUserId && targetUserId && currentUserId === targetUserId;
   return (
     currentUser?.role === "super_admin" ||
     (currentUser?.role === "admin" && targetUser?.role === "staff") ||
@@ -50,7 +52,9 @@ export const canEditUser = (currentUser, targetUser) => {
 };
 
 export const canDeleteUser = (currentUser, targetUser) => {
-  const isCurrentUser = currentUser?.id === targetUser?.id;
+  const currentUserId = currentUser?._id || currentUser?.id;
+  const targetUserId = targetUser?._id || targetUser?.id;
+  const isCurrentUser = currentUserId && targetUserId && currentUserId === targetUserId;
   return (
     (currentUser?.role === "super_admin" ||
       (currentUser?.role === "admin" && targetUser?.role === "staff")) &&
@@ -70,7 +74,9 @@ export const canChangeRole = (currentUser, targetUser) => {
 };
 
 export const canChangeStatus = (currentUser, targetUser) => {
-  const isCurrentUser = currentUser?.id === targetUser?.id;
+  const currentUserId = currentUser?._id || currentUser?.id;
+  const targetUserId = targetUser?._id || targetUser?.id;
+  const isCurrentUser = currentUserId && targetUserId && currentUserId === targetUserId;
   return (
     (currentUser?.role === "super_admin" ||
       (currentUser?.role === "admin" && targetUser?.role === "staff")) &&

@@ -33,7 +33,7 @@ export const CartItemsList = React.memo(function CartItemsList({
     <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-background min-h-0">
       {orderItems.map((item) => (
         <OrderItem
-          key={item._id || item.id}
+          key={item._id}
           item={item}
           onUpdateQuantity={onUpdateQuantity}
           onRemove={onRemoveItem}

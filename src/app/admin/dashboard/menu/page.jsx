@@ -145,10 +145,10 @@ export default function MenuPage() {
                 </DropdownMenuCheckboxItem>
                 {categories.map((category) => (
                   <DropdownMenuCheckboxItem
-                    key={category.id}
-                    checked={column.getFilterValue() === category.id}
+                    key={category._id}
+                    checked={column.getFilterValue() === category._id}
                     onCheckedChange={(checked) =>
-                      column.setFilterValue(checked ? category.id : undefined)
+                      column.setFilterValue(checked ? category._id : undefined)
                     }
                   >
                     {formatCategoryDisplay(category)}
@@ -234,14 +234,14 @@ export default function MenuPage() {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() =>
-                  router.push(`/admin/dashboard/menu/edit?id=${menuItem.id}`)
+                  router.push(`/admin/dashboard/menu/edit?id=${menuItem._id}`)
                 }
               >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Item
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => handleDeleteMenuItem(menuItem.id)}
+                onClick={() => handleDeleteMenuItem(menuItem._id)}
                 className="text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -256,7 +256,7 @@ export default function MenuPage() {
 
 
   const handleDeleteMenuItem = (menuItemId) => {
-    const menuItem = menuItems.find((item) => item.id === menuItemId);
+    const menuItem = menuItems.find((item) => item._id === menuItemId);
     if (menuItem) {
       setDeleteDialog({
         isOpen: true,

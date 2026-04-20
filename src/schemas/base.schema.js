@@ -3,8 +3,8 @@ import { z } from "zod";
 
 export const baseSchema = z.object({
   _id: z.string().optional(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
 });
 
 

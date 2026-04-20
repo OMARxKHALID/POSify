@@ -31,25 +31,23 @@ export function FaqSection() {
 
   const toggleItem = (index) => {
     setOpenItems((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
     );
   };
 
   return (
     <motion.section
       id="faq"
-      className="relative overflow-hidden py-16 pb-32"
+      className="relative overflow-hidden py-16 pb-16 w-full"
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-
       <div className="absolute top-1/2 -right-20 h-64 w-64 rounded-full bg-primary/20 opacity-80 blur-3xl" />
       <div className="absolute top-1/2 -left-20 h-64 w-64 rounded-full bg-primary/20 opacity-80 blur-3xl" />
 
       <div className="container mx-auto px-4">
-
         <div className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 px-3 py-1 text-sm uppercase text-primary">
             <span>✶</span>
@@ -63,7 +61,6 @@ export function FaqSection() {
             </span>
           </h2>
         </div>
-
 
         <div className="mx-auto mt-6 max-w-xl space-y-3">
           {faqs.map((faq, index) => {

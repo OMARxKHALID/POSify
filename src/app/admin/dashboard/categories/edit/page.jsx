@@ -49,7 +49,7 @@ function EditCategoryContent() {
   const currentUser = categoriesData?.currentUser;
   const categories = categoriesData?.categories || [];
   const targetCategory =
-    categories.find((category) => category.id === categoryId) || null;
+    categories.find((category) => category._id === categoryId) || null;
 
 
   const form = useForm({

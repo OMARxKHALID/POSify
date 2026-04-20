@@ -1,5 +1,3 @@
-
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "@/lib/mock-auth";
 import { apiClient } from "@/lib/api-client";
@@ -19,7 +17,7 @@ export const useUsers = (options = {}) => {
   const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
-    queryKey: [...queryKeys.users, session?.user?.id],
+    queryKey: [...queryKeys.users(), session?.user?.id],
     queryFn: createDemoQueryFn(
       "/dashboard/users",
       () => mockFallback.users().data,
@@ -34,7 +32,6 @@ export const useUsers = (options = {}) => {
   });
 };
 
-
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
 
@@ -42,7 +39,7 @@ export const useCreateUser = () => {
     mutationFn: async (userData) => {
       const response = await apiClient.post(
         "/dashboard/users/create",
-        userData
+        userData,
       );
       return response;
     },
@@ -54,7 +51,6 @@ export const useCreateUser = () => {
   });
 };
 
-
 export const useEditUser = () => {
   const queryClient = useQueryClient();
 
@@ -62,7 +58,7 @@ export const useEditUser = () => {
     mutationFn: async ({ userId, userData }) => {
       const response = await apiClient.put(
         `/dashboard/users/edit?userId=${userId}`,
-        userData
+        userData,
       );
       return response;
     },
@@ -74,14 +70,13 @@ export const useEditUser = () => {
   });
 };
 
-
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (userId) => {
       const response = await apiClient.delete(
-        `/dashboard/users/delete?userId=${userId}`
+        `/dashboard/users/delete?userId=${userId}`,
       );
       return response;
     },
@@ -92,7 +87,6 @@ export const useDeleteUser = () => {
     ...getDefaultMutationOptions({ operation: "User deletion" }),
   });
 };
-
 
 export const useUsersManagement = () => {
   const usersQuery = useUsers();

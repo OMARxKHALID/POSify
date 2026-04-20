@@ -64,7 +64,7 @@ const prepareOrderData = (
   return {
     organizationId: orgSettings?.organizationId,
     items: orderItems.map((item) => ({
-      menuItem: item._id || item.id,
+      menuItem: item._id,
       name: item.name || "Unknown Item",
       quantity: Number(item.quantity || 1),
       price: Number(item.price || 0),
@@ -81,7 +81,7 @@ const prepareOrderData = (
     tax:
       taxBreakdown?.length > 0
         ? taxBreakdown.map((tax) => ({
-            id: tax.id || `tax-${tax.name.toLowerCase().replace(/\s+/g, "-")}`,
+            _id: tax._id || `tax-${tax.name.toLowerCase().replace(/\s+/g, "-")}`,
             name: tax.name,
             rate: tax.rate,
             type: "percentage",

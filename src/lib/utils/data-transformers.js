@@ -1,5 +1,5 @@
 export const formatApiData = (document, fieldMapping = {}) => {
-  const formatted = { id: document._id ? document._id.toString() : (document.id ? document.id.toString() : null) };
+  const formatted = { _id: document._id ? document._id.toString() : (document.id ? document.id.toString() : null) };
 
   Object.entries(fieldMapping).forEach(([key, value]) => {
     if (typeof value === "function") {
@@ -62,7 +62,7 @@ export const formatOrganizationData = (organization) =>
     owner: (doc) =>
       doc.owner
         ? {
-            id: doc.owner._id ? doc.owner._id.toString() : null,
+            _id: doc.owner._id ? doc.owner._id.toString() : null,
             name: doc.owner.name,
             email: doc.owner.email,
             role: doc.owner.role,

@@ -8,7 +8,7 @@ import { TAX_TYPES } from "@/features/pos/constants/orders.constants";
 import { ORDER_STATUSES } from "@/features/pos/constants/orders.constants";
 
 export const taxSettingsSchema = z.object({
-  id: z.string().min(1, "Tax ID is required").trim(),
+  _id: z.string().min(1, "Tax ID is required").trim(),
   name: z.string().min(1, "Tax name is required").trim(),
   rate: z.coerce
     .number()

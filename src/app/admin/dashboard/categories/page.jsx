@@ -153,7 +153,7 @@ export default function CategoriesPage() {
               <DropdownMenuItem
                 onClick={() =>
                   router.push(
-                    `/admin/dashboard/categories/edit?id=${category.id}`
+                    `/admin/dashboard/categories/edit?id=${category._id}`
                   )
                 }
               >
@@ -161,7 +161,7 @@ export default function CategoriesPage() {
                 Edit Category
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => handleDeleteCategory(category.id)}
+                onClick={() => handleDeleteCategory(category._id)}
                 className="text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -176,7 +176,7 @@ export default function CategoriesPage() {
 
 
   const handleDeleteCategory = (categoryId) => {
-    const category = categories.find((item) => item.id === categoryId);
+    const category = categories.find((item) => item._id === categoryId);
     if (category) {
       setDeleteDialog({
         isOpen: true,

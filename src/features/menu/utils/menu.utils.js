@@ -24,14 +24,13 @@ export const getItemIcon = (item) => {
 export const getCategoryId = (category) => {
   if (!category) return "";
   if (typeof category === "string") return category;
-  if (typeof category === "object" && category.id) return category.id;
   if (typeof category === "object" && category._id) return category._id;
   return "";
 };
 
 export const formatMenuItemForAPI = (menuItem) => {
   return {
-    id: menuItem._id,
+    _id: menuItem._id,
     name: menuItem.name,
     description: menuItem.description,
     price: menuItem.price,

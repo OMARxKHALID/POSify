@@ -2,7 +2,7 @@
 
 export const mockReceipts = [
   {
-    id: "receipt_001",
+    _id: "receipt_001",
     orderId: "ord_001",
     orderNumber: "ORD-2024-001",
     receiptNumber: "RCP-2024-001",
@@ -58,7 +58,7 @@ export const mockReceipts = [
     status: "printed",
   },
   {
-    id: "receipt_002",
+    _id: "receipt_002",
     orderId: "ord_002",
     orderNumber: "ORD-2024-002",
     receiptNumber: "RCP-2024-002",
@@ -107,7 +107,7 @@ export const mockReceipts = [
     status: "printed",
   },
   {
-    id: "receipt_003",
+    _id: "receipt_003",
     orderId: "ord_003",
     orderNumber: "ORD-2024-003",
     receiptNumber: "RCP-2024-003",
@@ -164,7 +164,7 @@ export const mockReceipts = [
     status: "pending",
   },
   {
-    id: "receipt_004",
+    _id: "receipt_004",
     orderId: "ord_004",
     orderNumber: "ORD-2024-004",
     receiptNumber: "RCP-2024-004",
@@ -225,7 +225,7 @@ export const mockReceipts = [
     status: "printed",
   },
   {
-    id: "receipt_005",
+    _id: "receipt_005",
     orderId: "ord_005",
     orderNumber: "ORD-2024-005",
     receiptNumber: "RCP-2024-005",
@@ -290,7 +290,7 @@ export const mockReceiptStats = {
 
 export const mockReceiptTemplates = [
   {
-    id: "template_001",
+    _id: "template_001",
     name: "Default Template",
     description: "Standard receipt template with all details",
     preview: "/placeholder.svg",    isDefault: false,
@@ -306,7 +306,7 @@ export const mockReceiptStatuses = [
 
 export const mockPrinters = [
   {
-    id: "printer_001",
+    _id: "printer_001",
     name: "Kitchen Printer",
     type: "thermal",
     status: "online",
@@ -314,7 +314,7 @@ export const mockPrinters = [
     lastUsed: "2024-01-15T20:35:00Z",
   },
   {
-    id: "printer_002",
+    _id: "printer_002",
     name: "Bar Printer",
     type: "thermal",
     status: "online",
@@ -322,7 +322,7 @@ export const mockPrinters = [
     lastUsed: "2024-01-15T19:45:00Z",
   },
   {
-    id: "printer_003",
+    _id: "printer_003",
     name: "Receipt Printer",
     type: "thermal",
     status: "offline",

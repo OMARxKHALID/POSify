@@ -9,7 +9,7 @@ import { GeometricBackground } from "@/components/ui/geometric-background";
 
 export default function Home() {
   return (
-    <div className="min-h-screen w-full relative bg-background">
+    <div className="min-h-screen w-full relative bg-background overflow-x-hidden">
       <GeometricBackground />
       <div className="absolute top-20 right-20 w-96 h-96 bg-[#e78a53]/5 rounded-full blur-3xl" />
       <div className="absolute top-20 left-20 w-96 h-96 bg-[#e78a53]/5 rounded-full blur-3xl" />
@@ -27,7 +27,6 @@ export default function Home() {
       <div id="faq" className="relative z-10">
         <FaqSection />
       </div>
-      <div className="h-80 relative z-10" />
       <Footer />
     </div>
   );

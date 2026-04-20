@@ -2,7 +2,7 @@
 
 export const mockOrders = [
   {
-    id: "ord_001",
+    _id: "ord_001",
     orderNumber: "ORD-2024-001",
     customerName: "John Smith",
     mobileNumber: "+1-555-0123",
@@ -11,13 +11,13 @@ export const mockOrders = [
     paymentMethod: "card",
     isPaid: true,
     subtotal: 45.5,
-    total: 52.33,
+    total: 51.20,
     discount: 5.0,
     serviceCharge: 2.0,
     tip: 4.83,
     tax: [
       {
-        id: "tax_001",
+        _id: "tax_001",
         name: "Sales Tax",
         rate: 8.5,
         type: "percentage",
@@ -68,7 +68,7 @@ export const mockOrders = [
     updatedAt: "2024-01-15T15:15:00Z",
   },
   {
-    id: "ord_002",
+    _id: "ord_002",
     orderNumber: "ORD-2024-002",
     customerName: "Sarah Johnson",
     mobileNumber: "+1-555-0456",
@@ -83,7 +83,7 @@ export const mockOrders = [
     tip: 0,
     tax: [
       {
-        id: "tax_001",
+        _id: "tax_001",
         name: "Sales Tax",
         rate: 8.5,
         type: "percentage",
@@ -125,7 +125,7 @@ export const mockOrders = [
     updatedAt: "2024-01-15T16:50:00Z",
   },
   {
-    id: "ord_003",
+    _id: "ord_003",
     orderNumber: "ORD-2024-003",
     customerName: "Mike Wilson",
     mobileNumber: "+1-555-0789",
@@ -134,14 +134,14 @@ export const mockOrders = [
     paymentMethod: "card",
     isPaid: false,
     subtotal: 67.25,
-    total: 75.89,
+    total: 60.89,
     discount: 10.0,
     promoDiscount: 5.0,
     serviceCharge: 3.5,
     tip: 0,
     tax: [
       {
-        id: "tax_001",
+        _id: "tax_001",
         name: "Sales Tax",
         rate: 8.5,
         type: "percentage",
@@ -192,7 +192,7 @@ export const mockOrders = [
     updatedAt: "2024-01-15T18:20:00Z",
   },
   {
-    id: "ord_004",
+    _id: "ord_004",
     orderNumber: "ORD-2024-004",
     customerName: "Emily Davis",
     mobileNumber: "+1-555-0321",
@@ -201,7 +201,7 @@ export const mockOrders = [
     paymentMethod: "card",
     isPaid: true,
     subtotal: 35.5,
-    total: 42.15,
+    total: 47.02,
     discount: 0,
     serviceCharge: 0,
     tip: 5.0,
@@ -214,7 +214,7 @@ export const mockOrders = [
     },
     tax: [
       {
-        id: "tax_001",
+        _id: "tax_001",
         name: "Sales Tax",
         rate: 8.5,
         type: "percentage",
@@ -265,7 +265,7 @@ export const mockOrders = [
     updatedAt: "2024-01-15T20:35:00Z",
   },
   {
-    id: "ord_005",
+    _id: "ord_005",
     orderNumber: "ORD-2024-005",
     customerName: "David Brown",
     mobileNumber: "+1-555-0654",
@@ -274,14 +274,14 @@ export const mockOrders = [
     paymentMethod: "card",
     isPaid: false,
     subtotal: 22.5,
-    total: 24.44,
+    total: 24.41,
     discount: 0,
     serviceCharge: 0,
     tip: 0,
     refundStatus: "refunded",
     tax: [
       {
-        id: "tax_001",
+        _id: "tax_001",
         name: "Sales Tax",
         rate: 8.5,
         type: "percentage",

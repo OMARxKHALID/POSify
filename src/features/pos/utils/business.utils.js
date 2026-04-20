@@ -23,7 +23,7 @@ export function getTaxBreakdown(subtotal, taxSettings) {
   return taxSettings
     .filter((tax) => tax.enabled && tax.rate > 0)
     .map((tax) => ({
-      id: tax.id || tax._id || `tax-${tax.name}`,
+      _id: tax._id || `tax-${tax.name}`,
       name: tax.name,
       rate: Number(tax.rate),
       type: tax.type || "percentage",

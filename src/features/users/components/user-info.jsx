@@ -11,7 +11,6 @@ import {
   Shield,
   Users,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,7 +21,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-
 
 const getRoleIcon = (role) => {
   switch (role) {
@@ -63,7 +61,6 @@ const getRoleBadgeVariant = (role) => {
   }
 };
 
-
 export function UserInfoDisplay({
   session,
   showOrganization = true,
@@ -88,7 +85,6 @@ export function UserInfoDisplay({
     </div>
   );
 }
-
 
 export function UserDropdownMenu({
   session,
@@ -125,14 +121,12 @@ export function UserDropdownMenu({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-
         <DropdownMenuItem asChild>
           <Link href="/admin/dashboard" className="flex items-center gap-2">
             <LayoutDashboard className="w-4 h-4" />
             Dashboard
           </Link>
         </DropdownMenuItem>
-
 
         {showPOS &&
           (session.user.role === "admin" || session.user.role === "staff") && (
@@ -143,7 +137,6 @@ export function UserDropdownMenu({
               </Link>
             </DropdownMenuItem>
           )}
-
 
         {showSettings && session.user.role === "admin" && (
           <DropdownMenuItem asChild>
@@ -159,7 +152,6 @@ export function UserDropdownMenu({
 
         <DropdownMenuSeparator />
 
-
         <DropdownMenuItem
           onClick={() => signOut({ callbackUrl: logoutCallback })}
           className="flex items-center gap-2 text-red-600 focus:text-red-600"
@@ -171,7 +163,6 @@ export function UserDropdownMenu({
     </DropdownMenu>
   );
 }
-
 
 export function MobileUserInfo({ session, className = "" }) {
   if (!session?.user) return null;
@@ -187,7 +178,6 @@ export function MobileUserInfo({ session, className = "" }) {
   );
 }
 
-
 export function MobileUserMenu({
   session,
   showPOS = true,
@@ -198,7 +188,6 @@ export function MobileUserMenu({
 
   return (
     <>
-
       <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
         <div className="flex items-center gap-2">
           {getRoleIcon(session.user.role)}
@@ -214,7 +203,6 @@ export function MobileUserMenu({
           </div>
         </div>
       </div>
-
 
       <Button variant="ghost" asChild className="justify-start h-12 text-lg">
         <Link href="/admin/dashboard" className="flex items-center gap-3">
@@ -261,7 +249,6 @@ export function MobileUserMenu({
   );
 }
 
-
 export function SimpleUserDisplay({ session, className = "" }) {
   if (!session?.user) return null;
 
@@ -280,6 +267,5 @@ export function SimpleUserDisplay({ session, className = "" }) {
     </div>
   );
 }
-
 
 export { getRoleIcon, getRoleLabel, getRoleBadgeVariant };

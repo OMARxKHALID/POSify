@@ -79,7 +79,7 @@ function EditUserContent() {
 
   const users = usersData?.users || [];
   const currentUser = usersData?.currentUser;
-  const targetUser = users.find((u) => u.id === userId) || null;
+  const targetUser = users.find((u) => u._id === userId) || null;
 
 
   const form = useForm({
@@ -115,7 +115,8 @@ function EditUserContent() {
     ownershipTransferMutation?.isPending;
 
 
-  const isCurrentUser = currentUser?.id === userId;
+  const currentUserId = currentUser?._id || currentUser?.id;
+  const isCurrentUser = currentUserId === userId;
   const canEdit = canEditUser(currentUser, targetUser);
   const userCanChangeRole = canChangeRole(currentUser, targetUser);
   const userCanChangeStatus = canChangeStatus(currentUser, targetUser);
@@ -183,7 +184,7 @@ function EditUserContent() {
     try {
       const result = await ownershipTransferMutation.mutateAsync({
         organizationId: currentUser.organizationId,
-        newOwnerId: targetUser.id,
+        newOwnerId: targetUser._id,
       });
 
       if (result?.ownershipTransferred) {

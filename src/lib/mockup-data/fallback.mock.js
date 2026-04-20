@@ -41,7 +41,7 @@ export const mockFallback = {
       data: {
         menuItems: menuWithCategories,
         categories: mockCategories.filter((c) => c.isActive),
-        organization: { id: "demo_org", name: "Demo Restaurant" },
+        organization: { _id: "demo_org", name: "Demo Restaurant" },
       },
       isDemo: true,
     };
@@ -52,7 +52,7 @@ export const mockFallback = {
     code: "CATEGORIES_RETRIEVED_SUCCESSFULLY",
     data: {
       categories: mockCategories,
-      organization: { id: "demo_org", name: "Demo Restaurant" },
+      organization: { _id: "demo_org", name: "Demo Restaurant" },
     },
     isDemo: true,
   }),
@@ -116,8 +116,8 @@ export const mockFallback = {
     code: "SETTINGS_RETRIEVED_SUCCESSFULLY",
     data: {
       settings: mockSettings,
-      organization: { id: "demo_org", name: "Demo Restaurant", owner: "demo_user_001" },
-      currentUser: { id: "demo_user_001", role: "admin", name: "Demo Admin" },
+      organization: { _id: "demo_org", name: "Demo Restaurant", owner: "demo_user_001" },
+      currentUser: { _id: "demo_user_001", role: "admin", name: "Demo Admin" },
     },
     isDemo: true,
   }),
@@ -128,7 +128,7 @@ export const mockFallback = {
     data: {
       users: [
         {
-          id: "demo_user_001",
+          _id: "demo_user_001",
           name: "Admin User",
           email: "admin@demo.com",
           role: "admin",
@@ -142,7 +142,7 @@ export const mockFallback = {
           ).toISOString(),
         },
         {
-          id: "demo_user_002",
+          _id: "demo_user_002",
           name: "Jane Staff",
           email: "staff@demo.com",
           role: "staff",
@@ -156,7 +156,7 @@ export const mockFallback = {
           ).toISOString(),
         },
         {
-          id: "demo_user_003",
+          _id: "demo_user_003",
           name: "Bob Pending",
           email: "pending@demo.com",
           role: "pending",
@@ -170,7 +170,7 @@ export const mockFallback = {
           ).toISOString(),
         },
       ],
-      organization: { id: "demo_org", name: "Demo Restaurant" },
+      organization: { _id: "demo_org", name: "Demo Restaurant" },
     },
     isDemo: true,
   }),
@@ -179,7 +179,7 @@ export const mockFallback = {
     success: true,
     code: "ORGANIZATION_RETRIEVED_SUCCESSFULLY",
     data: {
-      id: "demo_org",
+      _id: "demo_org",
       name: "Demo Restaurant",
       slug: "demo-restaurant",
       businessType: "restaurant",

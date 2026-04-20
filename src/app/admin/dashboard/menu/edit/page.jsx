@@ -58,7 +58,7 @@ function EditMenuItemContent() {
   const menuItems = menuData?.menuItems || [];
   const categories = menuData?.categories || [];
   const targetMenuItem =
-    menuItems.find((item) => item.id === menuItemId) || null;
+    menuItems.find((item) => item._id === menuItemId) || null;
 
 
   const form = useForm({

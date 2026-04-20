@@ -53,7 +53,7 @@ export default function OrdersPage() {
       const order = mutation.state.variables;
       return {
         ...order,
-        id: `pending-${Math.random()}`,
+        _id: `pending-${Math.random()}`,
         orderNumber: "SYNCING...",
         createdAt: new Date().toISOString(),
         isPending: true,
@@ -222,7 +222,7 @@ export default function OrdersPage() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(`/admin/dashboard/orders/${order.id}`)
+                    router.push(`/admin/dashboard/orders/${order._id}`)
                   }
                 >
                   View Details

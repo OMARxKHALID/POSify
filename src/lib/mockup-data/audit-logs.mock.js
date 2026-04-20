@@ -1,6 +1,6 @@
 export const mockAuditLogs = [
   {
-    id: "al_001",
+    _id: "al_001",
     action: "LOGIN",
     resource: "User",
     resourceId: "demo_user_001",
@@ -12,7 +12,7 @@ export const mockAuditLogs = [
     createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
   },
   {
-    id: "al_002",
+    _id: "al_002",
     action: "CREATE",
     resource: "Order",
     resourceId: "ord_1001",
@@ -24,7 +24,7 @@ export const mockAuditLogs = [
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
   },
   {
-    id: "al_003",
+    _id: "al_003",
     action: "UPDATE",
     resource: "Product",
     resourceId: "item_005",

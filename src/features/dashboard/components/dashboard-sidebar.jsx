@@ -36,8 +36,8 @@ import { filterNavigationByPermissions } from "@/lib/utils/access-control";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 
 const FALLBACK_ORGS = [
-  { id: "2", name: "Demo Store", isActive: false },
-  { id: "3", name: "Test Location", isActive: false },
+  { _id: "2", name: "Demo Store", isActive: false },
+  { _id: "3", name: "Test Location", isActive: false },
 ];
 
 function OrganizationSwitcher({ user, organizations = [] }) {
@@ -53,7 +53,7 @@ function OrganizationSwitcher({ user, organizations = [] }) {
     if (user?.organizationName) {
       return [
         {
-          id: "1",
+          _id: "1",
           name: user.organizationName,
           isActive: true,
         },
@@ -87,7 +87,7 @@ function OrganizationSwitcher({ user, organizations = [] }) {
       <DropdownMenuContent className="w-56" align="start">
         {availableOrgs.map((org) => (
           <DropdownMenuItem
-            key={org.id}
+            key={org._id}
             onClick={() => setSelectedOrg(org.name)}
             className="flex items-center justify-between"
           >

@@ -16,7 +16,7 @@ export function TaxSettingsSection({
   const handleInlineAdd = () => {
     const next = [
       ...taxes,
-      { id: `tax_${Date.now()}`, name: "", rate: 0, enabled: true, type: "percentage" },
+      { _id: `tax_${Date.now()}`, name: "", rate: 0, enabled: true, type: "percentage" },
     ];
     form.setValue("taxes", next, { shouldDirty: true });
   };
@@ -54,7 +54,7 @@ export function TaxSettingsSection({
           <div className="divide-y">
             {taxes.map((tax, index) => (
               <div
-                key={tax.id || index}
+                key={tax._id || index}
                 className="grid grid-cols-1 md:grid-cols-12 items-center gap-3 px-4 py-3"
               >
                 <div className="md:col-span-5">

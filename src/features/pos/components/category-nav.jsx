@@ -17,7 +17,7 @@ export function CategoryNav({
     return menuItems.filter((item) => {
 
       const itemCategoryId =
-        (item.category && (item.category.id || item.category._id)) ||
+        (item.category && item.category._id) ||
         item.categoryId ||
         (typeof item.category === "string" ? item.category : null);
       return itemCategoryId === categoryId;
@@ -26,7 +26,7 @@ export function CategoryNav({
 
 
   const allCategory = {
-    id: "all",
+    _id: "all",
     name: "All",
     icon: "🍽️",
     count: getCategoryItemCount("all"),
@@ -35,8 +35,8 @@ export function CategoryNav({
 
   const categoriesWithCount = categories.map((cat) => ({
     ...cat,
-    id: cat.id || cat._id, 
-    count: getCategoryItemCount(cat.id || cat._id),
+    _id: cat._id,
+    count: getCategoryItemCount(cat._id),
   }));
 
   const displayCategories = [allCategory, ...categoriesWithCount];
@@ -66,12 +66,12 @@ export function CategoryNav({
   return (
     <div className="flex gap-2 mb-2 pb-3 overflow-x-auto scrollbar-hide max-w-full">
       {displayCategories.map((cat, idx) => {
-        const selected = selectedCategory === cat.id;
+        const selected = selectedCategory === cat._id;
         return (
           <button
-            key={cat.id || `cat-${idx}`}
+            key={cat._id || `cat-${idx}`}
             type="button"
-            onClick={() => onCategoryChange?.(cat.id)}
+            onClick={() => onCategoryChange?.(cat._id)}
             className={cn(
               "flex flex-col justify-between items-start p-2 rounded-2xl transition-all duration-200 w-[105px] h-[115px] border-2 flex-shrink-0 hover:shadow",
               selected

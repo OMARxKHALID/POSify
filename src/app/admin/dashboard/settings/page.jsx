@@ -158,7 +158,7 @@ export default function SettingsPage() {
   const addTax = () => {
     const currentTaxes = form.getValues("taxes") || [];
     const newTax = {
-      id: `tax_${Date.now()}`,
+      _id: `tax_${Date.now()}`,
       name: "",
       rate: 0,
       enabled: true,

@@ -54,14 +54,13 @@ export function PricingSection() {
 
   return (
     <motion.section
-      className="relative px-4 py-16"
+      className="relative px-4 py-16 overflow-hidden"
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="mx-auto max-w-7xl">
-
         <div className="mb-8 text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/50 px-4 py-2 backdrop-blur-sm">
             <Sparkles className="h-4 w-4 text-primary" />
@@ -77,7 +76,6 @@ export function PricingSection() {
           <p className="mx-auto mb-4 max-w-2xl text-lg text-muted-foreground">
             Start with our free trial. Upgrade anytime as your business grows.
           </p>
-
 
           <div className="mx-auto flex w-fit items-center gap-4 rounded-full border border-border/50 bg-card/50 p-1 backdrop-blur-sm">
             <button
@@ -106,7 +104,6 @@ export function PricingSection() {
           </div>
         </div>
 
-
         <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-3">
           {pricingPlans.map((plan) => {
             const price =
@@ -131,7 +128,6 @@ export function PricingSection() {
                   </div>
                 )}
 
-
                 <div className="mb-8 text-center">
                   <h3 className="mb-2 text-xl font-bold text-foreground">
                     {plan.name}
@@ -149,7 +145,6 @@ export function PricingSection() {
                   </p>
                 </div>
 
-
                 <ul className="mb-8 space-y-4">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-center gap-3">
@@ -160,7 +155,6 @@ export function PricingSection() {
                     </li>
                   ))}
                 </ul>
-
 
                 <Button
                   asChild
@@ -178,7 +172,6 @@ export function PricingSection() {
             );
           })}
         </div>
-
 
         <div className="mt-16 text-center">
           <p className="mb-4 text-muted-foreground">

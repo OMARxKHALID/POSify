@@ -1,91 +1,129 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Github, Twitter, MessageCircle, ArrowRight } from "lucide-react";
 
 const FOOTER_LINKS = [
   {
-    title: "Main",
-    links: ["Home", "Docs", "Components"],
+    title: "Product",
+    links: [
+      { name: "Features", href: "#features" },
+      { name: "Pricing", href: "#pricing" },
+      { name: "Documentation", href: "/docs" },
+      { name: "Release Notes", href: "/releases" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { name: "About Us", href: "/about" },
+      { name: "Careers", href: "/careers" },
+      { name: "Contact", href: "/contact" },
+      { name: "Privacy Policy", href: "/privacy" },
+    ],
   },
   {
     title: "Community",
-    links: ["Github", "Twitter", "Discord"],
+    links: [
+      { name: "GitHub", href: "https://github.com", icon: Github },
+      { name: "Twitter", href: "https://twitter.com", icon: Twitter },
+      { name: "Discord", href: "https://discord.com", icon: MessageCircle },
+    ],
   },
 ];
 
 export function Footer() {
-  const [isAtBottom, setIsAtBottom] = useState(false);
-
-  useEffect(() => {
-    let ticking = false;
-
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          const scrollTop = window.scrollY;
-          const windowHeight = window.innerHeight;
-          const documentHeight = document.documentElement.scrollHeight;
-
-
-          const nearBottom = scrollTop + windowHeight >= documentHeight - 50;
-
-          setIsAtBottom(nearBottom);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); 
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const currentYear = new Date().getFullYear();
 
   return (
-    <AnimatePresence>
-      {isAtBottom && (
-        <motion.footer
-          className="fixed bottom-0 left-0 z-50 h-80 w-full border-t border-primary/20 bg-gradient-to-b from-primary to-primary/90 backdrop-blur-sm"
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "100%" }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-        >
-          <div className="relative flex h-full w-full items-start justify-end overflow-hidden px-7 py-7 text-right sm:px-12 sm:py-12">
+    <footer className="relative mt-24 px-4 pb-12 sm:px-6 lg:px-8 overflow-hidden">
+      <div className="mx-auto max-w-7xl rounded-[32px] border border-border/50 bg-card/30 backdrop-blur-xl overflow-hidden pt-20 pb-10 px-8 sm:px-12">
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
-            <motion.div
-              className="flex flex-row space-x-8 text-sm sm:space-x-12 sm:text-base md:space-x-16 md:text-lg lg:space-x-20"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              {FOOTER_LINKS.map((group) => (
-                <ul key={group.title} className="space-y-3">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8 relative z-10">
+          <div className="lg:col-span-4 space-y-8">
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-xl shadow-lg shadow-primary/20 transition-transform group-hover:scale-110">
+                P
+              </div>
+              <span className="text-2xl font-black tracking-tighter">
+                POSIFY
+              </span>
+            </Link>
+
+            <p className="text-muted-foreground text-lg max-w-xs leading-relaxed">
+              The modern operating system for high-performance hospitality
+              businesses.
+            </p>
+
+            <div className="flex items-center gap-4">
+              {FOOTER_LINKS[2].links.map((social) => (
+                <Link
+                  key={social.name}
+                  href={social.href}
+                  className="w-10 h-10 rounded-full border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all bg-background/50 backdrop-blur-sm"
+                >
+                  <social.icon size={18} />
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8 relative z-10">
+            {FOOTER_LINKS.map((group) => (
+              <div key={group.title} className="space-y-6">
+                <h3 className="text-sm font-black uppercase tracking-widest text-foreground/50">
+                  {group.title}
+                </h3>
+                <ul className="space-y-4">
                   {group.links.map((link) => (
-                    <li
-                      key={link}
-                      className="cursor-pointer text-primary-foreground/90 transition-colors duration-200 hover:text-primary-foreground hover:underline"
-                    >
-                      {link}
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"
+                      >
+                        {link.name}
+                        <ArrowRight
+                          size={12}
+                          className="opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0"
+                        />
+                      </Link>
                     </li>
                   ))}
                 </ul>
-              ))}
-            </motion.div>
-
-
-            <motion.h2
-              className="absolute bottom-0 left-0 select-none text-[80px] font-bold text-primary-foreground/90 sm:text-[120px] md:text-[160px] lg:text-[192px] translate-y-1/3"
-              initial={{ opacity: 0, x: -100 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              POSIFY
-            </motion.h2>
+              </div>
+            ))}
           </div>
-        </motion.footer>
-      )}
-    </AnimatePresence>
+        </div>
+
+        <div className="my-12 h-px w-full bg-gradient-to-r from-transparent via-border to-transparent opacity-50 relative z-10" />
+
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+          <p className="text-sm text-muted-foreground text-center md:text-left">
+            © {currentYear} POSify Inc. All rights reserved. Built with
+            precision for the modern web.
+          </p>
+
+          <div className="flex items-center gap-8 text-sm text-muted-foreground">
+            <Link
+              href="/terms"
+              className="hover:text-foreground transition-colors"
+            >
+              Terms
+            </Link>
+            <Link
+              href="/privacy"
+              className="hover:text-foreground transition-colors"
+            >
+              Privacy
+            </Link>
+          </div>
+        </div>
+
+        <div className="absolute -bottom-10 -left-10 text-[15vw] font-black text-foreground/[0.03] select-none pointer-events-none tracking-tighter">
+          POSIFY
+        </div>
+      </div>
+    </footer>
   );
 }

@@ -262,7 +262,7 @@ export default function UsersPage() {
               {canEdit && (
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(`/admin/dashboard/users/edit?id=${user.id}`)
+                    router.push(`/admin/dashboard/users/edit?id=${user._id}`)
                   }
                 >
                   <Edit className="mr-2 h-4 w-4" />
@@ -271,7 +271,7 @@ export default function UsersPage() {
               )}
               {canDelete && (
                 <DropdownMenuItem
-                  onClick={() => handleDeleteUser(user.id)}
+                  onClick={() => handleDeleteUser(user._id)}
                   className="text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -286,7 +286,7 @@ export default function UsersPage() {
   ];
 
   const handleDeleteUser = (userId) => {
-    const user = users.find((u) => u.id === userId);
+    const user = users.find((u) => u._id === userId);
     if (user) {
       setDeleteDialog({
         isOpen: true,
@@ -375,7 +375,7 @@ export default function UsersPage() {
                 <div className="min-w-0 flex-1">
                   <p className="font-medium truncate">{organization.name}</p>
                   <p className="text-sm text-muted-foreground truncate">
-                    Organization ID: {organization.id}
+                    Organization ID: {organization._id}
                   </p>
                 </div>
               </div>

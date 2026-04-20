@@ -15,7 +15,7 @@ export const useCategories = (options = {}) => {
   const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
-    queryKey: queryKeys.categories,
+    queryKey: queryKeys.categories(),
     queryFn: createDemoQueryFn(
       "/dashboard/categories",
       () => mockFallback.categories().data,

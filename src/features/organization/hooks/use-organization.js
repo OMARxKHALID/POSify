@@ -20,7 +20,7 @@ export const useOrganizationOverview = (options = {}) => {
   const isDemoMode = useIsDemoModeEnabled();
 
   return useQuery({
-    queryKey: queryKeys.organization,
+    queryKey: queryKeys.organization(),
     queryFn: createDemoQueryFn(
       "/organizations/overview",
       () => mockFallback.organization().data,
@@ -34,9 +34,15 @@ export const useOrganizationOverview = (options = {}) => {
 };
 
 export const useSuspenseOrganizationOverview = (options = {}) => {
+  const isDemoMode = useIsDemoModeEnabled();
+
   return useSuspenseQuery({
-    queryKey: queryKeys.organization,
-    queryFn: () => apiClient.get("/organizations/overview"),
+    queryKey: queryKeys.organization(),
+    queryFn: createDemoQueryFn(
+      "/organizations/overview",
+      () => mockFallback.organization().data,
+      isDemoMode,
+    ),
     ...getDefaultQueryOptions({
       staleTime: 5 * 60 * 1000,
       ...options,

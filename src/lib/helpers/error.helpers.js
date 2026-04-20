@@ -1,13 +1,8 @@
-
-
 const ERROR_MESSAGES = {
-
   AUTHENTICATION_REQUIRED:
     "You need to be signed in to continue. Please log in.",
   INVALID_CREDENTIALS: "Incorrect email or password. Please try again.",
   INACTIVE_ACCOUNT: "Your account is inactive. Contact support for assistance.",
-  CREDENTIALS_SIGNIN: "Incorrect email or password. Please try again.",
-
 
   SIGNIN: "Sign-in failed. Try again with a different account.",
   OAUTH_SIGNIN: "Unable to sign in. Try again with a different account.",
@@ -22,20 +17,15 @@ const ERROR_MESSAGES = {
   EMAIL_SIGNIN: "Check your email inbox for the sign-in link.",
   SESSION_REQUIRED: "Your session has expired. Please sign in again.",
 
-
   USER_NOT_FOUND: "No matching user found. Please check your details.",
   USER_EXISTS:
     "This email is already in use. Please use a different email address.",
   SUPER_ADMIN_EXISTS: "A super admin already exists in the system.",
-  INACTIVE_USER: "This account is inactive. Contact support for assistance.",
-  TARGET_USER_NOT_FOUND: "No matching user found. Please check your details.",
   INVALID_USER_ID: "The user ID provided is not valid.",
   INVALID_ROLE_FOR_ADMIN: "Admins can only create staff accounts.",
   INVALID_FIELDS_FOR_STAFF: "Staff accounts can only update their password.",
   CANNOT_EDIT_ADMIN: "Admins cannot edit other admin accounts.",
   CANNOT_DEACTIVATE_SELF: "You cannot deactivate your own account.",
-  EMAIL_ALREADY_EXISTS:
-    "This email is already in use. Please use a different one.",
   CANNOT_DELETE_ADMIN: "Admin accounts cannot be deleted.",
   CANNOT_DELETE_SELF: "You cannot delete your own account.",
   CANNOT_DELETE_ORG_OWNER_NO_STAFF:
@@ -52,11 +42,8 @@ const ERROR_MESSAGES = {
   OWNERSHIP_ALREADY_TRANSFERRED:
     "Organization ownership has already been transferred by another user.",
   TRANSFER_FAILED: "We couldn't transfer ownership. Please try again.",
-  OWNERSHIP_TRANSFERRED_SUCCESSFULLY:
-    "Organization ownership transferred successfully! You will be logged out.",
   UPDATE_FAILED: "We couldn't update the user. Please try again.",
   DELETE_FAILED: "We couldn't delete the user. Please try again.",
-
 
   ORGANIZATION_NOT_FOUND: "Organization not found. Please contact support.",
   ORGANIZATION_EXISTS:
@@ -68,16 +55,13 @@ const ERROR_MESSAGES = {
   NO_ORGANIZATION_FOUND: "No organization is linked to this user.",
   NO_ORGANIZATION_OVERVIEW: "No organization overview available.",
 
-
   VALIDATION_ERROR: "Some inputs are invalid. Please check and try again.",
   INVALID_JSON: "The data format is invalid. Please try again.",
   DB_CONNECTION_ERROR:
     "We couldn't connect to the database. Please try again later.",
   INVALID_TIME_RANGE: "Invalid time range. Allowed values: 7d, 30d, 90d.",
 
-
   INSUFFICIENT_PERMISSIONS: "You don't have permission to perform this action.",
-
 
   LOGIN_FAILED: "We couldn't log you in. Please try again.",
   REGISTRATION_FAILED: "We couldn't complete registration. Please try again.",
@@ -86,7 +70,6 @@ const ERROR_MESSAGES = {
   USER_CREATION_FAILED: "We couldn't create the user. Please try again.",
   ANALYTICS_FETCH_FAILED: "We couldn't load analytics data. Please try again.",
   UNEXPECTED_ERROR: "An unexpected error occurred. Please try again.",
-
 
   MENU_ITEM_CREATION_FAILED:
     "We couldn't create the menu item. Please try again.",
@@ -98,7 +81,6 @@ const ERROR_MESSAGES = {
   MENU_ITEM_HAS_ORDERS: "Cannot delete menu item that has been ordered.",
   INVALID_MENU_ITEM_ID: "Invalid menu item ID provided.",
 
-
   ORDER_CREATION_FAILED: "We couldn't create the order. Please try again.",
   ORDER_NOT_FOUND: "The order was not found.",
   ORDER_UPDATE_FAILED: "We couldn't update the order. Please try again.",
@@ -108,7 +90,6 @@ const ERROR_MESSAGES = {
   ORDER_REFUND_FAILED: "We couldn't process the refund. Please try again.",
   INVALID_ORDER_ID: "Invalid order ID provided.",
   ORDERS_RETRIEVAL_FAILED: "We couldn't load orders. Please try again.",
-
 
   TRANSACTION_CREATION_FAILED:
     "We couldn't create the transaction. Please try again.",
@@ -127,80 +108,50 @@ const ERROR_MESSAGES = {
   TRANSACTION_NUMBER_EXISTS: "A transaction with this number already exists.",
 };
 
-
 const SUCCESS_MESSAGES = {
-
   LOGIN_SUCCESSFUL: "Login successful! Redirecting...",
-
 
   USER_REGISTERED_SUCCESSFULLY: "User registered successfully!",
   SUPER_ADMIN_REGISTERED_SUCCESSFULLY: "Super admin registered successfully!",
   USER_CREATED_SUCCESSFULLY: "User created successfully!",
   USER_UPDATED_SUCCESSFULLY: "User updated successfully!",
   USER_DELETED_SUCCESSFULLY: "User deleted successfully!",
-  USERS_RETRIEVED_SUCCESSFULLY: "Users retrieved successfully!",
-  USER_OVERVIEW_RETRIEVED_SUCCESSFULLY: "User overview retrieved successfully!",
-
 
   ORGANIZATION_REGISTERED_SUCCESSFULLY: "Organization registered successfully!",
-  ORGANIZATION_DATA_RETRIEVED_SUCCESSFULLY:
-    "Organization data retrieved successfully!",
-  ORGANIZATION_OVERVIEW_RETRIEVED_SUCCESSFULLY:
-    "Organization overview retrieved successfully!",
   OWNERSHIP_TRANSFERRED_SUCCESSFULLY: "Ownership transferred successfully!",
-  AVAILABLE_STAFF_RETRIEVED_SUCCESSFULLY:
-    "Available staff retrieved successfully!",
 
-
-  ANALYTICS_RETRIEVED_SUCCESSFULLY: "Analytics data retrieved successfully!",
-  ANALYTICS_RETRIEVED_SUCCESSFULLY_SUPER_ADMIN:
-    "Analytics data retrieved successfully!",
-
-
-  AUDIT_LOGS_RETRIEVED_SUCCESSFULLY: "Audit logs retrieved successfully!",
-
-
-  MENU_RETRIEVED_SUCCESSFULLY: "Menu items retrieved successfully!",
   MENU_ITEM_CREATED_SUCCESSFULLY: "Menu item created successfully!",
   MENU_ITEM_UPDATED_SUCCESSFULLY: "Menu item updated successfully!",
   MENU_ITEM_DELETED_SUCCESSFULLY: "Menu item deleted successfully!",
 
-
-  ORDERS_RETRIEVED_SUCCESSFULLY: "Orders retrieved successfully!",
   ORDER_CREATED_SUCCESSFULLY: "Order created successfully!",
   ORDER_UPDATED_SUCCESSFULLY: "Order updated successfully!",
   ORDER_DELETED_SUCCESSFULLY: "Order deleted successfully!",
   ORDER_STATUS_UPDATED_SUCCESSFULLY: "Order status updated successfully!",
   ORDER_REFUND_PROCESSED_SUCCESSFULLY: "Refund processed successfully!",
 
-
-  TRANSACTIONS_RETRIEVED_SUCCESSFULLY: "Transactions retrieved successfully!",
   TRANSACTION_CREATED_SUCCESSFULLY: "Transaction created successfully!",
   TRANSACTION_UPDATED_SUCCESSFULLY: "Transaction updated successfully!",
   TRANSACTION_DELETED_SUCCESSFULLY: "Transaction deleted successfully!",
-  TRANSACTION_STATS_RETRIEVED_SUCCESSFULLY:
-    "Transaction statistics retrieved successfully!",
 
-
-  SETTINGS_RETRIEVED_SUCCESSFULLY: "Settings retrieved successfully!",
   SETTINGS_UPDATED_SUCCESSFULLY: "Settings updated successfully!",
 };
-
 
 const DEFAULT_MESSAGES = {
   auth: "An authentication error occurred. Please try again.",
   api: "Something went wrong. Please try again later.",
 };
 
-
 export function getErrorMessage(errorCode, context = "api") {
-  return ERROR_MESSAGES[errorCode] || DEFAULT_MESSAGES[context];
+  return (
+    ERROR_MESSAGES[errorCode] ||
+    DEFAULT_MESSAGES[context] ||
+    DEFAULT_MESSAGES.api
+  );
 }
-
 
 export function getSuccessMessage(successCode) {
   return SUCCESS_MESSAGES[successCode] || "Operation completed successfully!";
 }
-
 
 export { ERROR_MESSAGES, SUCCESS_MESSAGES };

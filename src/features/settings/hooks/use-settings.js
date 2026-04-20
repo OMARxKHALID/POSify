@@ -3,7 +3,6 @@ import { useSession } from "@/lib/mock-auth";
 import { apiClient } from "@/lib/api-client";
 import {
   getDefaultQueryOptions,
-  getDefaultMutationOptions,
   handleHookSuccess,
   queryKeys,
   invalidateQueries,
@@ -34,7 +33,7 @@ export const useSettings = (options = {}) => {
 
         const processData = (sourceData) => {
           const { settings, organization, currentUser } = sourceData;
-          const organizationId = settings?.organizationId || organization?.id;
+          const organizationId = settings?.organizationId || organization?._id;
           const userRole = currentUser?.role;
 
           return {
@@ -44,11 +43,11 @@ export const useSettings = (options = {}) => {
             organization,
             currentUser,
             userRole,
-            userId: currentUser?.id,
+            userId: currentUser?._id,
             isAdmin: userRole === "admin",
             isStaff: userRole === "staff",
             isOwner:
-              userRole === "admin" && organization?.owner === currentUser?.id,
+              userRole === "admin" && organization?.owner === currentUser?._id,
             _raw: sourceData,
           };
         };
@@ -74,7 +73,7 @@ export const useSettings = (options = {}) => {
             ...mockFallback.settings().data.settings,
             organizationId: "demo_org",
             organizationName: "Demo Restaurant",
-            organization: { id: "demo_org", name: "Demo Restaurant" },
+            organization: { _id: "demo_org", name: "Demo Restaurant" },
             isDemo: true,
           };
         }

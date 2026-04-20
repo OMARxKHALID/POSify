@@ -10,7 +10,7 @@ import {
   TrendingUp,
   Clock,
   CheckCircle2,
-  DollarSign,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils/ui.utils";
 
@@ -70,14 +70,22 @@ export function FeatureSection() {
   };
 
   return (
-    <section
-      id="features"
-      className="relative py-24 overflow-hidden bg-background"
-    >
+    <section id="features" className="relative py-24 overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16 space-y-4">
+        <div className="text-center mb-16 space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            className="flex justify-center"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-black uppercase tracking-widest text-primary shadow-[0_0_15px_rgba(var(--primary),0.1)]">
+              <Sparkles className="h-4 w-4" />
+              <span>Features</span>
+            </div>
+          </motion.div>
+
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -95,18 +103,23 @@ export function FeatureSection() {
           </motion.p>
         </div>
 
-        <div ref={ref} className="grid grid-cols-12 gap-8">
+        <div ref={ref} className="grid grid-cols-12 gap-4">
           {featureCards.map((feature) => (
             <motion.div
               key={feature.id}
               className={cn(
-                "group relative rounded-3xl border border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden p-10 transition-all hover:border-primary/50",
+                "group relative rounded-3xl border border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden p-6 transition-all hover:border-primary/50",
                 feature.colSpan,
               )}
               onMouseEnter={() => setHoveredId(feature.id)}
               onMouseLeave={() => setHoveredId(null)}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : {}}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={isInView ? { opacity: 1, scale: 1, y: 0 } : {}}
+              transition={{
+                duration: 0.5,
+                delay: featureCards.indexOf(feature) * 0.1,
+                ease: "easeOut",
+              }}
             >
               <div className="relative z-10 space-y-4 mb-10">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
@@ -120,7 +133,7 @@ export function FeatureSection() {
                 </p>
               </div>
 
-              <div className="relative h-[380px] w-full flex items-center justify-center overflow-hidden">
+              <div className="relative h-[300px] w-full flex items-center justify-center">
                 {renderFeatureContent(feature.id)}
               </div>
             </motion.div>
@@ -139,18 +152,18 @@ const MenuWOW = ({ isHovered }) => {
   ];
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center scale-110">
-      <div className="relative w-56 h-40">
+    <div className="relative w-full h-full flex items-center justify-center">
+      <div className="relative w-48 h-32">
         {items.map((item, i) => (
           <motion.div
             key={item.name}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{
               opacity: 1,
-              scale: isHovered ? 1.1 : 1 - i * 0.05,
-              y: isHovered ? (i - 1) * 85 : i * -6,
-              x: isHovered ? (i - 1) * 30 : 0,
-              rotate: isHovered ? (i - 1) * 8 : 0,
+              scale: isHovered ? 1 : 1 - i * 0.05,
+              y: isHovered ? (i - 1) * 55 : i * -5,
+              x: isHovered ? (i - 1) * 15 : 0,
+              rotate: isHovered ? (i - 1) * 5 : 0,
               zIndex: 10 - i,
             }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
@@ -181,72 +194,78 @@ const MenuWOW = ({ isHovered }) => {
 };
 
 const OrdersWOW = ({ isHovered }) => {
+  const orders = [
+    {
+      id: "#104",
+      item: "🍔 Burger Combo",
+      status: "Ready",
+      color: "text-green-500",
+      bg: "bg-green-500",
+    },
+    {
+      id: "#103",
+      item: "☕ Latte",
+      status: "Preparing",
+      color: "text-orange-500",
+      bg: "bg-orange-500",
+    },
+    {
+      id: "#102",
+      item: "🍕 Pepperoni",
+      status: "New",
+      color: "text-primary",
+      bg: "bg-primary",
+    },
+  ];
+
   return (
-    <div className="relative flex items-center justify-center w-full h-full scale-110">
-      <div className="relative w-56 h-56">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-0 rounded-full border-2 border-dashed border-primary/30"
-        />
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-6 rounded-full border-2 border-dashed border-primary/20"
-        />
-
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-primary/20 border-2 border-primary/50 flex items-center justify-center shadow-2xl">
+    <div className="relative w-full h-full flex items-center justify-center">
+      <div className="w-full max-w-[280px] space-y-3">
+        {orders.map((order, i) => (
           <motion.div
-            animate={{ scale: [1, 1.3, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-6 h-6 rounded-full bg-primary shadow-[0_0_20px_rgba(var(--primary),0.5)]"
-          />
-        </div>
-
-        {isHovered &&
-          [0, 90, 180, 270].map((angle, i) => (
-            <motion.div
-              key={i}
-              animate={{
-                rotate: 360,
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "linear",
-                delay: i * 0.7,
-              }}
-              className="absolute inset-0"
-            >
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_12px_rgba(var(--primary),1)]" />
-            </motion.div>
-          ))}
-
-        {[
-          {
-            icon: Clock,
-            label: "Preparing",
-            pos: "-top-4 -left-12",
-            color: "text-orange-500",
-          },
-          {
-            icon: CheckCircle2,
-            label: "Ready",
-            pos: "-bottom-4 -right-16",
-            color: "text-green-500",
-          },
-        ].map((badge, i) => (
-          <motion.div
-            key={i}
-            animate={isHovered ? { y: [0, -10, 0] } : {}}
-            transition={{ duration: 3, repeat: Infinity, delay: i * 0.5 }}
-            className={cn(
-              "absolute px-5 py-2.5 rounded-full bg-background border border-border/50 shadow-2xl flex items-center gap-3 text-xs font-bold uppercase tracking-widest",
-              badge.pos,
-            )}
+            key={order.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{
+              opacity: 1,
+              x: 0,
+              y: isHovered ? 0 : i * 4,
+              scale: isHovered ? 1 : 1 - i * 0.03,
+            }}
+            transition={{
+              delay: i * 0.1,
+              type: "spring",
+              stiffness: 300,
+              damping: 25,
+            }}
+            className="flex items-center gap-3 rounded-xl bg-background border border-border/50 px-4 py-3 shadow-lg"
           >
-            <badge.icon className={badge.color} size={14} />
-            <span className="opacity-90">{badge.label}</span>
+            <div className="text-lg">{order.item.split(" ")[0]}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold truncate">
+                {order.item.split(" ").slice(1).join(" ")}
+              </div>
+              <div className="text-[10px] text-muted-foreground font-mono">
+                {order.id}
+              </div>
+            </div>
+            <motion.div
+              animate={
+                isHovered && order.status === "Preparing"
+                  ? { opacity: [1, 0.4, 1] }
+                  : {}
+              }
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                order.bg + "/15",
+                order.color,
+              )}
+            >
+              {order.status === "Ready" && <CheckCircle2 size={10} />}
+              {order.status === "Preparing" && <Clock size={10} />}
+              {order.status === "New" && <ShoppingCart size={10} />}
+              {order.status}
+            </motion.div>
           </motion.div>
         ))}
       </div>
@@ -258,8 +277,8 @@ const AnalyticsWOW = ({ isHovered }) => {
   const bars = [40, 75, 45, 95, 65, 85, 55];
 
   return (
-    <div className="w-full max-w-sm space-y-10 scale-110">
-      <div className="flex items-end justify-between h-40 gap-3 px-6">
+    <div className="w-full max-w-[280px] mx-auto space-y-4">
+      <div className="flex items-end justify-between h-32 gap-2">
         {bars.map((height, i) => (
           <motion.div
             key={i}
@@ -273,23 +292,23 @@ const AnalyticsWOW = ({ isHovered }) => {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-6 px-6">
-        <div className="p-4 rounded-2xl bg-background border border-border/50 space-y-2 shadow-xl">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="p-3 rounded-xl bg-background border border-border/50 space-y-1.5 shadow-lg">
           <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
             Revenue
           </span>
           <div className="flex items-center justify-between">
-            <span className="text-lg font-black">$42.5k</span>
-            <TrendingUp size={16} className="text-green-500" />
+            <span className="text-base font-black">$42.5k</span>
+            <TrendingUp size={14} className="text-green-500" />
           </div>
         </div>
-        <div className="p-4 rounded-2xl bg-background border border-border/50 space-y-2 shadow-xl">
+        <div className="p-3 rounded-xl bg-background border border-border/50 space-y-1.5 shadow-lg">
           <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
             Growth
           </span>
           <div className="flex items-center justify-between">
-            <span className="text-lg font-black">+18%</span>
-            <TrendingUp size={16} className="text-green-500" />
+            <span className="text-base font-black">+18%</span>
+            <TrendingUp size={14} className="text-green-500" />
           </div>
         </div>
       </div>
@@ -298,76 +317,66 @@ const AnalyticsWOW = ({ isHovered }) => {
 };
 
 const MultiLocationWOW = ({ isHovered }) => {
-  const nodes = [
-    { label: "London", x: -120, y: -70, val: "$8.2k" },
-    { label: "New York", x: 130, y: -40, val: "$12.4k" },
-    { label: "Tokyo", x: 30, y: 110, val: "$6.1k" },
-    { label: "Paris", x: -90, y: 80, val: "$4.9k" },
+  const locations = [
+    { label: "London", flag: "🇬🇧", val: "$8.2k", trend: "+12%" },
+    { label: "New York", flag: "🇺🇸", val: "$12.4k", trend: "+18%" },
+    { label: "Tokyo", flag: "🇯🇵", val: "$6.1k", trend: "+9%" },
+    { label: "Paris", flag: "🇫🇷", val: "$4.9k", trend: "+15%" },
   ];
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center scale-105">
-      <motion.div
-        animate={{ scale: [1, 1.4, 1], opacity: [0.15, 0.08, 0.15] }}
-        transition={{ duration: 5, repeat: Infinity }}
-        className="absolute w-80 h-80 rounded-full bg-primary/20 blur-[60px]"
-      />
-
-      <div className="relative">
-        <div className="w-18 h-18 rounded-full bg-primary/10 border-2 border-primary/50 flex items-center justify-center relative z-20 shadow-[0_0_40px_rgba(var(--primary),0.2)]">
+    <div className="relative w-full h-full flex items-center justify-center">
+      <div className="w-full max-w-[280px] grid grid-cols-2 gap-2.5">
+        {locations.map((loc, i) => (
           <motion.div
-            animate={isHovered ? { rotate: 360 } : {}}
-            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-          >
-            <DollarSign className="text-primary" size={28} />
-          </motion.div>
-          <div className="absolute inset-0 rounded-full border-2 border-primary/40 animate-ping opacity-20" />
-        </div>
-
-        {nodes.map((node, i) => (
-          <motion.div
-            key={node.label}
-            initial={{ opacity: 0 }}
+            key={loc.label}
+            initial={{ opacity: 0, y: 10 }}
             animate={{
               opacity: 1,
-              x: isHovered ? node.x : 0,
-              y: isHovered ? node.y : 0,
+              y: 0,
+              scale: isHovered ? 1.03 : 1,
             }}
             transition={{
-              duration: 0.7,
+              delay: i * 0.08,
               type: "spring",
-              bounce: 0.4,
-              delay: i * 0.06,
+              stiffness: 300,
+              damping: 25,
             }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            className="rounded-xl bg-background border border-border/50 p-3 shadow-lg"
           >
-            <div className="flex flex-col items-center gap-2 group/node">
-              {isHovered && (
-                <motion.div
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{
-                    opacity: 0.25,
-                    width: Math.sqrt(node.x ** 2 + node.y ** 2),
-                  }}
-                  className="absolute top-1/2 left-1/2 origin-left h-[1.5px] bg-primary/60 -z-10 shadow-[0_0_8px_rgba(var(--primary),0.3)]"
-                  style={{
-                    rotate: Math.atan2(-node.y, -node.x) * (180 / Math.PI),
-                  }}
-                />
-              )}
-
-              <div className="w-11 h-11 rounded-full bg-background border-2 border-primary/30 flex items-center justify-center shadow-2xl group-hover/node:border-primary transition-all duration-300">
-                <MapPin size={16} className="text-primary" />
-              </div>
-              <div className="flex flex-col items-center bg-background/95 border border-border/50 px-4 py-1.5 rounded-lg shadow-2xl min-w-[90px] backdrop-blur-md">
-                <span className="text-[10px] font-black uppercase tracking-widest">
-                  {node.label}
-                </span>
-                <span className="text-[9px] text-green-500 font-mono font-black">
-                  {node.val}
-                </span>
-              </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-lg">{loc.flag}</span>
+              <span className="text-xs font-bold uppercase tracking-wide truncate">
+                {loc.label}
+              </span>
             </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-base font-black">{loc.val}</span>
+              <motion.span
+                animate={
+                  isHovered ? { opacity: [0.6, 1, 0.6] } : { opacity: 0.6 }
+                }
+                transition={{ duration: 2, repeat: Infinity }}
+                className="text-[10px] font-bold text-green-500"
+              >
+                {loc.trend}
+              </motion.span>
+            </div>
+            {isHovered && (
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: i * 0.1 + 0.2, duration: 0.4 }}
+                className="mt-2 h-1 rounded-full bg-primary/20 origin-left"
+              >
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 0.4 + i * 0.15 }}
+                  transition={{ delay: i * 0.1 + 0.4, duration: 0.5 }}
+                  className="h-full rounded-full bg-primary origin-left"
+                />
+              </motion.div>
+            )}
           </motion.div>
         ))}
       </div>

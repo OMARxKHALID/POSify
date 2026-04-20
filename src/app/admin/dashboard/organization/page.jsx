@@ -60,7 +60,7 @@ export default function OrganizationPage() {
                         </Badge>
                       )}
                     </CardTitle>
-                    <CardDescription>ID: {organization.id}</CardDescription>
+                    <CardDescription>ID: {organization._id}</CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Badge variant="outline">

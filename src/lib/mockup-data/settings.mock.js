@@ -1,34 +1,30 @@
-
-
 export const mockSettings = {
-  id: "settings_001",
+  _id: "settings_001",
   organizationId: "org_001",
-
 
   taxes: [
     {
-      id: "tax_001",
+      _id: "tax_001",
       name: "Sales Tax",
       rate: 8.5,
       enabled: true,
       type: "percentage",
     },
     {
-      id: "tax_002",
+      _id: "tax_002",
       name: "City Tax",
       rate: 1.0,
       enabled: true,
       type: "percentage",
     },
     {
-      id: "tax_003",
+      _id: "tax_003",
       name: "Service Fee",
       rate: 2.5,
       enabled: false,
       type: "fixed",
     },
   ],
-
 
   payment: {
     defaultMethod: "card",
@@ -38,7 +34,6 @@ export const mockSettings = {
       requireExactChange: false,
     },
   },
-
 
   receipt: {
     template: "default",
@@ -52,14 +47,12 @@ export const mockSettings = {
     autoPrint: false,
   },
 
-
   customerPreferences: {
     requireCustomerPhone: false,
     requireCustomerName: false,
     allowGuestCheckout: true,
     enableCustomerDatabase: true,
   },
-
 
   operational: {
     orderManagement: {
@@ -69,7 +62,6 @@ export const mockSettings = {
     },
     syncMode: "auto",
   },
-
 
   business: {
     serviceCharge: {
@@ -87,7 +79,6 @@ export const mockSettings = {
     },
   },
 
-
   currency: "USD",
   timezone: "America/New_York",
   language: "en",
@@ -97,5 +88,3 @@ export const mockSettings = {
   createdAt: "2024-01-01T00:00:00Z",
   updatedAt: "2024-01-15T12:00:00Z",
 };
-
-

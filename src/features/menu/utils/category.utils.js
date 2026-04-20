@@ -19,7 +19,7 @@ export const formatCategoryOptions = (categories = []) => {
   };
 
   const categoryOptions = categories.map((category) => ({
-    value: category.id,
+    value: category._id,
     label: formatCategoryDisplay(category),
   }));
 
@@ -28,11 +28,11 @@ export const formatCategoryOptions = (categories = []) => {
 
 export const findCategoryById = (categories = [], categoryId) => {
   if (!categoryId || categoryId === "uncategorized") return null;
-  return categories.find((category) => category.id === categoryId) || null;
+  return categories.find((category) => category._id === categoryId) || null;
 };
 
 export const formatCategoryForAPI = (category) => ({
-  id: category._id,
+  _id: category._id,
   name: category.name,
   icon: category.icon || "",
   description: category.description || "",
