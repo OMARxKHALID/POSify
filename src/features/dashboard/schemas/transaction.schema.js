@@ -2,6 +2,11 @@ import { z } from "zod";
 import { organizationBaseSchema } from "@/schemas/base.schema";
 import { PAYMENT_METHODS } from "@/features/pos/constants/orders.constants";
 
+export const processedBySchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+});
+
 export const transactionSchema = organizationBaseSchema.extend({
   orderId: z.string().optional().nullable(),
   transactionNumber: z.string().optional(),
@@ -12,7 +17,7 @@ export const transactionSchema = organizationBaseSchema.extend({
     .enum(["completed", "pending", "failed", "cancelled"])
     .default("completed"),
   reference: z.string().trim().optional().nullable(),
-  processedBy: z.any().optional(),
+  processedBy: processedBySchema.optional(),
   processedAt: z.coerce.date().optional(),
   receiptNumber: z.string().optional().nullable(),
 });

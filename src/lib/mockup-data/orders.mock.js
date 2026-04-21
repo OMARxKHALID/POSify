@@ -14,6 +14,7 @@ export const mockOrders = [
     subtotal: 45.5,
     total: 51.20,
     discount: 5.0,
+    promoDiscount: 0,
     serviceCharge: 2.0,
     tip: 4.83,
     tax: [
@@ -76,6 +77,7 @@ export const mockOrders = [
     subtotal: 28.75,
     total: 31.19,
     discount: 0,
+    promoDiscount: 0,
     serviceCharge: 0,
     tip: 0,
     tax: [
@@ -169,6 +171,7 @@ export const mockOrders = [
     subtotal: 35.5,
     total: 47.02,
     discount: 0,
+    promoDiscount: 0,
     serviceCharge: 0,
     tip: 5.0,
     deliveryInfo: {
@@ -214,6 +217,7 @@ export const mockOrders = [
     subtotal: 22.5,
     total: 24.41,
     discount: 0,
+    promoDiscount: 0,
     serviceCharge: 0,
     tip: 0,
     refundStatus: "full",

@@ -45,6 +45,21 @@ const inventorySchema = z.object({
 
 export const analyticsPerformanceSchema = z.object({
   kpis: z.array(kpiSchema),
+  today: z.object({
+    revenue: z.number(),
+    orders: z.number(),
+    avgOrderValue: z.number(),
+  }).optional(),
+  thisWeek: z.object({
+    revenue: z.number(),
+    orders: z.number(),
+    avgOrderValue: z.number(),
+  }).optional(),
+  thisMonth: z.object({
+    revenue: z.number(),
+    orders: z.number(),
+    avgOrderValue: z.number(),
+  }).optional(),
   inventory: inventorySchema.optional(),
 });
 
@@ -65,4 +80,7 @@ export const transactionStatsSchema = z.object({
   failedTransactions: z.number(),
   refundedTransactions: z.number(),
   revenueByPaymentMethod: z.record(z.string(), z.number()),
+  totalOrders: z.number().optional(),
+  todayOrders: z.number().optional(),
+  todayRevenue: z.number().optional(),
 });

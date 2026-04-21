@@ -25,6 +25,6 @@ export const userService = {
 
   deleteUser: async (userId) => {
     const response = await apiClient.delete(`/dashboard/users/delete?userId=${userId}`);
-    return response;
+    return userSchema.parse(response.data);
   }
 };

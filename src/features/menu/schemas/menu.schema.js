@@ -42,7 +42,8 @@ export const itemDetailFormSchema = z.object({
 
 export const menuSchema = organizationBaseSchema.extend({
 
-  categoryId: z.string().optional(), 
+  categoryId: z.string().optional(),
+  categoryName: z.string().optional(),
   name: z.string().min(1, "Menu item name is required").trim(),
   price: z.coerce.number().min(0, "Price must be non-negative"),
 

@@ -38,7 +38,7 @@ export const posService = {
 
   deleteOrder: async (orderId) => {
     const response = await apiClient.delete(`/dashboard/orders/${orderId}`);
-    return response;
+    return orderSchema.parse(response.data);
   },
 
   processRefund: async (orderId, refundData) => {

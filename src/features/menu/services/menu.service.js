@@ -26,7 +26,7 @@ export const menuService = {
 
   deleteMenuItem: async (menuItemId) => {
     const response = await apiClient.delete(`/dashboard/menu/delete?menuItemId=${menuItemId}`);
-    return response;
+    return menuSchema.parse(response.data);
   },
 
   getCategories: async () => {
@@ -51,6 +51,6 @@ export const menuService = {
 
   deleteCategory: async (categoryId) => {
     const response = await apiClient.delete(`/dashboard/categories/delete?categoryId=${categoryId}`);
-    return response;
+    return categorySchema.parse(response.data);
   }
 };
