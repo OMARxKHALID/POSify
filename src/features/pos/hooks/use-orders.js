@@ -44,7 +44,6 @@ export const useCreateOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ["orders"],
     mutationFn: (orderData) => posService.createOrder(orderData),
     onSuccess: () => {
       invalidateQueries.orders(queryClient);

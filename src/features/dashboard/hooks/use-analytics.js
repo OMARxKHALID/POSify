@@ -24,10 +24,6 @@ export const useAnalytics = (options = {}) => {
       () => mockFallback.analytics(timeRange),
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      enabled,
-      refetchInterval,
-      ...customOptions,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };

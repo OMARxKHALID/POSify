@@ -3,27 +3,42 @@ import { persist, devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { createPersistConfig } from "@/lib/utils/zustand-storage";
 
+const ORDER_STATUS = {
+  PENDING: "pending",
+  PROCESSING: "processing",
+  COMPLETED: "completed",
+  FAILED: "failed",
+};
+
+const MAX_RETRY_COUNT = 3;
+
 export const createOrderQueueStore = (initState = {}) => {
   return createStore()(
     devtools(
       persist(
         immer((set, get) => ({
           queuedOrders: [],
-          failedOrders: [],
-          processedOrders: [],
+          processedKeys: [],
           ...initState,
 
-          _orderExists: (orders, idempotencyKey) =>
+          _hasKey: (orders, idempotencyKey) =>
             orders.some((order) => order.idempotencyKey === idempotencyKey),
 
           addOrder: (order) => {
             if (!order?.idempotencyKey) {
               throw new Error("Order must have an idempotencyKey");
             }
-            const { queuedOrders, _orderExists } = get();
-            if (!_orderExists(queuedOrders, order.idempotencyKey)) {
+            const { queuedOrders } = get();
+            if (!get()._hasKey(queuedOrders, order.idempotencyKey)) {
               set((state) => {
-                state.queuedOrders.push({ ...order, queuedAt: Date.now() });
+                state.queuedOrders.push({
+                  ...order,
+                  _status: ORDER_STATUS.PENDING,
+                  _createdAt: Date.now(),
+                  _retryCount: 0,
+                  _lastAttempt: null,
+                  _error: null,
+                });
               });
             }
           },
@@ -31,86 +46,76 @@ export const createOrderQueueStore = (initState = {}) => {
           removeOrder: (idempotencyKey) => {
             if (!idempotencyKey) return;
             set((state) => {
-              const orderIndex = state.queuedOrders.findIndex(
-                (o) => o.idempotencyKey === idempotencyKey
-              );
-              if (orderIndex !== -1) {
-                state.queuedOrders.splice(orderIndex, 1);
-                if (!state.processedOrders.includes(idempotencyKey)) {
-                  state.processedOrders.push(idempotencyKey);
-                }
-              }
-            });
-          },
-
-          addFailedOrder: (order, error) => {
-            if (!order?.idempotencyKey) {
-              throw new Error("Failed order must have an idempotencyKey");
-            }
-            set((state) => {
               state.queuedOrders = state.queuedOrders.filter(
-                (o) => o.idempotencyKey !== order.idempotencyKey
+                (o) => o.idempotencyKey !== idempotencyKey
               );
-              const exists = state.failedOrders.some(
-                (o) => o.idempotencyKey === order.idempotencyKey
-              );
-              if (!exists) {
-                state.failedOrders.push({
-                  ...order,
-                  error,
-                  failedAt: Date.now(),
-                });
+              if (!state.processedKeys.includes(idempotencyKey)) {
+                state.processedKeys.push(idempotencyKey);
               }
             });
           },
 
-          removeFailedOrder: (idempotencyKey) => {
+          markProcessing: (idempotencyKey) => {
             if (!idempotencyKey) return;
             set((state) => {
-              const orderIndex = state.failedOrders.findIndex(
+              const order = state.queuedOrders.find(
                 (o) => o.idempotencyKey === idempotencyKey
               );
-              if (orderIndex !== -1) {
-                state.failedOrders.splice(orderIndex, 1);
-                if (!state.processedOrders.includes(idempotencyKey)) {
-                  state.processedOrders.push(idempotencyKey);
-                }
+              if (order) {
+                order._status = ORDER_STATUS.PROCESSING;
+                order._lastAttempt = Date.now();
               }
             });
           },
 
-          retryFailedOrder: (idempotencyKey) => {
+          markCompleted: (idempotencyKey) => {
+            if (!idempotencyKey) return;
             set((state) => {
-              const failedOrder = state.failedOrders.find(
-                (o) => o.idempotencyKey === idempotencyKey
+              state.queuedOrders = state.queuedOrders.filter(
+                (o) => o.idempotencyKey !== idempotencyKey
               );
-              if (failedOrder) {
-                const { error, failedAt, ...orderData } = failedOrder;
-                state.failedOrders = state.failedOrders.filter(
-                  (o) => o.idempotencyKey !== idempotencyKey
-                );
-                state.queuedOrders.push({ ...orderData, queuedAt: Date.now() });
+              if (!state.processedKeys.includes(idempotencyKey)) {
+                state.processedKeys.push(idempotencyKey);
               }
             });
+          },
+
+          markFailed: (idempotencyKey, error) => {
+            if (!idempotencyKey) return;
+            set((state) => {
+              const order = state.queuedOrders.find(
+                (o) => o.idempotencyKey === idempotencyKey
+              );
+              if (order) {
+                order._status = ORDER_STATUS.FAILED;
+                order._error = error?.message || String(error);
+                order._retryCount += 1;
+              }
+            });
+          },
+
+          canRetry: (idempotencyKey) => {
+            const order = get().queuedOrders.find(
+              (o) => o.idempotencyKey === idempotencyKey
+            );
+            if (!order) return false;
+            return order._retryCount < MAX_RETRY_COUNT;
           },
 
           clearQueue: () =>
             set((state) => {
               state.queuedOrders = [];
             }),
-          clearFailedOrders: () =>
+
+          clearProcessed: () =>
             set((state) => {
-              state.failedOrders = [];
+              state.processedKeys = [];
             }),
-          clearProcessedOrders: () =>
-            set((state) => {
-              state.processedOrders = [];
-            }),
-          clearAllOrders: () =>
+
+          clearAll: () =>
             set((state) => {
               state.queuedOrders = [];
-              state.failedOrders = [];
-              state.processedOrders = [];
+              state.processedKeys = [];
             }),
 
           addMultipleOrders: (orders) => {
@@ -123,7 +128,14 @@ export const createOrderQueueStore = (initState = {}) => {
                     (o) => o.idempotencyKey === order.idempotencyKey
                   )
                 ) {
-                  state.queuedOrders.push({ ...order, queuedAt: Date.now() });
+                  state.queuedOrders.push({
+                    ...order,
+                    _status: ORDER_STATUS.PENDING,
+                    _createdAt: Date.now(),
+                    _retryCount: 0,
+                    _lastAttempt: null,
+                    _error: null,
+                  });
                 }
               });
             });
@@ -137,39 +149,79 @@ export const createOrderQueueStore = (initState = {}) => {
                 (order) => !keysSet.has(order.idempotencyKey)
               );
               idempotencyKeys.forEach((key) => {
-                if (!state.processedOrders.includes(key)) {
-                  state.processedOrders.push(key);
+                if (!state.processedKeys.includes(key)) {
+                  state.processedKeys.push(key);
                 }
               });
             });
           },
 
           getQueueStats: () => {
-            const { queuedOrders, failedOrders, processedOrders } = get();
+            const { queuedOrders, processedKeys } = get();
+            const pending = queuedOrders.filter(
+              (o) => o._status === ORDER_STATUS.PENDING
+            ).length;
+            const processing = queuedOrders.filter(
+              (o) => o._status === ORDER_STATUS.PROCESSING
+            ).length;
+            const failed = queuedOrders.filter(
+              (o) => o._status === ORDER_STATUS.FAILED
+            ).length;
             return {
-              queued: queuedOrders.length,
-              failed: failedOrders.length,
-              processed: processedOrders.length,
-              total:
-                queuedOrders.length +
-                failedOrders.length +
-                processedOrders.length,
+              pending,
+              processing,
+              failed,
+              processed: processedKeys.length,
+              total: queuedOrders.length + processedKeys.length,
             };
           },
 
           getOrderStatus: (idempotencyKey) => {
-            const { processedOrders, queuedOrders, failedOrders } = get();
-            if (processedOrders.includes(idempotencyKey)) return "processed";
-            if (queuedOrders.some((o) => o.idempotencyKey === idempotencyKey))
-              return "queued";
-            if (failedOrders.some((o) => o.idempotencyKey === idempotencyKey))
-              return "failed";
-            return "not_found";
+            const { processedKeys, queuedOrders } = get();
+            if (processedKeys.includes(idempotencyKey)) return "completed";
+            const order = queuedOrders.find(
+              (o) => o.idempotencyKey === idempotencyKey
+            );
+            if (!order) return "not_found";
+            return order._status;
+          },
+
+          isProcessed: (idempotencyKey) => {
+            return get().processedKeys.includes(idempotencyKey);
+          },
+
+          isQueued: (idempotencyKey) => {
+            return get()._hasKey(get().queuedOrders, idempotencyKey);
           },
         })),
-        createPersistConfig("order-queue")
+        {
+          ...createPersistConfig("order-queue"),
+          partialize: (state) => ({
+            queuedOrders: state.queuedOrders.map((order) => ({
+              idempotencyKey: order.idempotencyKey,
+              _status: order._status,
+              _createdAt: order._createdAt,
+              _retryCount: order._retryCount,
+              _lastAttempt: order._lastAttempt,
+              _error: order._error,
+              organizationId: order.organizationId,
+              items: order.items,
+              subtotal: order.subtotal,
+              total: order.total,
+              customerName: order.customerName,
+              paymentMethod: order.paymentMethod,
+              deliveryType: order.deliveryType,
+              tax: order.tax,
+              discount: order.discount,
+              tip: order.tip,
+            })),
+            processedKeys: state.processedKeys,
+          }),
+        }
       ),
       { name: "OrderQueueStore" }
     )
   );
 };
+
+export const ORDER_STATUS_ENUM = ORDER_STATUS;

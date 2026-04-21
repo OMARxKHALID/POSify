@@ -93,21 +93,4 @@ export const mockAnalytics = {
     ],
     outOfStock: [],
   },
-  revenueByCategory: [
-    { category: "Main Courses", revenue: 6250.50, percentage: 50.2 },
-    { category: "Beverages", revenue: 1875.75, percentage: 15.1 },
-    { category: "Sides", revenue: 1500.00, percentage: 12.0 },
-    { category: "Salads", revenue: 875.25, percentage: 7.0 },
-    { category: "Desserts", revenue: 750.00, percentage: 6.0 },
-  ],
-  revenueByPaymentMethod: [
-    { method: "Card", revenue: 8450.50, percentage: 67.9 },
-    { method: "Cash", revenue: 3200.25, percentage: 25.7 },
-    { method: "Digital", revenue: 800.00, percentage: 6.4 },
-  ],
-  revenueByDeliveryType: [
-    { type: "Dine-in", revenue: 5625.34, percentage: 45.2 },
-    { type: "Takeout", revenue: 4375.26, percentage: 35.1 },
-    { type: "Delivery", revenue: 2450.15, percentage: 19.7 },
-  ],
 };

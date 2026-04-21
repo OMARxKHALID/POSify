@@ -88,7 +88,7 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body className="antialiased overflow-x-hidden">
+      <body className="antialiased">
         <script
           dangerouslySetInnerHTML={{
             __html: `

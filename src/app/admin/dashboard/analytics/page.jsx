@@ -27,10 +27,11 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAnalytics } from "@/features/dashboard/hooks/use-analytics";
 import { BarChart, Bar, XAxis, CartesianGrid, Area, AreaChart } from "recharts";
 import { TrendingUp, AlertTriangle } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { PageLayout } from "@/features/dashboard/components/page-layout";
 import { PageHeader } from "@/features/dashboard/components/page-header";
+import { PageLoading } from "@/components/ui/loading";
 
 const chartConfig = {
   sales: {
@@ -111,7 +112,7 @@ const inventoryColumns = [
   },
 ];
 
-export default function AnalyticsPage() {
+function AnalyticsContent() {
   const [timeRange, setTimeRange] = useState("30d");
   const router = useRouter();
 
@@ -421,5 +422,13 @@ export default function AnalyticsPage() {
         </div>
       </div>
     </PageLayout>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <Suspense fallback={<PageLoading />}>
+      <AnalyticsContent />
+    </Suspense>
   );
 }

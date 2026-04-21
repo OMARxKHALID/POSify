@@ -3,7 +3,7 @@
 export const mockOrders = [
   {
     _id: "ord_001",
-    organizationId: "demo_org",
+    organizationId: "org_001",
     orderNumber: "ORD-2024-001",
     customerName: "John Smith",
     mobileNumber: "+1-555-0123",
@@ -65,7 +65,7 @@ export const mockOrders = [
   },
   {
     _id: "ord_002",
-    organizationId: "demo_org",
+    organizationId: "org_001",
     orderNumber: "ORD-2024-002",
     customerName: "Sarah Johnson",
     mobileNumber: "+1-555-0456",
@@ -111,7 +111,7 @@ export const mockOrders = [
   },
   {
     _id: "ord_003",
-    organizationId: "demo_org",
+    organizationId: "org_001",
     orderNumber: "ORD-2024-003",
     customerName: "Mike Wilson",
     mobileNumber: "+1-555-0789",
@@ -158,7 +158,7 @@ export const mockOrders = [
   },
   {
     _id: "ord_004",
-    organizationId: "demo_org",
+    organizationId: "org_001",
     orderNumber: "ORD-2024-004",
     customerName: "Emily Davis",
     mobileNumber: "+1-555-0321",
@@ -203,7 +203,7 @@ export const mockOrders = [
   },
   {
     _id: "ord_005",
-    organizationId: "demo_org",
+    organizationId: "org_001",
     orderNumber: "ORD-2024-005",
     customerName: "David Brown",
     mobileNumber: "+1-555-0654",
@@ -266,13 +266,11 @@ export const mockOrderStatuses = [
 export const mockPaymentMethods = [
   { value: "cash", label: "Cash", icon: "💵" },
   { value: "card", label: "Card", icon: "💳" },
-  { value: "digital", label: "Digital Wallet", icon: "📱" },
-  { value: "check", label: "Check", icon: "📝" },
+  { value: "wallet", label: "Wallet", icon: "📱" },
 ];
 
 export const mockDeliveryTypes = [
   { value: "dine-in", label: "Dine In", icon: "🍽️" },
-  { value: "takeout", label: "Takeout", icon: "🥡" },
+  { value: "takeaway", label: "Takeaway", icon: "🥡" },
   { value: "delivery", label: "Delivery", icon: "🚚" },
-  { value: "drive-thru", label: "Drive Thru", icon: "🚗" },
 ];

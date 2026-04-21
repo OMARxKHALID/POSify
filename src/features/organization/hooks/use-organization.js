@@ -8,6 +8,7 @@ import { useAppContext } from "@/lib/hooks/use-app-context";
 import {
   getDefaultQueryOptions,
   getDefaultMutationOptions,
+  handleHookSuccess,
   queryKeys,
   invalidateQueries,
   createServiceQueryFn,
@@ -53,10 +54,7 @@ export const useAvailableStaff = (organizationId, options = {}) => {
       () => mockFallback.users(),
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      enabled: Boolean(organizationId),
-      ...options,
-    }),
+    ...getDefaultQueryOptions({ enabled: Boolean(organizationId), ...options }),
   });
 };
 
@@ -70,6 +68,7 @@ export const useOwnershipTransfer = (options = {}) => {
       invalidateQueries.organization(queryClient);
       invalidateQueries.users(queryClient);
       invalidateQueries.availableStaff(queryClient, variables.organizationId);
+      handleHookSuccess("OWNERSHIP_TRANSFERRED_SUCCESSFULLY");
     },
     ...getDefaultMutationOptions({ operation: "Ownership transfer" }),
     ...options,

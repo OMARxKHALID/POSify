@@ -2,6 +2,7 @@
 
 import { PageLoading } from "@/components/ui/loading";
 import { ErrorBoundary } from "@/components/providers/error-boundary";
+import { Suspense } from "react";
 
 export function PageLayout({
   children,
@@ -9,10 +10,12 @@ export function PageLayout({
   error = null,
   errorMessage = "Failed to load page content. Please try refreshing the page.",
   showErrorBoundary = true,
+  skeleton,
 }) {
+  const loadingSkeleton = skeleton || <PageLoading />;
 
   if (isLoading) {
-    return <PageLoading />;
+    return loadingSkeleton;
   }
 
 
@@ -59,4 +62,12 @@ export function PageLayout({
   }
 
   return content;
+}
+
+export function PageWithSuspense({ children, isLoading, skeleton }) {
+  return (
+    <Suspense fallback={skeleton || <PageLoading />}>
+      {children}
+    </Suspense>
+  );
 }

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useCreateOrder } from "@/features/pos/hooks/use-orders";
 import { useSettings } from "@/features/settings/hooks/use-settings";
 import { useNetworkStatus } from "@/hooks/use-network-status";
+import { ORDER_STATUS_ENUM } from "../stores/queue-order.store";
 
 const SYNC_DEBOUNCE_TIME = 2000;
 const TRIGGER_COOLDOWN_TIME = 3000;
@@ -36,25 +37,40 @@ const isValidOrder = (order) => {
 export function useOrderQueueSync() {
   const {
     removeOrder,
-    addFailedOrder,
-    removeFailedOrder,
+    markFailed,
+    markProcessing,
+    markCompleted,
+    canRetry,
     queuedOrders,
-    failedOrders,
     getOrderStatus,
+    isProcessed,
   } = useOrderQueueStore(
     useShallow((state) => ({
       removeOrder: state.removeOrder,
-      addFailedOrder: state.addFailedOrder,
-      removeFailedOrder: state.removeFailedOrder,
+      markFailed: state.markFailed,
+      markProcessing: state.markProcessing,
+      markCompleted: state.markCompleted,
+      canRetry: state.canRetry,
       queuedOrders: state.queuedOrders,
-      failedOrders: state.failedOrders,
       getOrderStatus: state.getOrderStatus,
+      isProcessed: state.isProcessed,
     })),
   );
 
-  const getQueuedOrders = useCallback(() => queuedOrders, [queuedOrders]);
-  const getFailedOrders = useCallback(() => failedOrders, [failedOrders]);
-  const isOrderProcessed = useCallback((key) => getOrderStatus(key) === "processed", [getOrderStatus]);
+  const getPendingOrders = useCallback(
+    () => queuedOrders.filter((o) => o._status === ORDER_STATUS_ENUM.PENDING),
+    [queuedOrders],
+  );
+
+  const getFailedOrders = useCallback(
+    () => queuedOrders.filter((o) => o._status === ORDER_STATUS_ENUM.FAILED),
+    [queuedOrders],
+  );
+
+  const isOrderProcessed = useCallback(
+    (key) => isProcessed(key) || getOrderStatus(key) === ORDER_STATUS_ENUM.COMPLETED,
+    [isProcessed, getOrderStatus],
+  );
 
   const createOrder = useCreateOrder();
   const { settings } = useSettings();
@@ -64,13 +80,14 @@ export function useOrderQueueSync() {
   const [isSyncing, setIsSyncing] = useState(false);
   const lastSyncTimeRef = useRef(0);
   const lastTriggerTimeRef = useRef(0);
+
   const cleanupOrder = useCallback(
     (idempotencyKey) => {
       removeOrder(idempotencyKey);
-      removeFailedOrder(idempotencyKey);
     },
-    [removeOrder, removeFailedOrder],
+    [removeOrder],
   );
+
   const showSyncToast = useCallback(
     (order, created = true, totalPending = 0) => {
       if (totalPending <= 1) {
@@ -81,6 +98,7 @@ export function useOrderQueueSync() {
     },
     [],
   );
+
   const showErrorToast = useCallback((order, error) => {
     const message = error?.message || error?.toString() || "Unknown error";
     toast.error("Failed to sync order.", {
@@ -88,14 +106,16 @@ export function useOrderQueueSync() {
       description: message,
     });
   }, []);
+
   const handleSyncSuccess = useCallback(
     (order, created = true) => {
-      cleanupOrder(order.idempotencyKey);
-      const totalPending = getQueuedOrders().length + getFailedOrders().length;
+      markCompleted(order.idempotencyKey);
+      const totalPending = getPendingOrders().length + getFailedOrders().length;
       showSyncToast(order, created, totalPending);
     },
-    [cleanupOrder, getQueuedOrders, getFailedOrders, showSyncToast],
+    [markCompleted, getPendingOrders, getFailedOrders, showSyncToast],
   );
+
   const handleSyncError = useCallback(
     (order, error) => {
       if (isDuplicateError(error)) {
@@ -103,17 +123,21 @@ export function useOrderQueueSync() {
         return;
       }
       const message = error?.message || error?.toString() || "Unknown error";
-      addFailedOrder(order, message);
+      markFailed(order.idempotencyKey, { message });
       showErrorToast(order, error);
     },
-    [addFailedOrder, handleSyncSuccess, showErrorToast],
+    [markFailed, handleSyncSuccess, showErrorToast],
   );
+
   const processOrderWithRetry = useCallback(
     async (order) => {
       if (!isValidOrder(order)) {
         cleanupOrder(order.idempotencyKey);
         return { success: false, skipped: true };
       }
+
+      markProcessing(order.idempotencyKey);
+
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
           const response = await createOrder.mutateAsync(order);
@@ -135,8 +159,9 @@ export function useOrderQueueSync() {
         }
       }
     },
-    [createOrder, handleSyncSuccess, handleSyncError, cleanupOrder],
+    [createOrder, handleSyncSuccess, handleSyncError, cleanupOrder, markProcessing],
   );
+
   const syncQueuedOrders = useCallback(async () => {
     if (syncingRef.current) return;
     syncingRef.current = true;
@@ -144,14 +169,18 @@ export function useOrderQueueSync() {
     const now = Date.now();
     if (now - lastSyncTimeRef.current < SYNC_DEBOUNCE_TIME) return;
     lastSyncTimeRef.current = now;
+
     try {
-      const queuedOrders = getQueuedOrders();
+      const pendingOrders = getPendingOrders();
       const failedOrders = getFailedOrders();
-      const allOrders = [...queuedOrders, ...failedOrders];
+      const allOrders = [...pendingOrders, ...failedOrders];
+
       if (allOrders.length === 0) return;
+
       let syncedCount = 0;
       let failedCount = 0;
       const processedKeys = new Set();
+
       for (const order of allOrders) {
         if (
           processedKeys.has(order.idempotencyKey) ||
@@ -160,6 +189,16 @@ export function useOrderQueueSync() {
           continue;
         }
         processedKeys.add(order.idempotencyKey);
+
+        const shouldRetry = order._status === ORDER_STATUS_ENUM.FAILED
+          ? canRetry(order.idempotencyKey)
+          : true;
+
+        if (!shouldRetry) {
+          failedCount++;
+          continue;
+        }
+
         const result = await processOrderWithRetry(order);
         if (result.success) {
           syncedCount++;
@@ -167,6 +206,7 @@ export function useOrderQueueSync() {
           failedCount++;
         }
       }
+
       if (allOrders.length > 1) {
         if (failedCount === 0) {
           toast.success(`Successfully synced ${syncedCount} orders!`);
@@ -181,24 +221,27 @@ export function useOrderQueueSync() {
       setIsSyncing(false);
     }
   }, [
-    getQueuedOrders,
+    getPendingOrders,
     getFailedOrders,
     isOrderProcessed,
     processOrderWithRetry,
+    canRetry,
   ]);
+
   const syncSingleOrder = useCallback(
     async (idempotencyKey) => {
-      const queuedOrders = getQueuedOrders();
+      const pendingOrders = getPendingOrders();
       const failedOrders = getFailedOrders();
-      const order = [...queuedOrders, ...failedOrders].find(
+      const order = [...pendingOrders, ...failedOrders].find(
         (o) => o.idempotencyKey === idempotencyKey,
       );
       if (order) {
         await processOrderWithRetry(order);
       }
     },
-    [getQueuedOrders, getFailedOrders, processOrderWithRetry],
+    [getPendingOrders, getFailedOrders, processOrderWithRetry],
   );
+
   useEffect(() => {
     if (syncMode !== "auto") return;
     let timeoutId = null;
@@ -211,7 +254,7 @@ export function useOrderQueueSync() {
         return false;
       }
       const hasOrdersToSync =
-        getQueuedOrders().length > 0 || getFailedOrders().length > 0;
+        getPendingOrders().length > 0 || getFailedOrders().length > 0;
       return hasOrdersToSync;
     };
     const triggerSync = () => {
@@ -231,12 +274,14 @@ export function useOrderQueueSync() {
         clearTimeout(timeoutId);
       }
     };
-  }, [syncMode, syncQueuedOrders, isOnline, getQueuedOrders, getFailedOrders]);
+  }, [syncMode, syncQueuedOrders, isOnline, getPendingOrders, getFailedOrders]);
+
   useEffect(() => {
     return () => {
       syncingRef.current = false;
     };
   }, []);
+
   return {
     syncQueuedOrders,
     syncSingleOrder,

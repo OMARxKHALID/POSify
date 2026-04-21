@@ -102,7 +102,11 @@ export const createCartStore = (initState = {}) => {
         {
           ...createPersistConfig("cart-store"),
           partialize: (state) => ({
-            orderItems: state.orderItems,
+            orderItems: state.orderItems.map((item) => ({
+              _id: item._id,
+              quantity: item.quantity,
+              discount: item.discount || 0,
+            })),
             cartDiscount: state.cartDiscount,
           }),
         }

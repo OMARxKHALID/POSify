@@ -7,32 +7,18 @@ import {
   createServiceQueryFn,
 } from "@/lib/helpers/hook.helpers";
 import { mockFallback } from "@/lib/mockup-data";
-
-const buildQueryParams = (filters) => {
-  const queryParams = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      queryParams.append(key, value.toString());
-    }
-  });
-
-  return queryParams;
-};
+import { auditService } from "../services/audit.service";
 
 export const useAuditLogs = (filters = {}, options = {}) => {
   const { userId, isDemoMode } = useAppContext();
 
-  const queryParams = buildQueryParams(filters);
-  const queryFn = createServiceQueryFn(
-    () => mockFallback.auditLogs(),
-    () => mockFallback.auditLogs(),
-    isDemoMode,
-  );
-
   return useQuery({
     queryKey: queryKeys.auditLogs(filters, userId),
-    queryFn,
+    queryFn: createServiceQueryFn(
+      () => auditService.getAuditLogs(filters),
+      () => mockFallback.auditLogs(),
+      isDemoMode,
+    ),
     ...getDefaultQueryOptions(options),
   });
 };

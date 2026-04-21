@@ -1,6 +1,7 @@
 export const mockMenuItems = [
   {
     _id: "menu_001",
+    organizationId: "org_001",
     name: "Grilled Chicken Sandwich",
     price: 12.99,
     description: "Tender grilled chicken breast with fresh lettuce, tomato, and house-made mayo on toasted bread",
@@ -18,6 +19,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_002",
+    organizationId: "org_001",
     name: "Caesar Salad",
     price: 8.99,
     description: "Crisp romaine lettuce with parmesan cheese, croutons, and Caesar dressing",
@@ -35,6 +37,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_003",
+    organizationId: "org_001",
     name: "French Fries",
     price: 4.99,
     description: "Crispy golden fries seasoned with sea salt",
@@ -52,6 +55,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_004",
+    organizationId: "org_001",
     name: "Cola",
     price: 2.99,
     description: "Classic refreshing cola beverage",
@@ -69,6 +73,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_005",
+    organizationId: "org_001",
     name: "Margherita Pizza",
     price: 16.99,
     description: "Fresh mozzarella, tomatoes, and basil on our signature crust",
@@ -86,6 +91,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_006",
+    organizationId: "org_001",
     name: "Garlic Bread",
     price: 6.99,
     description: "Toasted bread with garlic butter and herbs",
@@ -103,6 +109,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_007",
+    organizationId: "org_001",
     name: "House Salad",
     price: 4.77,
     description: "Mixed greens with your choice of dressing",
@@ -120,6 +127,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_008",
+    organizationId: "org_001",
     name: "Ribeye Steak",
     price: 32.99,
     description: "12oz prime ribeye cooked to perfection with choice of sides",
@@ -137,6 +145,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_009",
+    organizationId: "org_001",
     name: "Mashed Potatoes",
     price: 6.99,
     description: "Creamy mashed potatoes with gravy",
@@ -154,6 +163,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_010",
+    organizationId: "org_001",
     name: "Grilled Asparagus",
     price: 8.99,
     description: "Fresh asparagus grilled with lemon butter",
@@ -171,6 +181,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_011",
+    organizationId: "org_001",
     name: "House Red Wine",
     price: 12.99,
     description: "Selection of fine red wine by the glass",
@@ -188,6 +199,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_012",
+    organizationId: "org_001",
     name: "Chicken Pad Thai",
     price: 14.99,
     description: "Traditional Thai stir-fried noodles with chicken",
@@ -205,6 +217,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_013",
+    organizationId: "org_001",
     name: "Spring Rolls",
     price: 7.99,
     description: "Crispy vegetable spring rolls with sweet chili sauce",
@@ -222,6 +235,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_014",
+    organizationId: "org_001",
     name: "Thai Iced Tea",
     price: 4.99,
     description: "Sweet Thai iced tea with condensed milk",
@@ -239,6 +253,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_015",
+    organizationId: "org_001",
     name: "Mango Sticky Rice",
     price: 7.53,
     description: "Sweet coconut sticky rice with fresh mango",
@@ -256,6 +271,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_016",
+    organizationId: "org_001",
     name: "Fish and Chips",
     price: 15.99,
     description: "Beer-battered fish with crispy chips",
@@ -273,6 +289,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_017",
+    organizationId: "org_001",
     name: "Coleslaw",
     price: 3.99,
     description: "Creamy house-made coleslaw",
@@ -290,6 +307,7 @@ export const mockMenuItems = [
   },
   {
     _id: "menu_018",
+    organizationId: "org_001",
     name: "Fresh Lemonade",
     price: 2.52,
     description: "Fresh squeezed lemonade",

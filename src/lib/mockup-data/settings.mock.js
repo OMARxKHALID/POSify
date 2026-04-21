@@ -26,15 +26,6 @@ export const mockSettings = {
     },
   ],
 
-  payment: {
-    defaultMethod: "card",
-    preferredMethods: ["card", "cash", "digital"],
-    cashHandling: {
-      enableCashDrawer: true,
-      requireExactChange: false,
-    },
-  },
-
   receipt: {
     template: "default",
     footer: "Thank you for dining with us! Visit us again soon.",
@@ -47,20 +38,11 @@ export const mockSettings = {
     autoPrint: false,
   },
 
-  customerPreferences: {
-    requireCustomerPhone: false,
-    requireCustomerName: false,
-    allowGuestCheckout: true,
-    enableCustomerDatabase: true,
-  },
-
   operational: {
     orderManagement: {
       defaultStatus: "pending",
-      orderNumberFormat: "ORD-{YYYY}-{seq}",
-      autoConfirmOrders: false,
     },
-    syncMode: "auto",
+    demoMode: true,
   },
 
   business: {
@@ -74,16 +56,9 @@ export const mockSettings = {
       suggestedPercentages: [15, 18, 20, 25],
       allowCustomTip: true,
     },
-    discountRules: {
-      maxDiscountPercentage: 20,
-    },
   },
 
   currency: "USD",
-  timezone: "America/New_York",
-  language: "en",
-  dateFormat: "MM/DD/YYYY",
-  timeFormat: "12h",
 
   createdAt: "2024-01-01T00:00:00Z",
   updatedAt: "2024-01-15T12:00:00Z",

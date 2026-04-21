@@ -4,7 +4,6 @@ import {
   getErrorMessage,
   getSuccessMessage,
 } from "@/lib/helpers/error.helpers";
-import { apiClient } from "@/lib/api-client";
 
 const formatZodError = (error) => {
   if (error instanceof z.ZodError) {
@@ -44,6 +43,7 @@ export const getDefaultQueryOptions = (customOptions = {}) => ({
   retry: 2,
   refetchOnWindowFocus: false,
   refetchOnMount: false,
+  suspense: true,
   ...customOptions,
 });
 
@@ -165,24 +165,18 @@ export const sessionUtils = {
   },
 };
 
-export const createDemoQueryFn = (serviceFn, fallbackFn) => {
+export const createServiceQueryFn = (serviceFn, fallbackFn, isDemoMode) => {
   return async () => {
+    if (isDemoMode) {
+      return fallbackFn();
+    }
     try {
       const data = await serviceFn();
       if (data !== null && data !== undefined) return data;
       return fallbackFn();
     } catch (error) {
-      console.warn("[Demo Mode] Service failed, using fallback:", error.message);
+      console.warn("[API Error] Service failed, using fallback:", error.message);
       return fallbackFn();
     }
-  };
-};
-
-export const createServiceQueryFn = (serviceFn, fallbackFn, isDemoMode) => {
-  return async () => {
-    if (isDemoMode) {
-      return createDemoQueryFn(serviceFn, fallbackFn)();
-    }
-    return await serviceFn();
   };
 };
