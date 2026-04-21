@@ -4,7 +4,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,
+      staleTime: 3 * 60 * 1000,
       gcTime: 10 * 60 * 1000,
       retry: (failureCount, error) => {
         if (error?.statusCode >= 400 && error?.statusCode < 500) {
@@ -12,8 +12,8 @@ export const queryClient = new QueryClient({
         }
         return failureCount < 3;
       },
-      refetchOnWindowFocus: process.env.NODE_ENV === "development",
-      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
     },
     mutations: {
       retry: 1,
