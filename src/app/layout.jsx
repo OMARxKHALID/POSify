@@ -10,11 +10,13 @@ import { StoreProvider } from "@/components/providers/store-provider";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -42,7 +44,7 @@ export const metadata = {
 
   openGraph: {
     title: "POSify - Modern Point of Sale System",
-    description: "Transform your business with POSify's modern POS system.",
+    description: "Transform your restaurant or retail business with POSify's modern POS system.",
     url: "/",
     siteName: "POSify",
     images: [
@@ -59,8 +61,8 @@ export const metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "POSify",
-    description: "Modern POS system",
+    title: "POSify - Modern Point of Sale System",
+    description: "Transform your restaurant or retail business with POSify's modern POS system.",
     images: ["/og-image.png"],
     creator: "@posify",
   },

@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Building2, Crown, ChevronDown, Check } from "lucide-react";
+import { Building2, Crown, ChevronDown, Check, Home } from "lucide-react";
 
 import { NAVIGATION_PERMISSIONS } from "@/constants";
 import { filterNavigationByPermissions } from "@/lib/utils/access-control";
@@ -203,6 +203,16 @@ export function DashboardSidebar({ ...props }) {
         {!isSuperAdmin && <Separator className="my-2" />}
 
         {user && <UserProfile user={user} isSuperAdmin={isSuperAdmin} />}
+
+        <Link
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors mx-2 mt-2 rounded-md hover:bg-muted"
+        >
+          <Home className="h-4 w-4" />
+          <span>Go to Website</span>
+        </Link>
       </SidebarHeader>
       <SidebarContent className="gap-1 py-2">
         <SectionErrorBoundary
