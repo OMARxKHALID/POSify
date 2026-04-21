@@ -26,126 +26,79 @@ export const mockFallback = {
   menu: () => {
     const data = mockStore.getMenu();
     return {
-      success: true,
-      code: "MENU_RETRIEVED_SUCCESSFULLY",
-      data: {
-        ...data,
-        organization: { _id: "demo_org", name: "Demo Restaurant" },
-      },
-      isDemo: true,
+      ...data,
+      organization: { _id: "demo_org", name: "Demo Restaurant" },
     };
   },
 
   categories: () => {
     const data = mockStore.getCategories();
     return {
-      success: true,
-      code: "CATEGORIES_RETRIEVED_SUCCESSFULLY",
-      data: {
-        ...data,
-        organization: { _id: "demo_org", name: "Demo Restaurant" },
-      },
-      isDemo: true,
+      ...data,
+      organization: { _id: "demo_org", name: "Demo Restaurant" },
     };
   },
 
   orders: () => {
     const data = mockStore.getOrders();
     return {
-      success: true,
-      code: "ORDERS_RETRIEVED_SUCCESSFULLY",
-      data: {
-        ...data,
-        pagination: {
-          page: 1,
-          limit: 20,
-          total: data.orders.length,
-          totalPages: 1,
-        },
+      ...data,
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: data.orders.length,
+        totalPages: 1,
       },
-      isDemo: true,
     };
   },
 
   transactions: () => {
     const data = mockStore.getTransactions();
     return {
-      success: true,
-      code: "TRANSACTIONS_RETRIEVED_SUCCESSFULLY",
-      data: {
-        ...data,
-        pagination: {
-          page: 1,
-          limit: 20,
-          total: data.transactions.length,
-          totalPages: 1,
-        },
+      ...data,
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: data.transactions.length,
+        totalPages: 1,
       },
-      isDemo: true,
     };
   },
 
   analytics: (timeRange = "7d") => {
-    const data = mockStore.getAnalytics(timeRange);
-    return {
-      success: true,
-      code: "ANALYTICS_RETRIEVED_SUCCESSFULLY",
-      data,
-      isDemo: true,
-    };
+    return mockStore.getAnalytics(timeRange);
   },
 
   settings: () => {
-    const data = mockStore.getSettings();
-    return {
-      success: true,
-      code: "SETTINGS_RETRIEVED_SUCCESSFULLY",
-      data,
-      isDemo: true,
-    };
+    return mockStore.getSettings();
   },
 
   users: () => {
     const data = mockStore.getUsers();
     return {
-      success: true,
-      code: "USERS_RETRIEVED_SUCCESSFULLY",
-      data: {
-        ...data,
-        organization: { _id: "demo_org", name: "Demo Restaurant" },
-      },
-      isDemo: true,
+      ...data,
+      organization: { _id: "demo_org", name: "Demo Restaurant" },
     };
   },
 
   organization: () => ({
-    success: true,
-    code: "ORGANIZATION_RETRIEVED_SUCCESSFULLY",
-    data: {
-      _id: "demo_org",
-      name: "Demo Restaurant",
-      slug: "demo-restaurant",
-      businessType: "restaurant",
-      status: "active",
-    },
-    isDemo: true,
+    _id: "demo_org",
+    name: "Demo Restaurant",
+    slug: "demo-restaurant",
+    businessType: "restaurant",
+    status: "active",
   }),
 
   auditLogs: () => {
     const data = mockStore.getAuditLogs();
     return {
-      success: true,
-      code: "AUDIT_LOGS_RETRIEVED_SUCCESSFULLY",
-      data: {
-        ...data,
-        pagination: {
-          page: 1,
-          limit: 20,
-          total: data.auditLogs.length,
-          totalPages: 1,
-        },
+      ...data,
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: data.auditLogs.length,
+        totalPages: 1,
       },
-      isDemo: true,
     };
   },
 };

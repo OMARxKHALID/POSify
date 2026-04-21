@@ -18,15 +18,10 @@ export const useCategories = (options = {}) => {
     queryKey: queryKeys.categories(userId),
     queryFn: createServiceQueryFn(
       menuService.getCategories,
-      () => mockFallback.categories().data,
+      () => mockFallback.categories(),
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      staleTime: 3 * 60 * 1000,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 

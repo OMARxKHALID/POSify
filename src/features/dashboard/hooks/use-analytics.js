@@ -21,13 +21,12 @@ export const useAnalytics = (options = {}) => {
     queryKey: queryKeys.analytics(timeRange, userId),
     queryFn: createServiceQueryFn(
       () => dashboardService.getAnalytics(timeRange),
-      () => mockFallback.analytics(timeRange).data,
+      () => mockFallback.analytics(timeRange),
       isDemoMode,
     ),
     ...getDefaultQueryOptions({
       enabled,
       refetchInterval,
-      staleTime: 2 * 60 * 1000,
       ...customOptions,
     }),
   });

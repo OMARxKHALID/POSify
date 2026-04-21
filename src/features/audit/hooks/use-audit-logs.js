@@ -25,20 +25,15 @@ export const useAuditLogs = (filters = {}, options = {}) => {
 
   const queryParams = buildQueryParams(filters);
   const queryFn = createServiceQueryFn(
-    () => mockFallback.auditLogs().data,
-    () => mockFallback.auditLogs().data,
+    () => mockFallback.auditLogs(),
+    () => mockFallback.auditLogs(),
     isDemoMode,
   );
 
   return useQuery({
     queryKey: queryKeys.auditLogs(filters, userId),
     queryFn,
-    ...getDefaultQueryOptions({
-      staleTime: 2 * 60 * 1000,
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 

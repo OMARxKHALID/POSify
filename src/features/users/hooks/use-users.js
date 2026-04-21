@@ -18,15 +18,10 @@ export const useUsers = (options = {}) => {
     queryKey: queryKeys.users(userId),
     queryFn: createServiceQueryFn(
       userService.getUsers,
-      () => mockFallback.users().data,
+      () => mockFallback.users(),
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      staleTime: 3 * 60 * 1000,
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 

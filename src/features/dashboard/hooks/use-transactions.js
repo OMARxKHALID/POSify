@@ -18,15 +18,10 @@ export const useTransactions = (options = {}) => {
     queryKey: queryKeys.transactions(userId),
     queryFn: createServiceQueryFn(
       dashboardService.getTransactions,
-      () => mockFallback.transactions().data,
+      () => mockFallback.transactions(),
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      staleTime: 60 * 1000,
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 
@@ -37,14 +32,11 @@ export const useTransaction = (transactionId, options = {}) => {
     queryKey: queryKeys.transaction(transactionId, userId),
     queryFn: createServiceQueryFn(
       () => dashboardService.getTransactionById(transactionId),
-      () => mockFallback.transactions().data.transactions.find(t => t._id === transactionId) || mockFallback.transactions().data.transactions[0],
+      () => mockFallback.transactions().transactions.find(t => t._id === transactionId) || mockFallback.transactions().transactions[0],
       isDemoMode,
     ),
     enabled: Boolean(transactionId),
-    ...getDefaultQueryOptions({
-      staleTime: 2 * 60 * 1000,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 
@@ -55,15 +47,10 @@ export const useTransactionStats = (options = {}) => {
     queryKey: queryKeys.transactionStats(userId),
     queryFn: createServiceQueryFn(
       dashboardService.getTransactionStats,
-      () => mockFallback.transactions().data.stats,
+      () => mockFallback.transactions().stats,
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      staleTime: 2 * 60 * 1000,
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 
@@ -74,15 +61,10 @@ export const useTransactionsWithFilters = (filters = {}, options = {}) => {
     queryKey: queryKeys.transactionsFiltered(filters, userId),
     queryFn: createServiceQueryFn(
       () => dashboardService.getTransactions(filters),
-      () => mockFallback.transactions().data,
+      () => mockFallback.transactions(),
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      staleTime: 60 * 1000,
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 

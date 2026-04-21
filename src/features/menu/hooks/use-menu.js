@@ -18,15 +18,10 @@ export const useMenu = (options = {}) => {
     queryKey: queryKeys.menu(userId),
     queryFn: createServiceQueryFn(
       menuService.getMenu,
-      () => mockFallback.menu().data,
+      () => mockFallback.menu(),
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      staleTime: 3 * 60 * 1000,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 

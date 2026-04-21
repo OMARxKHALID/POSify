@@ -18,15 +18,10 @@ export const useOrders = (options = {}) => {
     queryKey: queryKeys.orders(userId),
     queryFn: createServiceQueryFn(
       posService.getAllOrders,
-      () => mockFallback.orders().data,
+      () => mockFallback.orders(),
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      staleTime: 60 * 1000,
-      refetchOnMount: true,
-      refetchOnWindowFocus: true,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 
@@ -37,14 +32,11 @@ export const useOrder = (orderId, options = {}) => {
     queryKey: queryKeys.order(orderId, userId),
     queryFn: createServiceQueryFn(
       () => posService.getOrderById(orderId),
-      () => mockFallback.orders().data.orders.find(o => o._id === orderId) || mockFallback.orders().data.orders[0],
+      () => mockFallback.orders().orders.find(o => o._id === orderId) || mockFallback.orders().orders[0],
       isDemoMode,
     ),
     enabled: Boolean(orderId),
-    ...getDefaultQueryOptions({
-      staleTime: 2 * 60 * 1000,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 

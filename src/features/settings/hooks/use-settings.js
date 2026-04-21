@@ -14,33 +14,20 @@ import { settingsService } from "../services/settings.service";
 export const useSettings = (options = {}) => {
   const { userId, isDemoMode } = useAppContext();
 
-  const queryOptions = getDefaultQueryOptions({
-    staleTime: 60 * 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
-    retry: 1,
-    ...options,
-  });
-
   return useQuery({
     queryKey: queryKeys.settings(userId),
     queryFn: createServiceQueryFn(
       settingsService.getSettings,
-      () => {
-        const mockData = mockFallback.settings().data;
-        return {
-          ...mockData.settings,
-          organizationId: "demo_org",
-          organizationName: "Demo Restaurant",
-          organization: { _id: "demo_org", name: "Demo Restaurant" },
-          isDemo: true,
-        };
-      },
+      () => ({
+        ...mockFallback.settings().settings,
+        organizationId: "demo_org",
+        organizationName: "Demo Restaurant",
+        organization: { _id: "demo_org", name: "Demo Restaurant" },
+      }),
       isDemoMode,
     ),
     enabled: Boolean(userId),
-    ...queryOptions,
+    ...getDefaultQueryOptions(options),
   });
 };
 

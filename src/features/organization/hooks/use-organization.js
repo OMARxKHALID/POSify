@@ -22,13 +22,10 @@ export const useOrganizationOverview = (options = {}) => {
     queryKey: queryKeys.organization(userId),
     queryFn: createServiceQueryFn(
       organizationService.getOverview,
-      () => mockFallback.organization().data,
+      () => mockFallback.organization(),
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      staleTime: 5 * 60 * 1000,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 
@@ -39,13 +36,10 @@ export const useSuspenseOrganizationOverview = (options = {}) => {
     queryKey: queryKeys.organization(userId),
     queryFn: createServiceQueryFn(
       organizationService.getOverview,
-      () => mockFallback.organization().data,
+      () => mockFallback.organization(),
       isDemoMode,
     ),
-    ...getDefaultQueryOptions({
-      staleTime: 5 * 60 * 1000,
-      ...options,
-    }),
+    ...getDefaultQueryOptions(options),
   });
 };
 
@@ -56,11 +50,10 @@ export const useAvailableStaff = (organizationId, options = {}) => {
     queryKey: queryKeys.availableStaff(organizationId, userId),
     queryFn: createServiceQueryFn(
       () => organizationService.getAvailableStaff(organizationId),
-      () => mockFallback.users().data,
+      () => mockFallback.users(),
       isDemoMode,
     ),
     ...getDefaultQueryOptions({
-      staleTime: 2 * 60 * 1000,
       enabled: Boolean(organizationId),
       ...options,
     }),

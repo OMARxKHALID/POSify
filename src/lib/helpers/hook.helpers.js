@@ -40,11 +40,18 @@ export const handleHookSuccess = (messageOrCode) => {
 };
 
 export const getDefaultQueryOptions = (customOptions = {}) => ({
-  staleTime: 5 * 60 * 1000,
+  staleTime: 3 * 60 * 1000,
   retry: 2,
   refetchOnWindowFocus: false,
+  refetchOnMount: false,
   ...customOptions,
 });
+
+const serializeFilters = (filters) => {
+  if (!filters || typeof filters !== "object") return "default";
+  const entries = Object.entries(filters).sort(([a], [b]) => a.localeCompare(b));
+  return entries.map(([k, v]) => `${k}=${v}`).join("&");
+};
 
 export const getDefaultMutationOptions = ({
   operation,
@@ -78,7 +85,7 @@ const BASE_KEYS = {
   transaction: (id, userId) => ["transactions", id, userId],
   transactionStats: (userId) => ["transactions", "stats", userId],
   settings: (userId) => ["settings", userId],
-  transactionsFiltered: (filters, userId) => ["transactions", "filtered", JSON.stringify(filters), userId],
+  transactionsFiltered: (filters, userId) => ["transactions", "filtered", serializeFilters(filters), userId],
 };
 
 export const queryKeys = {
