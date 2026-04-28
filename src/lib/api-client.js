@@ -1,13 +1,13 @@
 import { mockStore } from "./mockup-data/mock-store";
 
 export class ApiError extends Error {
-  constructor(message, code, details, statusCode = 400) {
+  constructor(message, code, details, status = 400) {
     super(message);
     this.name = "ApiError";
     this.code = code;
 
     this.details = details ?? [];
-    this.statusCode = statusCode;
+    this.status = status;
   }
 }
 

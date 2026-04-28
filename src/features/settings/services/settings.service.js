@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api-client";
 import { settingsSchema } from "../schemas/settings.schema";
+import { handleServiceError } from "@/lib/utils/error-handler";
 
 const normalizeSettings = (sourceData) => {
   const { settings, organization, currentUser } = sourceData;
@@ -25,18 +26,26 @@ const normalizeSettings = (sourceData) => {
 
 export const settingsService = {
   getSettings: async () => {
-    const response = await apiClient.get("/dashboard/settings");
-    const normalized = normalizeSettings(response.data);
-    
-    if (!normalized.organizationId) {
-      throw new Error("Organization ID not found in settings response");
-    }
+    try {
+      const response = await apiClient.get("/dashboard/settings");
+      const normalized = normalizeSettings(response.data);
+      
+      if (!normalized.organizationId) {
+        throw new Error("Organization ID not found in settings response");
+      }
 
-    return normalized;
+      return normalized;
+    } catch (error) {
+      handleServiceError(error);
+    }
   },
 
   updateSettings: async (settingsData) => {
-    const response = await apiClient.put("/dashboard/settings", settingsData);
-    return settingsSchema.parse(response.data);
+    try {
+      const response = await apiClient.put("/dashboard/settings", settingsData);
+      return settingsSchema.parse(response.data);
+    } catch (error) {
+      handleServiceError(error);
+    }
   }
 };
