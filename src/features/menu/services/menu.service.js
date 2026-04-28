@@ -11,8 +11,8 @@ export const menuService = {
       const menuItems = response.data?.menuItems || [];
       const validatedItems = z.array(menuSchema).parse(menuItems);
       return {
-        ...response.data,
-        menuItems: validatedItems
+        menuItems: validatedItems,
+        ...(response.data?.categories && { categories: z.array(categorySchema).safeParse(response.data.categories).data || [] })
       };
     } catch (error) {
       handleServiceError(error);
@@ -52,7 +52,6 @@ export const menuService = {
       const categories = response.data?.categories || [];
       const validatedCategories = z.array(categorySchema).parse(categories);
       return {
-        ...response.data,
         categories: validatedCategories
       };
     } catch (error) {

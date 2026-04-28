@@ -10,7 +10,6 @@ export const posService = {
       const orders = response.data?.orders || [];
       const validatedOrders = z.array(orderSchema).parse(orders);
       return {
-        ...response.data,
         orders: validatedOrders
       };
     } catch (error) {

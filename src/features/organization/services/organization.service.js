@@ -20,7 +20,6 @@ export const organizationService = {
       const users = response.data?.users || [];
       const validatedUsers = z.array(userSchema).parse(users);
       return {
-        ...response.data,
         users: validatedUsers
       };
     } catch (error) {

@@ -1,26 +1,30 @@
 import { apiClient } from "@/lib/api-client";
 import { settingsSchema } from "../schemas/settings.schema";
+import { organizationSchema } from "@/features/organization/schemas/organization.schema";
+import { userSchema } from "@/features/users/schemas/user.schema";
 import { handleServiceError } from "@/lib/utils/error-handler";
 
 const normalizeSettings = (sourceData) => {
   const { settings, organization, currentUser } = sourceData;
   const validatedSettings = settingsSchema.parse(settings || {});
   
-  const organizationId = validatedSettings?.organizationId || organization?._id;
-  const userRole = currentUser?.role;
+  const validatedOrganization = organization ? organizationSchema.safeParse(organization).data : undefined;
+  const validatedUser = currentUser ? userSchema.safeParse(currentUser).data : undefined;
+
+  const organizationId = validatedSettings?.organizationId || validatedOrganization?._id;
+  const userRole = validatedUser?.role;
 
   return {
     ...validatedSettings,
     organizationId,
-    organizationName: organization?.name,
-    organization,
-    currentUser,
+    organizationName: validatedOrganization?.name,
+    organization: validatedOrganization,
+    currentUser: validatedUser,
     userRole,
-    userId: currentUser?._id,
+    userId: validatedUser?._id,
     isAdmin: userRole === "admin",
     isStaff: userRole === "staff",
-    isOwner: userRole === "admin" && organization?.owner === currentUser?._id,
-    _raw: sourceData,
+    isOwner: userRole === "admin" && validatedOrganization?.owner === validatedUser?._id,
   };
 };
 

@@ -20,8 +20,8 @@ export const dashboardService = {
       const transactions = response.data?.transactions || [];
       const validatedTransactions = z.array(transactionSchema).parse(transactions);
       return {
-        ...response.data,
-        transactions: validatedTransactions
+        transactions: validatedTransactions,
+        ...(response.data?.stats && { stats: transactionStatsSchema.safeParse(response.data.stats).data })
       };
     } catch (error) {
       handleServiceError(error);

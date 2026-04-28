@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api-client";
 import { userSchema } from "../schemas/user.schema";
+import { organizationSchema } from "@/features/organization/schemas/organization.schema";
 import { z } from "zod";
 import { handleServiceError } from "@/lib/utils/error-handler";
 
@@ -10,8 +11,9 @@ export const userService = {
       const users = response.data?.users || [];
       const validatedUsers = z.array(userSchema).parse(users);
       return {
-        ...response.data,
-        users: validatedUsers
+        users: validatedUsers,
+        ...(response.data?.currentUser && { currentUser: userSchema.safeParse(response.data.currentUser).data }),
+        ...(response.data?.organization && { organization: organizationSchema.safeParse(response.data.organization).data }),
       };
     } catch (error) {
       handleServiceError(error);
